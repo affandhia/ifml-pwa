@@ -1,4 +1,6 @@
 from main.utils.project_generator import create_structure
+from main.template.project_structure.angular_strcture import default_structure
 
-wanted_structure = {'hai1': {'test1.py' : 'test1 doang'}, "test2.py" : "test 2 doang"}
-create_structure(wanted_structure,"D:/testing/")
+target_structure = {"generated-angular-python": default_structure}
+
+create_structure(target_structure,"D:/testing/")
