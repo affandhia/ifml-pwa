@@ -10,9 +10,13 @@ still not yet handled
 def create_new_file(filename,path,content):
     target_path = Path(path)
     file_with_target_path = target_path / filename
-    f = open(file_with_target_path,'w+')
-    f.write(content)
-    logger_ff.info('CREATED {file}'.format(file=str(file_with_target_path)))
+    if path_is_exist(file_with_target_path):
+        logger_ff.error("FAILED creating {file}, already exists".format(file=str(file_with_target_path)))
+        raise FileExistsError("FAILED creating {file}".format(file=str(file_with_target_path)))
+    else:
+        f = open(file_with_target_path,'w+')
+        f.write(content)
+        logger_ff.info('CREATED {file}'.format(file=str(file_with_target_path)))
 
 def create_new_directory(foldername,path):
     generated_folder_target = Path(path) / foldername
@@ -22,6 +26,8 @@ def create_new_directory(foldername,path):
             logging.debug('CREATED directory. ' + str(generated_folder_target))
     except OSError:
         logging.error('FAILED creating directory. ' + str(generated_folder_target))
+        raise FileExistsError("FAILED creating {file}".format(file=str(generated_folder_target)))
+
 
 def is_directory(path):
     target_path = Path(path)
@@ -38,7 +44,3 @@ def path_is_exist(path):
 def directory_is_empty(path):
     target_path = Path(path)
     return os.listdir(target_path) == []
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    print(directory_is_empty('D:\\testing\\'))
