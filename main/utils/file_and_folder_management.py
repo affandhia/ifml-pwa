@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import logging
+import shutil
 
 logger_ff = logging.getLogger("utils.file_and_folder_management")
 
@@ -28,6 +29,12 @@ def create_new_directory(foldername,path):
         logging.error('FAILED creating directory. ' + str(generated_folder_target))
         raise FileExistsError("FAILED creating {file}".format(file=str(generated_folder_target)))
 
+def copy_file_to_target_folder(source_path, target_path):
+    try:
+        shutil.copyfile(source_path, target_path)
+        logging.debug('SUCCESS copy into '+target_path)
+    except Exception as e:
+        logging.error(str(e))
 
 def is_directory(path):
     target_path = Path(path)

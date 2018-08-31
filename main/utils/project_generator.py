@@ -12,9 +12,21 @@
 # Licence:     MIT License
 # -----------------------------------------------------------------------------
 
-from .file_and_folder_management import create_new_file, create_new_directory
+from .file_and_folder_management import create_new_file, create_new_directory, copy_file_to_target_folder
 from pathlib import Path
 import os
+import logging
+
+ASSETS_EXTENSION = ['.jpg', '.jpeg', '.png', '.ico']
+
+
+def write_or_copy(filename, target_directory, content):
+    project_base = Path(os.sys.path[0])
+    if (os.path.splitext(filename)[1] in ASSETS_EXTENSION):
+        copy_file_to_target_folder(project_base / content / filename, target_directory / filename)
+    else:
+        create_new_file(filename, target_directory, content)
+
 
 def create_structure(struct, directory=None):
     """
@@ -40,13 +52,13 @@ def create_structure(struct, directory=None):
 
     for name, content in struct.items():
         if isinstance(content, str):
-            create_new_file(name, target_directory, content)
+            write_or_copy(name, target_directory, content)
             changed[name] = content
         elif isinstance(content, dict):
             create_new_directory(name, target_directory)
             new_target_directory = target_directory / name
             changed[name] = create_structure(
-                    struct[name], new_target_directory)
+                struct[name], new_target_directory)
         elif content is None:
             pass
         else:
