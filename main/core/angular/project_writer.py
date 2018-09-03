@@ -3,10 +3,10 @@ from main.utils.jinja.angular import base_file_writer
 
 
 class AngularProject:
-
     SRC_FOLDER_KEY = 'src'
     ENV_FOLDER_KEY = 'environments'
     E2E_KEY = 'e2e'
+    APP_KEY = 'app'
 
     EDITOR_CONFIG_KEY = '.editorconfig'
     GITIGNORE_KEY = '.gitignore'
@@ -33,12 +33,17 @@ class AngularProject:
     E2E_PROTRACTOR_KEY = 'protractor.conf.js'
     E2E_PO_KEY = 'app.po.ts'
     E2E_SPEC_KEY = 'app.e2e-spec.ts'
+    APP_HTML_KEY = 'app.component.html'
+    APP_COMPONENT_KEY = 'app.component.ts'
+    APP_MODULE_KEY = 'app.module.ts'
+    APP_ROUTING_KEY = 'app-routing.module.ts'
 
     app_name = 'generated-template'
 
     def __init__(self, structure=None):
         self.project_structure = default_structure if structure == None else structure
         self.write_base_angular_project_file()
+        self.write_base_app()
 
     def write_base_angular_project_file(self):
         self.write_editor_config()
@@ -154,6 +159,22 @@ class AngularProject:
     def write_e2e_spec_definition(self):
         self.project_structure[self.E2E_KEY][self.SRC_FOLDER_KEY][self.E2E_SPEC_KEY] = base_file_writer(
             self.E2E_KEY + '/' + self.SRC_FOLDER_KEY + '/' + self.E2E_SPEC_KEY + '.template')
+
+    def write_base_app(self):
+        app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
+
+        app_folder[self.APP_COMPONENT_KEY] = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_COMPONENT_KEY + '.template',
+            app_name=self.app_name)
+
+        app_folder[self.APP_HTML_KEY] = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_HTML_KEY + '.template')
+
+        app_folder[self.APP_MODULE_KEY] = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_MODULE_KEY + '.template', app_name=self.app_name)
+
+        app_folder[self.APP_ROUTING_KEY] = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_ROUTING_KEY + '.template')
 
     def return_project_structure(self):
         return {self.app_name: self.project_structure}
