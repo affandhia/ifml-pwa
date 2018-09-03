@@ -46,13 +46,13 @@ default_structure = {
         'tsconfig.spec.json': '',
         'tslint.json': '',
     },
-    '.editorconfig': base_file_writer('.editorconfig.template'),
-    '.gitignore': base_file_writer('.gitignore.template'),
-    'angular.json': base_file_writer('angular.json.template',app_name='generated-template'),
-    'ngsw-config.json': base_file_writer('ngsw-config.json.template',app_name='generated-template'),
-    'package.json': base_file_writer('package.json.template',app_name='generated-template'),
-    'README.md': base_file_writer('README.md.template',app_name='generated-template'),
-    'server.js': base_file_writer('server.js.template',app_name='generated-template'),
-    'tsconfig.json': base_file_writer('tsconfig.json.template',),
-    'tslint.json': base_file_writer('tslint.json.template')
+    '.editorconfig': '',
+    '.gitignore': '',
+    'angular.json': '',
+    'ngsw-config.json': '',
+    'package.json': '',
+    'README.md': '',
+    'server.js': '',
+    'tsconfig.json': '',
+    'tslint.json': ''
 }

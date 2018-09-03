@@ -62,6 +62,7 @@ def create_structure(struct, directory=None):
         elif content is None:
             pass
         else:
+            print(content)
             raise RuntimeError("Don't know what to do with content type "
                                "{type}.".format(type=type(content)))
 
