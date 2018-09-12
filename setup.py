@@ -28,7 +28,7 @@ setup(
     license='BSD',
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
     include_package_data=True,
-    scripts=['ifml-to-angularpwa/bin/itap-cli.py'],
+    scripts=['main/bin/itap-cli.py'],
     entry_points={'console_scripts': [
         'django-admin = django.core.management:execute_from_command_line',
     ]},
