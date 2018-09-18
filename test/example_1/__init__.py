@@ -8,4 +8,4 @@ logging.basicConfig(level=logging.DEBUG)
 
 #target_structure = {"generated-angular-python": default_structure}
 
-generate_project('test1.txt','test2.txt',"D:/testing/")
+generate_project('test1.txt','test2.txt',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
