@@ -1,31 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
-  selector: '',
-  templateUrl: './article.component.html',
-  styleUrls: ['./article.component.css']
+  selector: '{{ selector_name }}',
+  templateUrl: './{{ component_name }}.component.html',
+  styleUrls: ['./{{ component_name }}.component.css']
 })
-export class ArticleComponent implements OnInit {
+export class {{ class_name }}Component {
 
-  @HostBinding('attr.class') cssClass = 'row';
-  @Input() article: Article;
+  {{ constructor }}
 
-  constructor() {
-
-  }
-
-  voteUp(): boolean {
-    this.article.voteUp();
-    return false;
-  }
-
-  voteDown(): boolean {
-    this.article.voteDown();
-    return false;
-  }
-
-
-  ngOnInit() {
-  }
+  {{ body }}
 
 }
