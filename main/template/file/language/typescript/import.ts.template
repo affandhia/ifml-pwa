@@ -1,0 +1,1 @@
+import { {$ imported_element $} } from '{$ main_module $}';

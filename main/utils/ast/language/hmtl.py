@@ -1,1 +1,1 @@
-from ..base import Node
+from main.utils.ast.base import Node
