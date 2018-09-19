@@ -1,20 +1,23 @@
 from main.core.angular.main import generate_project
 import logging
-
+from ifml_parser.ifmlxmiparser import parse
+from custom_xmi_parser.xmiparser_2 import parse as uml_parse
 logging.basicConfig(level=logging.DEBUG)
 
 #target_structure = {"generated-angular-python": default_structure}
 
-generate_project('test1.txt','test2.txt',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
+#generate_project('test1.txt','test2.txt',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
 
-'''
+
 ifml_movies = parse('movies.core')
 uml_movies = uml_parse('movies.xmi')
 
-print(ifml_movies.get_list_interaction_flow_model()['_740hok7SEeSvsr3-_MjFew'].get_interaction_flow_model_elements())
+print(ifml_movies.get_interaction_flow_model())
+print('-------------')
+print(ifml_movies.get_domain_model())
 print('-------------')
 print(uml_movies.get_classes()['_Gt2cYE7REeSt-rUToYoH4A'].get_properties())
-'''
+
 
 '''
 component_name = 'coba'

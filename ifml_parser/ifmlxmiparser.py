@@ -213,7 +213,6 @@ class IFMLModel(NamedElement):
     CORE_ATTRIBUTE = 'xmlns:core'
     EXT_ATTRIBUTE = 'xmlns:ext'
 
-
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
         self.core_version = str(self._schema.getAttribute(self.CORE_ATTRIBUTE)) if len(
@@ -221,20 +220,30 @@ class IFMLModel(NamedElement):
         self.ext_version = str(self._schema.getAttribute(self.EXT_ATTRIBUTE)) if len(
             str(self._schema.getAttribute(self.EXT_ATTRIBUTE))) > 0 else "No Version Found"
         self._interaction_flow_model = self.build_interaction_flow_model()
-        self._domain_model = self.getElementsByTagName(DomainModel.DOMAIN_MODEL_ATTRIBUTE)
+        self._domain_model = self.build_domain_model()
 
     def build_interaction_flow_model(self):
+        interaction_flow_model = None
         list_schema_interaction_flow_model = self.getElementsByTagName(InteractionFlowModel.INTERACTION_FLOW_ATTRIBUTE)
-        dict_interaction_flow_model = {}
-        for if_model in list_schema_interaction_flow_model:
-            interaction_flow_model_instance = InteractionFlowModel(if_model)
-            dict_interaction_flow_model[interaction_flow_model_instance.get_id()] = interaction_flow_model_instance
-        return dict_interaction_flow_model
+        if len(list_schema_interaction_flow_model) > 1:
+            raise ValueError('XMI FIle invalid, Cannot have More than 1 InteractionFlowModel')
+        else:
+            if_model = InteractionFlowModel(list_schema_interaction_flow_model[0])
+        return if_model
 
-    def get_list_interaction_flow_model(self):
+    def build_domain_model(self):
+        domain_model = None
+        list_schema_domain_model = self.getElementsByTagName(DomainModel.DOMAIN_MODEL_ATTRIBUTE)
+        if len(list_schema_domain_model) > 1:
+            raise ValueError('XMI FIle invalid, Cannot have More than 1 DomainModel')
+        else:
+            domain_model = DomainModel(list_schema_domain_model[0])
+        return domain_model
+
+    def get_interaction_flow_model(self):
         return self._interaction_flow_model
 
-    def get_list_domain_model(self):
+    def get_domain_model(self):
         return self._domain_model
 
 
