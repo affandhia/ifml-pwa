@@ -1,20 +1,29 @@
 import logging
 import sys
 
+from custom_xmi_parser.xmiparser_2 import parse as uml_parse
+from ifml_parser.ifmlxmiparser import parse as ifml_parse
+from main.core.angular.interpreter.base import IFMLtoAngularInterpreter
 from main.core.angular.project_writer import AngularProject
+from main.utils.project_generator import create_structure
 from main.utils.ast.framework.angular.base import AngularMainModule
-from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass
+from main.utils.ast.framework.angular.components import AngularComponentTypescriptClass
 from main.utils.ast.framework.angular.routers import AngularDefaultRouterDefinition
 from main.utils.jinja.angular import base_file_writer
-from main.utils.project_generator import create_structure
 
-logger_angular = logging.getLogger("core.angular")
+logger_angular = logging.getLogger("main.core.angular.main")
 
 
 def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=''):
     ifml = open(path_to_ifml_file, "rt")
     class_diagram = open(path_to_class_diagram, "rt")
     target_project_directory = sys.path[0] if target_directory == '' else target_directory
+
+
+
+    ifml_interpreter = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
+                                                class_diagram_xmi=uml_parse(path_to_class_diagram))
+    '''
     basic_template = AngularProject()
 
     # Adding App Module
@@ -39,10 +48,9 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     root_html = base_file_writer('src/app/app.component.html.template')
     basic_template.add_app_html_template(root_html)
 
-
-
     create_structure(basic_template.return_project_structure(), target_directory)
     logger_angular.debug('Target directory is ' + target_directory)
+    '''
 
 
 def write_base_project_content(ifml, class_diagram, target_directory, default_structure):
