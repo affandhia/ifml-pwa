@@ -68,6 +68,6 @@ class TypescriptClassType(Node):
 
         return typescript_writer('class.ts.template',
                                      class_name=self.class_name,
-                                     constructor=self.constructor, body='\n'.join(self.body),
+                                     constructor=','.join(self.constructor), body='\n'.join(self.body),
                                      import_statement_list='\n'.join(import_statement_list))
 

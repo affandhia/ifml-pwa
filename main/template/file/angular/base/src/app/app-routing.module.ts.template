@@ -5,7 +5,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [ {{ ngmodule_imports }} ],
-  exports: [ {{ ngmodule_exports }} ]
+  imports: [{{ ngmodule_imports }}],
+  exports: [{{ ngmodule_exports }}]
 })
 export class AppRoutingModule { }

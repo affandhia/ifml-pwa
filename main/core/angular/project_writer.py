@@ -163,8 +163,8 @@ class AngularProject:
     def add_app_html_template(self, html_template):
         self.app_folder[self.APP_HTML_KEY] = html_template
 
-    def add_app_component_behaviour(self, app_component_behaviour):
-        self.app_folder[self.APP_COMPONENT_KEY] = app_component_behaviour
+    def add_default_app_component(self, app_component_typescript):
+        self.app_folder[self.APP_COMPONENT_KEY] = app_component_typescript
 
     def add_app_module_routing(self, app_routing_file):
         self.app_folder[self.APP_ROUTING_KEY] = app_routing_file

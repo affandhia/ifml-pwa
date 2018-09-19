@@ -7,7 +7,7 @@
   imports: [
     {{ ngmodule_imports|safe }}
   ],
-  providers: [ {{ ngmodule_providers|safe }} ],
-  bootstrap: [ {{ ngmodule_bootstrap|safe }} ]
+  providers: [{{ ngmodule_providers|safe }}],
+  bootstrap: [{{ ngmodule_bootstrap|safe }}]
 })
 export class AppModule { }

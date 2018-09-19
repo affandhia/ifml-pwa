@@ -1,6 +1,7 @@
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType
 from main.utils.jinja.angular import component_file_writer
+from main.utils.naming_management import dasherize, classify
 
 from .base import ANGULAR_CORE_MODULE
 
@@ -32,6 +33,11 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         import_component_from_angular_core.add_imported_element('Component')
         self.import_dict[ANGULAR_CORE_MODULE] = import_component_from_angular_core
 
+    def set_component_selector_class_name(self, name):
+        self.selector_name = dasherize(name)
+        self.class_name = classify(name)
+        self.component_name = dasherize(name)
+
     def set_selector_name(self, selector_name):
         self.selector_name = selector_name
 
@@ -46,7 +52,7 @@ class AngularComponentTypescriptClass(TypescriptClassType):
 
         return component_file_writer('basic.component.ts.template', selector_name=self.selector_name,
                                      class_name=self.class_name, component_name=self.component_name,
-                                     constructor=self.constructor, body='',
+                                     constructor=', '.join(self.constructor), body='\n'.join(self.body),
                                      import_statement_list='\n'.join(import_statement_list))
 
 

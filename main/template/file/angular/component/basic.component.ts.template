@@ -1,4 +1,4 @@
-{$ import_statement_list $}
+{$ import_statement_list|safe $}
 
 @Component({
   selector: '{$ selector_name $}',
@@ -7,7 +7,9 @@
 })
 export class {$ class_name $}Component {
 
-  {$ constructor $}
+  constructor({$ constructor_param $}){
+    {$ constructor_body $}
+  }
 
   {$ body $}
 
