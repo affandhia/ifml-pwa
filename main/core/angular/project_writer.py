@@ -43,7 +43,7 @@ class AngularProject:
     def __init__(self, structure=None):
         self.project_structure = default_structure if structure == None else structure
         self.write_base_angular_project_file()
-        self.write_base_app()
+        self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
 
     def write_base_angular_project_file(self):
         self.write_editor_config()
@@ -160,21 +160,20 @@ class AngularProject:
         self.project_structure[self.E2E_KEY][self.SRC_FOLDER_KEY][self.E2E_SPEC_KEY] = base_file_writer(
             self.E2E_KEY + '/' + self.SRC_FOLDER_KEY + '/' + self.E2E_SPEC_KEY + '.template')
 
-    def write_base_app(self):
-        app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
+    def add_app_html_template(self, html_template):
+        self.app_folder[self.APP_HTML_KEY] = html_template
 
-        app_folder[self.APP_COMPONENT_KEY] = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_COMPONENT_KEY + '.template',
-            app_name=self.app_name)
+    def add_app_component_behaviour(self, app_component_behaviour):
+        self.app_folder[self.APP_COMPONENT_KEY] = app_component_behaviour
 
-        app_folder[self.APP_HTML_KEY] = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_HTML_KEY + '.template')
+    def add_app_module_routing(self, app_routing_file):
+        self.app_folder[self.APP_ROUTING_KEY] = app_routing_file
 
-        app_folder[self.APP_MODULE_KEY] = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_MODULE_KEY + '.template', app_name=self.app_name)
+    def add_app_module_file(self, app_module_file):
+        self.app_folder[self.APP_MODULE_KEY] = app_module_file
 
-        app_folder[self.APP_ROUTING_KEY] = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.APP_ROUTING_KEY + '.template')
+    def add_new_component_with_existing_behaviour(self, inserted_component_folder):
+        self.app_folder.update(inserted_component_folder)
 
     def return_project_structure(self):
         return {self.app_name: self.project_structure}

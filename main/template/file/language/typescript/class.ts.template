@@ -1,0 +1,9 @@
+{$ import_list $}
+
+export class {$ class_name $}{
+
+    {$ constructor $}
+
+    {$ body $}
+
+}

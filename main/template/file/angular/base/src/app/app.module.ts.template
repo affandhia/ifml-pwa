@@ -1,21 +1,13 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
+{{ import_statement_list|safe }}
 
 @NgModule({
   declarations: [
-    AppComponent
+    {{ ngmodule_declarations|safe }}
   ],
   imports: [
-    BrowserModule,
-    AppRoutingModule,
-    ServiceWorkerModule.register('/{{ app_name }}/ngsw-worker.js', { enabled: environment.production })
+    {{ ngmodule_imports|safe }}
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [ {{ ngmodule_providers|safe }} ],
+  bootstrap: [ {{ ngmodule_bootstrap|safe }} ]
 })
 export class AppModule { }
