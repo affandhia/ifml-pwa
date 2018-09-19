@@ -16,7 +16,7 @@ class ImportStatementType(Node):
         self.main_module = main_module
 
     def add_imported_elements(self, elements_that_want_to_be_imported):
-        self.imported_elements + elements_that_want_to_be_imported
+        self.imported_elements += elements_that_want_to_be_imported
 
     def add_imported_element(self, element_that_want_to_be_imported):
         self.imported_elements.append(element_that_want_to_be_imported)

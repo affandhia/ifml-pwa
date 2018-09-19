@@ -1,9 +1,4 @@
 from main.core.angular.main import generate_project
-from main.template.project_structure.angular_strcture import default_structure
-from main.utils.jinja.angular import base_file_writer
-from ifml_parser.ifmlxmiparser import parse
-from custom_xmi_parser.xmiparser_2 import parse as uml_parse
-from main.utils.ast.framework.angular import AngularComponent, AngularComponentTypescriptClass, AngularComponentHTML
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
