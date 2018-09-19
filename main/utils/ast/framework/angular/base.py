@@ -27,7 +27,7 @@ class AngularMainModule(TypescriptClassType):
         # Importing basic requirement of app module
         self.base_element_import_statement_for_module()
 
-        service_worker_initialization = "ServiceWorkerModule.register('/" + app_name + "/ngsw-worker.js', { enabled: environment.production }"
+        service_worker_initialization = "ServiceWorkerModule.register('/" + app_name + "/ngsw-worker.js', { enabled: environment.production })"
         self.ngmodule_declarations = ['AppComponent']
         self.ngmodule_imports = ['BrowserModule', 'AppRoutingModule', service_worker_initialization]
         self.ngmodule_providers = ['']
