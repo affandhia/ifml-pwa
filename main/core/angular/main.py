@@ -21,18 +21,10 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
 
 
-    ifml_interpreter = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
+    interpreting_result = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
                                                 class_diagram_xmi=uml_parse(path_to_class_diagram))
-    '''
     basic_template = AngularProject()
-
-    # Adding App Module
-    basic_app_module = AngularMainModule(app_name='generated-pwa')
-    basic_template.add_app_module_file(basic_app_module.render())
-
-    # Adding basic Routing Module
-    basic_routing = AngularDefaultRouterDefinition()
-    basic_template.add_app_module_routing(basic_routing.render())
+    basic_template.set_app_name(interpreting_result.get_project_name())
 
     # Adding app.component.ts
     root_component_name = 'app'
@@ -48,9 +40,28 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     root_html = base_file_writer('src/app/app.component.html.template')
     basic_template.add_app_html_template(root_html)
 
+    #Defining Angular Main Module
+    basic_app_module = AngularMainModule(app_name=interpreting_result.get_project_name())
+
+    #Adding the result of interpreting into the AngularProject
+    for _, component_node in interpreting_result.component.items():
+
+        #Insert the component into main module
+        basic_app_module.add_component_to_declaration(component_node)
+
+        #Insert the component definition into src folder
+        basic_template.add_new_component_using_basic_component_folder(component_node.build())
+
+    # Adding App Module
+    basic_template.add_app_module_file(basic_app_module.render())
+
+    # Adding basic Routing Module
+    basic_routing = AngularDefaultRouterDefinition()
+    basic_template.add_app_module_routing(basic_routing.render())
+
     create_structure(basic_template.return_project_structure(), target_directory)
-    logger_angular.debug('Target directory is ' + target_directory)
-    '''
+    logger_angular.info('Angular PWA Project successfully generated at ' + target_directory)
+
 
 
 def write_base_project_content(ifml, class_diagram, target_directory, default_structure):

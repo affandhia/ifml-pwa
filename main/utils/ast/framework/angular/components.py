@@ -8,17 +8,31 @@ from .base import ANGULAR_CORE_MODULE
 class AngularComponent(Node):
     SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
     SUFFIX_HTML_COMPONENT_FILENAME = '.component.html'
+    SUFFIX_CSS_COMPONENT_FILENAME = '.component.css'
 
     def __init__(self, component_name, component_typescript_class, component_html):
         self.component_name = component_name
         self.component_typescript_class = component_typescript_class
         self.component_html = component_html
+        self.typescript_component_name = self.component_name + self.SUFFIX_TYPESCRIPT_COMPONENT_FILENAME
+        self.typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
+        self.typescript_css_name = self.component_name + self.SUFFIX_CSS_COMPONENT_FILENAME
+
+    def get_component_name(self):
+        return self.component_name
+
+    def get_typescript_component_filename(self):
+        return self.typescript_component_name
+
+    def get_typescript_class_node(self):
+        return self.component_typescript_class
+
+    def get_component_html(self):
+        return self.component_html
 
     def build(self):
-        typescript_component_name = self.component_name + self.SUFFIX_TYPESCRIPT_COMPONENT_FILENAME
-        typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
-        return {self.component_name: {typescript_component_name: self.component_typescript_class.render(),
-                                      typescript_html_name: self.component_html.render()}}
+        return {self.component_name: {self.typescript_component_name: self.component_typescript_class.render(),
+                                      self.typescript_html_name: self.component_html.render(), self.typescript_css_name: ''}}
 
 
 class AngularComponentTypescriptClass(TypescriptClassType):

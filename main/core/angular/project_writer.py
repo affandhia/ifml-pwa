@@ -38,12 +38,16 @@ class AngularProject:
     APP_MODULE_KEY = 'app.module.ts'
     APP_ROUTING_KEY = 'app-routing.module.ts'
 
-    app_name = 'generated-template'
+
 
     def __init__(self, structure=None):
+        self.app_name = ''
         self.project_structure = default_structure if structure == None else structure
         self.write_base_angular_project_file()
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
+
+    def set_app_name(self, name):
+        self.app_name = name
 
     def write_base_angular_project_file(self):
         self.write_editor_config()
@@ -172,7 +176,7 @@ class AngularProject:
     def add_app_module_file(self, app_module_file):
         self.app_folder[self.APP_MODULE_KEY] = app_module_file
 
-    def add_new_component_with_existing_behaviour(self, inserted_component_folder):
+    def add_new_component_using_basic_component_folder(self, inserted_component_folder):
         self.app_folder.update(inserted_component_folder)
 
     def return_project_structure(self):

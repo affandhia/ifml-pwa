@@ -42,6 +42,9 @@ class TypescriptClassType(Node):
     def set_class_name(self, class_name):
         self.class_name = class_name
 
+    def get_class_name(self):
+        return self.class_name
+
     def add_import_statement_for_multiple_element(self, main_module, elements_imported):
         try:
             self.import_dict[main_module].add_imported_elements(elements_imported)

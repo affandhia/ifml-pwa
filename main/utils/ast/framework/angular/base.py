@@ -41,6 +41,12 @@ class AngularMainModule(TypescriptClassType):
         else:
             raise TypeError('Need at least an element or list of elements to be added into NgModule Declarations')
 
+    def add_component_to_declaration(self, component_node):
+        folder_name = component_node.get_component_name()
+        component_class_name = component_node.get_typescript_class_node().get_class_name()
+        self.add_import_statement(main_module='./'+ folder_name +'/' + folder_name + '.component',
+                                 element_imported=component_class_name)
+
     def add_element_into_ngmodule_imports(self, element=None, elements=None):
         if element:
             self.ngmodule_imports.append(element)
