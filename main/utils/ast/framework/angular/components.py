@@ -1,7 +1,7 @@
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType
 from main.utils.jinja.angular import component_file_writer
-from main.utils.naming_management import dasherize, classify
+from main.utils.naming_management import camel_classify, dasherize
 
 from .base import ANGULAR_CORE_MODULE
 
@@ -35,7 +35,7 @@ class AngularComponentTypescriptClass(TypescriptClassType):
 
     def set_component_selector_class_name(self, name):
         self.selector_name = dasherize(name)
-        self.class_name = classify(name)
+        self.class_name = camel_classify(name)
         self.component_name = dasherize(name)
 
     def set_selector_name(self, selector_name):

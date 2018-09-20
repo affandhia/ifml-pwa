@@ -1,30 +1,21 @@
-# -*- coding: utf-8 -*-
-# -----------------------------------------------------------------------------
-# Name:        naming_management.py
-# Purpose:     Creating name for class, method, file, or directory
-#
-# Source:      Blue Yonder Tech (http://www.blue-yonder.com), Psycaffold Project
-# Author:      Hafiyyan Sayyid Fadhlillah
-#
-# Created:     2018/08/21
-# Editted:     2018/08/28
-# Copyright:
-# Licence:
-# -----------------------------------------------------------------------------
+import re
+
 
 def dasherize(word):
     """Replace underscores with dashes in the string.
     Example::
-        >>> dasherize("foo_bar")
+        >>> dasherize("FooBar")
         "foo-bar"
     Args:
         word (str): input word
     Returns:
         input word with underscores replaced by dashes
     """
-    return word.replace('_', '-')
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', word)
+    s2 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1)
+    return s2.replace('_','-').lower()
 
-def classify(word):
+def camel_classify(word):
     """Creating class name based on a word that have a dash or underscore.
 
         Example::
@@ -37,3 +28,20 @@ def classify(word):
             Class name based on input word
         """
     return word.replace('_', ' ').replace('-', ' ').title().replace(' ','')
+
+def camel_function_style(word):
+    """Creating class name based on a word that have a dash or underscore.
+
+            Example::
+                >>> classify("foo_bar")
+                >>> classify("foo-bar")
+                "fooBar"
+            Args:
+                word (str): input word
+            Returns:
+                Funcation or var name styling based on input word
+            """
+    classy_name = dasherize_and_underscore_to_camel_class(word)
+    first_lowercase_letter = classy_name[:1].lower()
+    rest_of_word = classy_name[1:]
+    return first_lowercase_letter + rest_of_word
