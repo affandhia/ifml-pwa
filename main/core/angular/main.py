@@ -23,9 +23,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
     interpreting_result = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
                                                 class_diagram_xmi=uml_parse(path_to_class_diagram))
-    basic_template = AngularProject()
-    basic_template.set_app_name(interpreting_result.get_project_name())
-
+    basic_template = AngularProject(app_name=interpreting_result.get_project_name())
     # Adding app.component.ts
     root_component_name = 'app'
     root_class_name = 'App'
@@ -61,8 +59,3 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
     create_structure(basic_template.return_project_structure(), target_directory)
     logger_angular.info('Angular PWA Project successfully generated at ' + target_directory)
-
-
-
-def write_base_project_content(ifml, class_diagram, target_directory, default_structure):
-    pass

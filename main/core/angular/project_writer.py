@@ -40,14 +40,14 @@ class AngularProject:
 
 
 
-    def __init__(self, structure=None):
-        self.app_name = ''
+    def __init__(self, app_name, structure=None):
+        self.app_name = app_name
         self.project_structure = default_structure if structure == None else structure
         self.write_base_angular_project_file()
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
 
-    def set_app_name(self, name):
-        self.app_name = name
+    def get_app_name(self):
+        return self.app_name
 
     def write_base_angular_project_file(self):
         self.write_editor_config()
