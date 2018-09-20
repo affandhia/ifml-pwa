@@ -45,7 +45,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     for _, component_node in interpreting_result.component.items():
 
         #Insert the component into main module
-        basic_app_module.add_component_to_declaration(component_node)
+        basic_app_module.add_component_to_module(component_node)
 
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
