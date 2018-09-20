@@ -1,16 +1,16 @@
 {$ import_statement_list|safe $}
 
 @Component({
-  selector: '{$ selector_name $}',
-  templateUrl: './{$ component_name $}.component.html',
-  styleUrls: ['./{$ component_name $}.component.css']
+  selector: '{$ selector_name|safe $}',
+  templateUrl: './{$ component_name|safe $}.component.html',
+  styleUrls: ['./{$ component_name|safe $}.component.css']
 })
-export class {$ class_name $}Component {
+export class {$ class_name|safe $}Component {
 
-  constructor({$ constructor_param $}){
-    {$ constructor_body $}
+  constructor({$ constructor_param|safe $}){
+    {$ constructor_body|safe $}
   }
 
-  {$ body $}
+  {$ body|safe $}
 
 }

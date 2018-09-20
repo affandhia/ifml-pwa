@@ -1,11 +1,11 @@
 {{ import_statement_list|safe }}
 
 const routes: Routes = [
-{{ list_routes }}
+{{ list_routes|safe }}
 ];
 
 @NgModule({
-  imports: [{{ ngmodule_imports }}],
-  exports: [{{ ngmodule_exports }}]
+  imports: [{{ ngmodule_imports|safe }}],
+  exports: [{{ ngmodule_exports|safe }}]
 })
 export class AppRoutingModule { }

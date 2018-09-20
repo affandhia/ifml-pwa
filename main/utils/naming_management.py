@@ -41,7 +41,10 @@ def camel_function_style(word):
             Returns:
                 Funcation or var name styling based on input word
             """
-    classy_name = dasherize_and_underscore_to_camel_class(word)
+    classy_name = camel_classify(word)
     first_lowercase_letter = classy_name[:1].lower()
     rest_of_word = classy_name[1:]
     return first_lowercase_letter + rest_of_word
+
+def creating_title_sentence_from_dasherize_word(word):
+    return word.replace('-',' ').title()

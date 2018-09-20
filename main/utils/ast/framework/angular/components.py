@@ -18,6 +18,12 @@ class AngularComponent(Node):
         self.typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
         self.typescript_css_name = self.component_name + self.SUFFIX_CSS_COMPONENT_FILENAME
 
+    def set_routing_node(self, routing_node):
+        self.routing_node = routing_node
+
+    def get_routing_node(self):
+        return self.routing_node
+
     def get_component_name(self):
         return self.component_name
 
@@ -73,6 +79,9 @@ class AngularComponentTypescriptClass(TypescriptClassType):
 class AngularComponentHTML(Node):
     def __init__(self):
         self.body = []
+
+    def add_html_into_body(self, html_element):
+        self.body.append(html_element)
 
     def render(self):
         return component_file_writer('basic.component.html.template', body='\n'.join(self.body))

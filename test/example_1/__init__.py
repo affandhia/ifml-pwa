@@ -6,7 +6,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 #target_structure = {"generated-angular-python": default_structure}
 
-generate_project('movies.core','movies.xmi',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
+#generate_project('movies.core','movies.xmi',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
+generate_project('movies.core','movies.xmi',"D:\\testing\\")
 
 '''
 ifml_movies = parse('movies.core')

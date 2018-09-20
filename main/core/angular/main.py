@@ -41,11 +41,16 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     #Defining Angular Main Module
     basic_app_module = AngularMainModule(app_name=interpreting_result.get_project_name())
 
+    # Adding basic Routing Module
+    basic_routing = AngularDefaultRouterDefinition()
+
     #Adding the result of interpreting into the AngularProject
     for _, component_node in interpreting_result.component.items():
 
         #Insert the component into main module
         basic_app_module.add_component_to_module(component_node)
+        #Insert the routing into main routing module
+        basic_routing.add_routing_definition_for_component(component_node)
 
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
@@ -53,8 +58,6 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     # Adding App Module
     basic_template.add_app_module_file(basic_app_module.render())
 
-    # Adding basic Routing Module
-    basic_routing = AngularDefaultRouterDefinition()
     basic_template.add_app_module_routing(basic_routing.render())
 
     create_structure(basic_template.return_project_structure(), target_directory)

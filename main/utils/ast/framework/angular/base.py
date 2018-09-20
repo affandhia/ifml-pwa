@@ -45,7 +45,7 @@ class AngularMainModule(TypescriptClassType):
 
         #Import into Module
         folder_name = component_node.get_component_name()
-        component_class_name = component_node.get_typescript_class_node().get_class_name()
+        component_class_name = component_node.get_typescript_class_node().get_class_name()+'Component'
         self.add_import_statement(main_module='./'+ folder_name +'/' + folder_name + '.component',
                                  element_imported=component_class_name)
 
