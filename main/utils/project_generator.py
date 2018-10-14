@@ -56,6 +56,7 @@ def create_structure(struct, directory=None):
             changed[name] = content
         elif isinstance(content, dict):
             create_new_directory(name, target_directory)
+            print("masuk")
             new_target_directory = target_directory / name
             changed[name] = create_structure(
                 struct[name], new_target_directory)

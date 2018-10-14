@@ -23,6 +23,7 @@ class BaseViewContainerInterpreter(ViewContainerIntepreter):
         self.dasherize_name = dasherize(self.view_container.get_name())
         self.angular_component_node = None
         view_container_interpreter_logging.info("{name} is being interpreted".format(name=view_container.get_name()))
+        print(view_container.get_in_interaction_flow())
 
     def creating_angular_component_node(self):
         component_typescript = self.creating_angular_typescript_component_node()

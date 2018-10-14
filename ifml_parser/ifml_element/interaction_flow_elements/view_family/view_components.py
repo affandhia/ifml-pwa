@@ -40,7 +40,7 @@ class ViewComponent(ViewElement):
                 dict_view_component_parts_associated.update({data_binding_element.get_id(): data_binding_element})
 
             if element_type == DynamicBehavior.DYNAMIC_BEHAVIOUR_TYPE:
-                dynamic_behaviour_element = DynamicBehaviour(part)
+                dynamic_behaviour_element = DynamicBehavior(part)
                 dict_view_component_parts_associated.update({dynamic_behaviour_element.get_id(): dynamic_behaviour_element})
 
             else:

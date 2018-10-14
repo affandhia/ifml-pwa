@@ -5,6 +5,7 @@ from main.utils.jinja.language_template_writer import typescript_writer
 
 IMPORT_TYPESCRIPT_TEMPLATE = 'import.ts.template'
 CLASS_TYPESCRIPT_TEMPLATE = 'class.ts.template'
+VARIABLE_DECLARATION_TEMPLATE = 'variable.ts.template'
 
 class ImportStatementType(Node):
 
@@ -31,11 +32,28 @@ class ImportStatementType(Node):
     def __str__(self):
         return self.main_module + ' with ' + '[' + ','.join(self.imported_elements) + ']'
 
+class VarDeclType(Node):
+
+    def __init__(self, name, semicolon=''):
+        self.acc_modifiers = ''
+        self.variable_type = ''
+        self.variable_name = name
+        self.variable_datatype = ''
+        self.value = ''
+        self.semicolon = semicolon
+
+    def render(self):
+        return typescript_writer(VARIABLE_DECLARATION_TEMPLATE,
+                                     acc_modifiers=self.acc_modifiers,
+                                     variable_type=self.variable_type, variable_name=self.variable_name,
+                                     variable_datatype=self.variable_datatype, value=self.value, end=self.semicolon)
+
 class TypescriptClassType(Node):
 
     def __init__(self):
         self.class_name = ''
-        self.constructor = []
+        self.constructor_param = {}
+        self.constructor_body = []
         self.body = []
         self.import_dict = {}
 
@@ -63,14 +81,22 @@ class TypescriptClassType(Node):
             new_import_statement_node.add_imported_element(element_imported)
             self.import_dict[main_module] = new_import_statement_node
 
+    def set_constructor_param(self, var_decl):
+        self.constructor_param[var_decl.variable_name] = var_decl
+
     def render(self):
         # Rendering all import statement
         import_statement_list = []
         for _, import_statement in self.import_dict.items():
             import_statement_list.append(import_statement.render())
 
-        return typescript_writer('class.ts.template',
+        # Rendering all constructor param statement
+        constructor_param_list = []
+        for _, param in self.constructor_param.items():
+            constructor_param_list.append(param.render())
+
+        return typescript_writer(CLASS_TYPESCRIPT_TEMPLATE,
                                      class_name=self.class_name,
-                                     constructor=','.join(self.constructor), body='\n'.join(self.body),
+                                     constructor_param=','.join(constructor_param_list), body='\n'.join(self.body),
                                      import_statement_list='\n'.join(import_statement_list))
 

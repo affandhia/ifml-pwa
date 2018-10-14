@@ -1,0 +1,5 @@
+<nav id='X' class='navbar'>
+    <ul>
+        {$ list_button|safe $}
+    </ul>
+</nav>

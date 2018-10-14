@@ -50,7 +50,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
         #Insert the component into main module
         basic_app_module.add_component_to_module(component_node)
         #Insert the routing into main routing module
-        basic_routing.add_routing_definition_for_component(component_node)
+        #basic_routing.add_routing_definition_for_component(component_node)
 
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
@@ -59,6 +59,6 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     basic_template.add_app_module_file(basic_app_module.render())
 
     basic_template.add_app_module_routing(basic_routing.render())
-
+    print(basic_template.return_project_structure())
     create_structure(basic_template.return_project_structure(), target_directory)
     logger_angular.info('Angular PWA Project successfully generated at ' + target_directory)

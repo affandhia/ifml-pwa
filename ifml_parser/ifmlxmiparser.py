@@ -213,6 +213,7 @@ class IFMLModel(NamedElement):
     CORE_ATTRIBUTE = 'xmlns:core'
     EXT_ATTRIBUTE = 'xmlns:ext'
 
+    #Add parameter of UML symbol table to be used in the process of parsing
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
         self.core_version = str(self._schema.getAttribute(self.CORE_ATTRIBUTE)) if len(
@@ -253,7 +254,7 @@ def build_ifml_model(doc=None):
 
         buildIFMLModel(doc) -> IFMLModel
     """
-
+    #Parse the UML Model here and become input for IFML Model
     model = IFMLModel(doc.getElementsByTagName('core:IFMLModel')[0])
 
     return model

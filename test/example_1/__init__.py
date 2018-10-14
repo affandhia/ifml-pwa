@@ -7,18 +7,17 @@ logging.basicConfig(level=logging.DEBUG)
 #target_structure = {"generated-angular-python": default_structure}
 
 #generate_project('movies.core','movies.xmi',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
-generate_project('movies.core','movies.xmi',"D:\\testing\\")
+generate_project('movie_practice.core','movies.uml',"D:\\testing")
 
-'''
-ifml_movies = parse('movies.core')
-uml_movies = uml_parse('movies.xmi')
 
-print(ifml_movies.get_interaction_flow_model())
-print('-------------')
-print(ifml_movies.get_domain_model())
-print('-------------')
-print(uml_movies.get_classes()['_Gt2cYE7REeSt-rUToYoH4A'].get_properties())
-'''
+#ifml_movies = parse('movies.core')
+#uml_movies = uml_parse('movies.xmi')
+
+#print('-------------')
+#print(ifml_movies.get_domain_model())
+#print('-------------')
+#print(uml_movies.get_classes()['_Gt2cYE7REeSt-rUToYoH4A'].get_properties())
+
 
 '''
 component_name = 'coba'

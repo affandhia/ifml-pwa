@@ -15,7 +15,7 @@ def create_new_file(filename,path,content):
         logger_ff.error("FAILED creating {file}, already exists".format(file=str(file_with_target_path)))
         raise FileExistsError("FAILED creating {file}".format(file=str(file_with_target_path)))
     else:
-        f = open(file_with_target_path,'w+')
+        f = open(file_with_target_path, 'w+')
         f.write(content)
         logger_ff.info('CREATED {file}'.format(file=str(file_with_target_path)))
 

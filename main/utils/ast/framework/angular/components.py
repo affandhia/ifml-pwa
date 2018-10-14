@@ -1,9 +1,10 @@
 from main.utils.ast.base import Node
-from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType
+from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType, VarDeclType
 from main.utils.jinja.angular import component_file_writer
 from main.utils.naming_management import camel_classify, dasherize
+from yattag import Doc
 
-from .base import ANGULAR_CORE_MODULE
+from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
 
 class AngularComponent(Node):
     SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
@@ -53,6 +54,25 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         import_component_from_angular_core.add_imported_element('Component')
         self.import_dict[ANGULAR_CORE_MODULE] = import_component_from_angular_core
 
+        #Importing Routing Purpose
+        import_component_from_angular_router = ImportStatementType()
+        import_component_from_angular_router.set_main_module(ANGULAR_ROUTER_MODULE)
+        import_component_from_angular_router.add_imported_element('ActivatedRoute')
+        import_component_from_angular_router.add_imported_element('Router')
+        self.import_dict[ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
+
+        #Adding ActivatedRoute and Router in constructor
+        activated_route_var = VarDeclType('route')
+        activated_route_var.variable_datatype = 'ActivatedRoute'
+        activated_route_var.acc_modifiers = 'private'
+
+        router_var = VarDeclType('router')
+        router_var.variable_datatype = 'Route'
+        router_var.acc_modifiers = 'private'
+
+        self.set_constructor_param(activated_route_var)
+        self.set_constructor_param(router_var)
+
     def set_component_selector_class_name(self, name):
         self.selector_name = dasherize(name)
         self.class_name = camel_classify(name)
@@ -70,11 +90,15 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         for _, import_statement in self.import_dict.items():
             import_statement_list.append(import_statement.render())
 
+        # Rendering all constructor param statement
+        constructor_param_list = []
+        for _, param in self.constructor_param.items():
+            constructor_param_list.append(param.render())
+
         return component_file_writer('basic.component.ts.template', selector_name=self.selector_name,
                                      class_name=self.class_name, component_name=self.component_name,
-                                     constructor=', '.join(self.constructor), body='\n'.join(self.body),
+                                     constructor_param=', '.join(constructor_param_list), body='\n'.join(self.body),
                                      import_statement_list='\n'.join(import_statement_list))
-
 
 class AngularComponentHTML(Node):
     def __init__(self):

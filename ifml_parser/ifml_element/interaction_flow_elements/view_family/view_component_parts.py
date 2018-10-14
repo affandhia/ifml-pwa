@@ -1,7 +1,7 @@
 from ifml_parser.ifml_element.interaction_flow_elements.interaction_flow_base import InteractionFlowElement
 from ifml_parser.ifml_element.expression_family.boolean_expression_extension import ActivationExpression
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
-
+from ifml_parser.ifml_element.parameter_family.parameters import Parameter
 
 
 class ViewComponentPart(InteractionFlowElement):
@@ -131,7 +131,7 @@ class ViewComponentPart(InteractionFlowElement):
     def get_view_element_events(self):
         return self._view_element_events
 
-class Field(ViewComponentPart):
+class Field(ViewComponentPart, Parameter):
 
     FIELD_TYPE = 'ext:Field'
 
@@ -151,7 +151,7 @@ class SelectionField(Field):
         super().__init__(xmiSchema)
         self._is_multi_selection = self._schema.getAttribute('isMultiSelection')
 
-class Slot(Field):
+class Slot(Field, Parameter):
     SLOT_TYPE = 'ext:Slot'
 
     def __init__(self, xmiSchema):

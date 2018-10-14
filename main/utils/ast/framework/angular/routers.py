@@ -46,7 +46,7 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
                                 list_routes=',\n'.join(routing_configuration_list),
                                 import_statement_list='\n'.join(import_statement_list))
 
-class BaseRoutingElement(Node):
+class BaseRoutingNode(Node):
 
     def __init__(self, path):
         self.path = path
@@ -60,7 +60,7 @@ class BaseRoutingElement(Node):
     def render(self):
         pass
 
-class RouteToModule(BaseRoutingElement):
+class RouteToModule(BaseRoutingNode):
 
     ROUTE_TO_MODULE_TEMPLATE = 'route_to_component.ts.template'
 
@@ -73,7 +73,7 @@ class RouteToModule(BaseRoutingElement):
     def render(self):
         return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE, path=self.path, component=self.component)
 
-class RedirectToAnotherPath(BaseRoutingElement):
+class RedirectToAnotherPath(BaseRoutingNode):
 
     def __init__(self, path, target_redirect, path_match=None):
         super().__init__(path)
