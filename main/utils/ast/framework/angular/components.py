@@ -2,9 +2,9 @@ from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType, VarDeclType
 from main.utils.jinja.angular import component_file_writer
 from main.utils.naming_management import camel_classify, dasherize
-from yattag import Doc
 
 from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
+
 
 class AngularComponent(Node):
     SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
@@ -18,12 +18,13 @@ class AngularComponent(Node):
         self.typescript_component_name = self.component_name + self.SUFFIX_TYPESCRIPT_COMPONENT_FILENAME
         self.typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
         self.typescript_css_name = self.component_name + self.SUFFIX_CSS_COMPONENT_FILENAME
+        self.routing_path = None
 
-    def set_routing_node(self, routing_node):
-        self.routing_node = routing_node
+    def set_routing_node(self, routing_path):
+        self.routing_path = routing_path
 
-    def get_routing_node(self):
-        return self.routing_node
+    def get_routing_path(self):
+        return self.routing_path
 
     def get_component_name(self):
         return self.component_name
@@ -39,7 +40,8 @@ class AngularComponent(Node):
 
     def build(self):
         return {self.component_name: {self.typescript_component_name: self.component_typescript_class.render(),
-                                      self.typescript_html_name: self.component_html.render(), self.typescript_css_name: ''}}
+                                      self.typescript_html_name: self.component_html.render(),
+                                      self.typescript_css_name: ''}}
 
 
 class AngularComponentTypescriptClass(TypescriptClassType):
@@ -54,20 +56,20 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         import_component_from_angular_core.add_imported_element('Component')
         self.import_dict[ANGULAR_CORE_MODULE] = import_component_from_angular_core
 
-        #Importing Routing Purpose
+        # Importing Routing Purpose
         import_component_from_angular_router = ImportStatementType()
         import_component_from_angular_router.set_main_module(ANGULAR_ROUTER_MODULE)
         import_component_from_angular_router.add_imported_element('ActivatedRoute')
         import_component_from_angular_router.add_imported_element('Router')
         self.import_dict[ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
 
-        #Adding ActivatedRoute and Router in constructor
+        # Adding ActivatedRoute and Router in constructor
         activated_route_var = VarDeclType('route')
         activated_route_var.variable_datatype = 'ActivatedRoute'
         activated_route_var.acc_modifiers = 'private'
 
         router_var = VarDeclType('router')
-        router_var.variable_datatype = 'Route'
+        router_var.variable_datatype = 'Router'
         router_var.acc_modifiers = 'private'
 
         self.set_constructor_param(activated_route_var)
@@ -95,10 +97,17 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         for _, param in self.constructor_param.items():
             constructor_param_list.append(param.render())
 
+        # Rendering all property decl statement
+        property_decl_list = []
+        for _, prop in self.property_decl.items():
+            property_decl_list.append(prop.render())
+
         return component_file_writer('basic.component.ts.template', selector_name=self.selector_name,
                                      class_name=self.class_name, component_name=self.component_name,
                                      constructor_param=', '.join(constructor_param_list), body='\n'.join(self.body),
-                                     import_statement_list='\n'.join(import_statement_list))
+                                     import_statement_list='\n'.join(import_statement_list),
+                                     property_decl='\n'.join(property_decl_list))
+
 
 class AngularComponentHTML(Node):
     def __init__(self):

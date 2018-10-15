@@ -25,7 +25,7 @@ class ImportStatementType(Node):
     def render(self):
         list_element_imported_in_module = ','.join(self.imported_elements)
         import_statement = typescript_writer(IMPORT_TYPESCRIPT_TEMPLATE,
-                                             imported_element=','.join(self.imported_elements),
+                                             imported_element=', '.join(self.imported_elements),
                                              main_module=self.main_module)
         return import_statement
 

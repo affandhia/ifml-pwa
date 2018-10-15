@@ -28,8 +28,11 @@ def write_or_copy(filename, target_directory, content):
     else:
         create_new_file(filename, target_directory, content)
 
+
 def js_linter(content):
+
     return jsbeautifier.beautify(content)
+
 
 def create_structure(struct, directory=None):
     """
@@ -59,7 +62,6 @@ def create_structure(struct, directory=None):
             changed[name] = content
         elif isinstance(content, dict):
             create_new_directory(name, target_directory)
-            print("masuk")
             new_target_directory = target_directory / name
             changed[name] = create_structure(
                 struct[name], new_target_directory)

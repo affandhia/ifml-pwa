@@ -15,6 +15,13 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
     def add_routing_hierarchy(self, routing_hierarchy):
         self.route_hierarchy = routing_hierarchy
 
+    def register_component_with_router(self, component):
+        selector_name = component.component_typescript_class.selector_name
+        class_name = component.component_typescript_class.class_name+'Component'
+        if not(component.get_routing_path() is None):
+            component_location = './'+selector_name+'/'+selector_name+'.component'
+            self.add_import_statement(main_module=component_location, element_imported=class_name)
+
     def base_element_import_statement_for_router(self):
         self.add_import_statement(main_module=ANGULAR_CORE_MODULE, element_imported=IMPORTED_NG_MODULE)
         self.add_import_statement_for_multiple_element(main_module=ANGULAR_ROUTER_MODULE, elements_imported=[IMPORTED_ROUTES, IMPORTED_ROUTER_MODULE])
@@ -30,9 +37,22 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
                                 list_routes=self.route_hierarchy.render(),
                                 import_statement_list='\n'.join(import_statement_list))
 
-class RootRoutingNode(Node):
+class BaseRoutingNode(Node):
 
-    def __init__(self):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def get_target_path(self):
+        return self.path
+    
+    def render(self):
+        pass
+
+class RootRoutingNode(BaseRoutingNode):
+
+    def __init__(self, path):
+        super().__init__(path)
         self.angular_children_routes = {}
 
     def render(self):
@@ -55,19 +75,7 @@ class RootRoutingNode(Node):
     def get_routing_hierarchy(self):
         return self.angular_children_routes
 
-class BaseRoutingNode(RootRoutingNode):
-
-    def __init__(self, path):
-        super().__init__()
-        self.path = path
-
-    def get_target_path(self):
-        return self.path
-    
-    def render(self):
-        pass
-
-class RouteToModule(BaseRoutingNode):
+class RouteToModule(RootRoutingNode):
 
     ROUTE_TO_MODULE_TEMPLATE = 'route_to_component.ts.template'
 

@@ -3,12 +3,13 @@ import logging
 from yattag import Doc
 
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
-from main.core.angular.interpreter.view_family import BaseViewContainerInterpreter
-from . import BaseInterpreter
+from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
+    AngularComponentHTML
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
-from main.utils.naming_management import dasherize
-from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, AngularComponentHTML
 from main.utils.ast.language.html import HTMLMenuTemplate
+from main.utils.ast.language.typescript import VarDeclType
+from main.utils.naming_management import dasherize
+from . import BaseInterpreter
 
 logger_ifml_angular_interpreter = logging.getLogger("main.core.angular.interpreter")
 
@@ -22,7 +23,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.project_name = dasherize(self.root_ifml.name)
         self.component = {}
         self.service = {}
-        self.angular_routing = RootRoutingNode()
+        self.angular_routing = RootRoutingNode('')
         self.root_html = self.get_root_html()
         self.root_typescript_class = self.get_root_class()
 
@@ -36,7 +37,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.interpret_interaction_flow_model()
         self.interpret_domain_model()
 
-        #Decide whether router-outlet is needed or not
+        # Decide whether router-outlet is needed or not
         self.append_router_outlet()
 
     def append_router_outlet(self):
@@ -72,11 +73,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             elif isinstance(interaction_flow_model_element, ViewContainer):
                 logger_ifml_angular_interpreter.info(
                     "Interpreting a {name} View Container".format(name=interaction_flow_model_element.get_name()))
-                self.interpret_view_container(interaction_flow_model_element, self.root_html, self.root_typescript_class, self.angular_routing)
+                self.interpret_view_container(interaction_flow_model_element, self.root_html,
+                                              self.root_typescript_class, self.angular_routing)
 
     def interpret_menu(self, menu_element, html_calling):
 
-        #Name of element
+        # Name of element
         element_name = menu_element.get_name()
 
         # Prepare Typescript Class
@@ -86,24 +88,24 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Prepare HTML
         html = HTMLMenuTemplate(typescript_class.selector_name)
 
-        #Build All View Element Event Inside
+        # Build All View Element Event Inside
         events = menu_element.get_view_element_events()
         for event in events:
             self.interpret_view_element_event(event, html, typescript_class)
 
-        #The Component Itself
+        # The Component Itself
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
-                                                       component_html=html)
+                                                  component_html=html)
 
         self.component[menu_element.get_id()] = angular_component_node
 
-        #Calling Menu selector
+        # Calling Menu selector
         doc_selector, tag_selector, text_selector = Doc().tagtext()
 
         with tag_selector(typescript_class.selector_name):
             text_selector('')
 
-        #Menu always appended into first element
+        # Menu always appended into first element
         html_calling.append_html_into_body(doc_selector.getvalue())
 
     def interpret_view_container(self, view_container, html_calling, typescript_calling, routing_parent):
@@ -111,7 +113,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Name of element
         element_name = view_container.get_name()
 
-        #Defining variable for routing node, intialized if this container have inInteractionFlow or isLandmark
+        # Defining variable for routing node, intialized if this container have inInteractionFlow or isLandmark
         routing_node = None
 
         # Prepare Typescript Class
@@ -128,33 +130,57 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node = RouteToModule(typescript_class)
             routing_node.enable_children_routing()
 
-        if(view_container.get_is_landmark() or len(view_container.get_in_interaction_flow()) > 0) and routing_node is None:
+        if (view_container.get_is_landmark() or len(
+                view_container.get_in_interaction_flow()) > 0) and routing_node is None:
+
+            landmark_path_var_name = typescript_class.class_name+'path'
+
+            doc_landmark, tag_landmark, text_landmark = Doc().tagtext()
+            with tag_landmark('button', ('class', 'landmark-event'), ('id', typescript_class.selector_name),
+                              ('[routerLink]', typescript_class.class_name+'path')):
+                text_landmark(typescript_class.class_name)
             routing_node = RouteToModule(typescript_class)
+
+            absolute_path = routing_parent.path + '/' + routing_node.path
+
+            landmark_path_var_decl = VarDeclType(landmark_path_var_name,';')
+            landmark_path_var_decl.acc_modifiers = 'public'
+            landmark_path_var_decl.value = absolute_path
+            landmark_path_var_decl.variable_datatype = 'string'
+
+            typescript_calling.set_property_decl(landmark_path_var_decl)
+            html_calling.append_html_into_body(doc_landmark.getvalue())
 
         # TODO Implement, Delete below line after testing use
         doc_test, tag_test, text_test = Doc().tagtext()
 
         with tag_test('h2'):
-            text_test(typescript_class.selector_name+' Works Fine')
+            text_test(typescript_class.selector_name + ' Works Fine')
 
         html.append_html_into_body(doc_test.getvalue())
         # End TODO
 
-        #Build All Associated View Element
+        # Build All Associated View Element
         for key, view_element in view_container.get_assoc_view_element().items():
             if isinstance(view_element, Menu):
                 self.interpret_menu(view_element, html)
             elif isinstance(view_element, ViewContainer):
                 self.interpret_view_container(view_element, html, typescript_class, routing_node)
 
-        #Decide if this container is default in its XOR
+        # Add to Global Component Dictionary
+        # The Component Itself
+        angular_component_node = AngularComponent(component_typescript_class=typescript_class,
+                                                  component_html=html)
+
+        # Decide if this container is default in its XOR
         if view_container.get_is_default():
             routing_parent.add_children_routing(RedirectToAnotherPath('', typescript_class.selector_name))
 
-        #Add Routing Node and (If exist) any children route
+        # Add Routing Node and (If exist) any children route
         try:
             routing_parent.add_children_routing(routing_node)
-        #If this container must be called
+            angular_component_node.set_routing_node(routing_parent.path + '/' + routing_node.path)
+        # If this container must be called
         except Exception:
             # Calling ViewContainer selector
             doc_selector, tag_selector, text_selector = Doc().tagtext()
@@ -163,13 +189,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                 text_selector('')
             html_calling.append_html_into_body(doc_selector.getvalue())
 
-        #Add to Global Component Dictionary
-        # The Component Itself
-        angular_component_node = AngularComponent(component_typescript_class=typescript_class,
-                                                  component_html=html)
-
         self.component[view_container.get_id()] = angular_component_node
-
 
     def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
         pass

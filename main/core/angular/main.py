@@ -49,6 +49,9 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
         #Insert the component into main module
         basic_app_module.add_component_to_module(component_node)
 
+        #Importing all component to the routing node
+        basic_routing.register_component_with_router(component_node)
+
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
 
