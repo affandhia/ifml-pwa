@@ -1,1 +1,1 @@
-{% if acc_modifiers %}{$ acc_modifiers $} {% endif %}{% if variable_type %}{$ variable_type $} {% endif %}{$ variable_name $}{% if variable_datatype %}: {$ variable_datatype $}{% endif %}{% if value %} = {$ value $}{% endif %}{$ end|safe $}
+{% if acc_modifiers %}{$ acc_modifiers $} {% endif %}{% if decorator %}{$ decorator $} {% endif %}{% if variable_type %}{$ variable_type $} {% endif %}{$ variable_name $}{% if variable_datatype %}: {$ variable_datatype $}{% endif %}{% if value %} = {$ value $}{% endif %}{$ end|safe $}

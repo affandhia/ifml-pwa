@@ -7,24 +7,13 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
 
     def __init__(self):
         super().__init__()
-
-        self.route_definition = {}
+        self.route_hierarchy = None
         self.ngmodule_imports = ["RouterModule.forRoot(routes)"]
         self.ngmodule_exports = ["RouterModule"]
         self.base_element_import_statement_for_router()
 
-    def add_routing_definition_for_component(self, component_that_have_routing):
-        routing_node = component_that_have_routing.get_routing_node()
-        try:
-            check_if_path_already_being_used = self.route_definition[routing_node.get_target_path()] != None
-            raise ValueError('Path {path} is already used, please use another path configuration'.format(path=routing_node.get_target_path()))
-        except KeyError:
-            # Import into Module
-            folder_name = component_that_have_routing.get_component_name()
-            component_class_name = component_that_have_routing.get_typescript_class_node().get_class_name() + 'Component'
-            self.add_import_statement(main_module='./' + folder_name + '/' + folder_name + '.component',
-                                      element_imported=component_class_name)
-            self.route_definition[routing_node.get_target_path()] = routing_node
+    def add_routing_hierarchy(self, routing_hierarchy):
+        self.route_hierarchy = routing_hierarchy
 
     def base_element_import_statement_for_router(self):
         self.add_import_statement(main_module=ANGULAR_CORE_MODULE, element_imported=IMPORTED_NG_MODULE)
@@ -36,23 +25,41 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
         for _, import_statement in self.import_dict.items():
             import_statement_list.append(import_statement.render())
 
-        #Rendering all configuration definition
-        routing_configuration_list = []
-        for _, routing_configuration in self.route_definition.items():
-            routing_configuration_list.append(routing_configuration.render())
-
         return base_file_writer('src/app/app-routing.module.ts.template',
                                 ngmodule_imports=',\n'.join(self.ngmodule_imports), ngmodule_exports=',\n'.join(self.ngmodule_exports),
-                                list_routes=',\n'.join(routing_configuration_list),
+                                list_routes=self.route_hierarchy.render(),
                                 import_statement_list='\n'.join(import_statement_list))
 
-class BaseRoutingNode(Node):
+class RootRoutingNode(Node):
+
+    def __init__(self):
+        self.angular_children_routes = {}
+
+    def render(self):
+        #Rendering Children route
+        children_routes = []
+        for _, route_node in self.angular_children_routes.items():
+            children_routes.append(route_node.render())
+        return ','.join(children_routes)
+
+    def add_children_routing(self, children_route_node):
+        if not(children_route_node.path in self.angular_children_routes.keys()):
+            self.angular_children_routes[children_route_node.path] = children_route_node
+        else:
+            raise KeyError('Path {path} is already exists'.format(path=children_route_node.path))
+
+    def add_list_of_children_routing(self, list_of_children_route_node):
+        for route_node in list_of_children_route_node:
+            self.add_children_routing(route_node)
+
+    def get_routing_hierarchy(self):
+        return self.angular_children_routes
+
+class BaseRoutingNode(RootRoutingNode):
 
     def __init__(self, path):
+        super().__init__()
         self.path = path
-
-    def add_children_routing(self, children_routes_configuration):
-        self.list_of_children_routes = children_routes_configuration.render()
 
     def get_target_path(self):
         return self.path
@@ -64,25 +71,36 @@ class RouteToModule(BaseRoutingNode):
 
     ROUTE_TO_MODULE_TEMPLATE = 'route_to_component.ts.template'
 
-    def __init__(self, path, component):
-        super().__init__(path)
-        self.add_component_to_route(component)
+    def __init__(self, component_typescript_class):
+        super().__init__(component_typescript_class.selector_name)
+        self.component = component_typescript_class.class_name + 'Component'
+        self.flag = False
+
+    def enable_children_routing(self):
+        self.flag = True
+
     def add_component_to_route(self, component):
         self.component = component.component_typescript_class.class_name+'Component'
 
     def render(self):
-        return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE, path=self.path, component=self.component)
+        #Rendering Children route
+        children_routes = []
+        for route_node in self.angular_children_routes:
+            children_routes.append(route_node.render())
+        return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE, flag=self.flag, path=self.path, component=self.component, childrens=',\n'.join(children_routes))
 
 class RedirectToAnotherPath(BaseRoutingNode):
 
-    def __init__(self, path, target_redirect, path_match=None):
+    REDIRECT_TO_PATH_TEMPLATE = 'redirect_to_path.ts.template'
+
+    def __init__(self, path, target_redirect, path_match='full'):
         super().__init__(path)
-        self.set_path_match(path_match)
-        self.set_target_redirect(target_redirect)
+        self.path_match = path_match
+        self.target_redirect = target_redirect
 
     def set_target_redirect(self, target_redirect):
         self.target_redirect = target_redirect
 
-    def set_path_match(self, path_match):
-        self.path_match = path_match
-
+    def render(self):
+        return router_file_writer(self.REDIRECT_TO_PATH_TEMPLATE, path=self.path, target_redirect=self.target_redirect,
+                                  path_match=self.path_match)

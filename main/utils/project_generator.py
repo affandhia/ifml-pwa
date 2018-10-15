@@ -16,6 +16,7 @@ from .file_and_folder_management import create_new_file, create_new_directory, c
 from pathlib import Path
 import os
 import logging
+import jsbeautifier
 
 ASSETS_EXTENSION = ['.jpg', '.jpeg', '.png', '.ico']
 
@@ -27,6 +28,8 @@ def write_or_copy(filename, target_directory, content):
     else:
         create_new_file(filename, target_directory, content)
 
+def js_linter(content):
+    return jsbeautifier.beautify(content)
 
 def create_structure(struct, directory=None):
     """

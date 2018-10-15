@@ -33,24 +33,21 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     root_ts_class.component_name = root_component_name
     root_ts_class.class_name = root_class_name
     root_ts_class.selector_name = root_component_name + '-root'
-    basic_template.add_default_app_component(root_ts_class.render())
-
-    root_html = base_file_writer('src/app/app.component.html.template')
-    basic_template.add_app_html_template(root_html)
+    basic_template.add_default_app_component(interpreting_result.root_typescript_class.render())
+    basic_template.add_app_html_template(interpreting_result.root_html.render())
 
     #Defining Angular Main Module
     basic_app_module = AngularMainModule(app_name=interpreting_result.get_project_name())
 
     # Adding basic Routing Module
     basic_routing = AngularDefaultRouterDefinition()
+    basic_routing.add_routing_hierarchy(interpreting_result.angular_routing)
 
     #Adding the result of interpreting into the AngularProject
     for _, component_node in interpreting_result.component.items():
 
         #Insert the component into main module
         basic_app_module.add_component_to_module(component_node)
-        #Insert the routing into main routing module
-        #basic_routing.add_routing_definition_for_component(component_node)
 
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
@@ -59,6 +56,6 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     basic_template.add_app_module_file(basic_app_module.render())
 
     basic_template.add_app_module_routing(basic_routing.render())
-    print(basic_template.return_project_structure())
+    #print(basic_template.return_project_structure())
     create_structure(basic_template.return_project_structure(), target_directory)
     logger_angular.info('Angular PWA Project successfully generated at ' + target_directory)

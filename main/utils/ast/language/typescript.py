@@ -36,6 +36,7 @@ class VarDeclType(Node):
 
     def __init__(self, name, semicolon=''):
         self.acc_modifiers = ''
+        self.decorator = ''
         self.variable_type = ''
         self.variable_name = name
         self.variable_datatype = ''
@@ -44,7 +45,7 @@ class VarDeclType(Node):
 
     def render(self):
         return typescript_writer(VARIABLE_DECLARATION_TEMPLATE,
-                                     acc_modifiers=self.acc_modifiers,
+                                     acc_modifiers=self.acc_modifiers, decorator=self.decorator,
                                      variable_type=self.variable_type, variable_name=self.variable_name,
                                      variable_datatype=self.variable_datatype, value=self.value, end=self.semicolon)
 
@@ -53,6 +54,7 @@ class TypescriptClassType(Node):
     def __init__(self):
         self.class_name = ''
         self.constructor_param = {}
+        self.property_decl = {}
         self.constructor_body = []
         self.body = []
         self.import_dict = {}
@@ -84,6 +86,9 @@ class TypescriptClassType(Node):
     def set_constructor_param(self, var_decl):
         self.constructor_param[var_decl.variable_name] = var_decl
 
+    def set_property_decl(self, var_decl):
+        self.property_decl[var_decl.variable_name] = var_decl
+
     def render(self):
         # Rendering all import statement
         import_statement_list = []
@@ -94,6 +99,11 @@ class TypescriptClassType(Node):
         constructor_param_list = []
         for _, param in self.constructor_param.items():
             constructor_param_list.append(param.render())
+
+        # Rendering all property decl statement
+        property_decl_list = []
+        for _, prop in self.property_decl.items():
+            property_decl_list.append(prop.render())
 
         return typescript_writer(CLASS_TYPESCRIPT_TEMPLATE,
                                      class_name=self.class_name,

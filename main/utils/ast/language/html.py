@@ -4,7 +4,8 @@ from yattag import Doc
 
 
 class HTMLMenuTemplate(Node):
-    def __init__(self):
+    def __init__(self, name):
+        self.menu_name = name
         self.button_list = []
 
     def add_button_to_menu(self, button):
@@ -14,4 +15,4 @@ class HTMLMenuTemplate(Node):
         self.button_list.append(doc.getvalue())
 
     def render(self):
-        return base_html_writer('menu.html.template', list_button='\n'.join(self.button_list))
+        return base_html_writer('menu.html.template', list_button='\n'.join(self.button_list), menu_name=self.menu_name)

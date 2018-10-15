@@ -11,10 +11,10 @@ class AngularComponent(Node):
     SUFFIX_HTML_COMPONENT_FILENAME = '.component.html'
     SUFFIX_CSS_COMPONENT_FILENAME = '.component.css'
 
-    def __init__(self, component_name, component_typescript_class, component_html):
-        self.component_name = component_name
+    def __init__(self, component_typescript_class, component_html):
         self.component_typescript_class = component_typescript_class
         self.component_html = component_html
+        self.component_name = self.component_typescript_class.selector_name
         self.typescript_component_name = self.component_name + self.SUFFIX_TYPESCRIPT_COMPONENT_FILENAME
         self.typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
         self.typescript_css_name = self.component_name + self.SUFFIX_CSS_COMPONENT_FILENAME
@@ -104,7 +104,7 @@ class AngularComponentHTML(Node):
     def __init__(self):
         self.body = []
 
-    def add_html_into_body(self, html_element):
+    def append_html_into_body(self, html_element):
         self.body.append(html_element)
 
     def render(self):
