@@ -13,7 +13,7 @@ def dasherize(word):
     """
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', word)
     s2 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1)
-    return s2.replace('_','-').lower()
+    return s2.replace('_','-').lower().replace(' ','')
 
 def camel_classify(word):
     """Creating class name based on a word that have a dash or underscore.

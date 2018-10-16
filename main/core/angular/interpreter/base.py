@@ -2,10 +2,12 @@ import logging
 
 from yattag import Doc
 
+from ifml_parser.ifml_element.interaction_flow_elements.action_family.base import Action
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
+from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize
@@ -21,8 +23,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.root_ifml = ifml_xmi
         self.root_class_diagram_xmi = class_diagram_xmi
         self.project_name = dasherize(self.root_ifml.name)
-        self.component = {}
-        self.service = {}
+        self.components = {}
+        self.services = {}
+        self.list_service_worker_config = []
         self.angular_routing = RootRoutingNode('')
         self.root_html = self.get_root_html()
         self.root_typescript_class = self.get_root_class()
@@ -65,8 +68,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     def interpret_interaction_flow_model(self):
         for key, interaction_flow_model_element in self.ifml_expressing_ui_design.items():
+            # If the root have actions
+            if isinstance(interaction_flow_model_element, Action):
+                self.interpret_action(interaction_flow_model_element)
             # If the root have menu
-            if isinstance(interaction_flow_model_element, Menu):
+            elif isinstance(interaction_flow_model_element, Menu):
                 logger_ifml_angular_interpreter.info(
                     "Interpreting a {name} Menu".format(name=interaction_flow_model_element.get_name()))
                 self.interpret_menu(interaction_flow_model_element, self.root_html)
@@ -97,8 +103,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
                                                   component_html=html)
 
-        self.component[menu_element.get_id()] = angular_component_node
-
         # Calling Menu selector
         doc_selector, tag_selector, text_selector = Doc().tagtext()
 
@@ -107,6 +111,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Menu always appended into first element
         html_calling.append_html_into_body(doc_selector.getvalue())
+
+        # Register to components container
+        self.components[menu_element.get_id()] = angular_component_node
 
     def interpret_view_container(self, view_container, html_calling, typescript_calling, routing_parent):
 
@@ -160,6 +167,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html.append_html_into_body(doc_test.getvalue())
         # End TODO
 
+        #Build All Action inside the Container
+        for action in view_container.get_action():
+            self.interpret_action(action)
+
         # Build All Associated View Element
         for key, view_element in view_container.get_assoc_view_element().items():
             if isinstance(view_element, Menu):
@@ -167,7 +178,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             elif isinstance(view_element, ViewContainer):
                 self.interpret_view_container(view_element, html, typescript_class, routing_node)
 
-        # Add to Global Component Dictionary
         # The Component Itself
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
                                                   component_html=html)
@@ -189,9 +199,31 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                 text_selector('')
             html_calling.append_html_into_body(doc_selector.getvalue())
 
-        self.component[view_container.get_id()] = angular_component_node
+        #Register to components container
+        self.components[view_container.get_id()] = angular_component_node
 
     def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
+        pass
+
+    def interpret_action(self, action_element):
+        # Name of element
+        element_name = action_element.get_name()
+
+        #Defining service typescript, and add the name into AngularService
+        service_typescript = AngularService()
+        service_typescript.set_endpoint_class_name_and_worker(element_name)
+
+        #Calling ActionEvent and build it
+        for action_event in action_element.get_action_event():
+            self.interpret_action_event(action_event, service_typescript)
+
+        #Register to services container
+        self.services[action_element.get_id()] = service_typescript
+
+        # Register service worker config
+        self.list_service_worker_config.append(service_typescript.worker_config.render())
+
+    def interpret_action_event(self, action_event_element, typescript_call):
         pass
 
     def interpret_domain_model(self):

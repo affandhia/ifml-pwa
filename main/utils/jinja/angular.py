@@ -14,7 +14,6 @@ def base_file_writer(template_name, *args, **kwargs):
     template = base_env.get_template(template_name)
     return template.render(*args, **kwargs)
 
-
 def component_file_writer(template_name, *args, **kwargs):
     template = component_env.get_template(template_name)
     return template.render(*args, **kwargs)

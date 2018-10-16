@@ -22,5 +22,9 @@
         ]
       }
     }
+  ]{% if data_config %},
+  "dataGroups": [
+    {{ data_config|safe }}
   ]
+  {% endif %}
 }

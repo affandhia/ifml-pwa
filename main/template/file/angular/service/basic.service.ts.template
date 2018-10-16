@@ -1,0 +1,29 @@
+import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+{$ import_statement_list|safe $}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class {$ class_name|safe $}Service {
+
+  {$ property_decl|safe $}
+
+  constructor(private http: HttpClient{% if constructor_param %},{$ constructor_param|safe $}{% endif %}) {
+    {$ constructor_body|safe $}
+  }
+
+  httpOptions = {
+
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
+
+  endpoint: string = environment.rootApi + '{$ api_endpoint|safe $}';
+
+  call({$ call_param|safe $}){
+    return this.http.get(this.endpoint{% if call_param %}, {$ call_param|safe $}{% endif %}, this.httpOptions).toPromise();
+  }
+}

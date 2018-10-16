@@ -9,6 +9,8 @@ APP_COMPONENT_LOCATION = './app.component'
 ANGULAR_SERVICE_WORKER_MODULE = '@angular/service-worker'
 ENVIRONMENTS_LOCATION = '../environments/environment'
 ANGULAR_ROUTER_MODULE = '@angular/router'
+FORMS_MODULE_LOCATION = '@angular/forms'
+HTTP_MODULE_LOCATION = '@angular/common/http'
 
 IMPORTED_NG_MODULE = 'NgModule'
 IMPORTED_ROUTES = 'Routes'
@@ -20,6 +22,8 @@ class AngularMainModule(TypescriptClassType):
     IMPORTED_APP_COMPONENT = 'AppComponent'
     IMPORTED_SERVICE_WORKER_MODULE = 'ServiceWorkerModule'
     IMPORTED_ENVIRONMENT = 'environment'
+    IMPORTED_FORMS_MODULE = 'FormsModule'
+    IMPORTED_HTTP_CLIENT_MODULE = 'HttpClientModule'
 
     def __init__(self, app_name):
         super().__init__()
@@ -28,10 +32,10 @@ class AngularMainModule(TypescriptClassType):
         self.base_element_import_statement_for_module()
 
         service_worker_initialization = "ServiceWorkerModule.register('/" + app_name + "/ngsw-worker.js', { enabled: environment.production })"
-        self.ngmodule_declarations = ['AppComponent']
-        self.ngmodule_imports = ['BrowserModule', 'AppRoutingModule', service_worker_initialization]
+        self.ngmodule_declarations = [self.IMPORTED_APP_COMPONENT]
+        self.ngmodule_imports = [self.IMPORTED_BROWSER_MODULE, self.IMPORTED_HTTP_CLIENT_MODULE , self.IMPORTED_APP_ROUTING_MODULE, self.IMPORTED_FORMS_MODULE ,service_worker_initialization]
         self.ngmodule_providers = ['']
-        self.ngmodule_bootstraps = ['AppComponent']
+        self.ngmodule_bootstraps = [self.IMPORTED_APP_COMPONENT]
 
     def add_element_into_ngmodule_declarations(self, element=None, elements=None):
         if element:
@@ -86,6 +90,8 @@ class AngularMainModule(TypescriptClassType):
         self.add_import_statement(main_module=ANGULAR_SERVICE_WORKER_MODULE,
                                   element_imported=self.IMPORTED_SERVICE_WORKER_MODULE)
         self.add_import_statement(main_module=ENVIRONMENTS_LOCATION, element_imported=self.IMPORTED_ENVIRONMENT)
+        self.add_import_statement(main_module=HTTP_MODULE_LOCATION, element_imported=self.IMPORTED_HTTP_CLIENT_MODULE)
+        self.add_import_statement(main_module=FORMS_MODULE_LOCATION, element_imported=self.IMPORTED_FORMS_MODULE)
 
     def render(self):
         # Rendering all import statement

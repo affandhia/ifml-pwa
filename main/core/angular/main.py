@@ -15,11 +15,7 @@ logger_angular = logging.getLogger("main.core.angular.main")
 
 
 def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=''):
-    ifml = open(path_to_ifml_file, "rt")
-    class_diagram = open(path_to_class_diagram, "rt")
     target_project_directory = sys.path[0] if target_directory == '' else target_directory
-
-
 
     interpreting_result = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
                                                 class_diagram_xmi=uml_parse(path_to_class_diagram))
@@ -29,10 +25,6 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     root_class_name = 'App'
 
     # Angular Typescript Component for root component
-    root_ts_class = AngularComponentTypescriptClass()
-    root_ts_class.component_name = root_component_name
-    root_ts_class.class_name = root_class_name
-    root_ts_class.selector_name = root_component_name + '-root'
     basic_template.add_default_app_component(interpreting_result.root_typescript_class.render())
     basic_template.add_app_html_template(interpreting_result.root_html.render())
 
@@ -43,8 +35,11 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     basic_routing = AngularDefaultRouterDefinition()
     basic_routing.add_routing_hierarchy(interpreting_result.angular_routing)
 
-    #Adding the result of interpreting into the AngularProject
-    for _, component_node in interpreting_result.component.items():
+    #Adding service worker cofig
+    basic_template.write_service_worker_config(interpreting_result.list_service_worker_config)
+
+    #Adding each component of interpreting into the AngularProject
+    for _, component_node in interpreting_result.components.items():
 
         #Insert the component into main module
         basic_app_module.add_component_to_module(component_node)
@@ -54,6 +49,12 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
+
+    #Adding each service and worker configuration into the AngularProject
+    for _, service_node in interpreting_result.services.items():
+
+        #Insert the service into the services folder
+        basic_template.add_service_inside_services_folder(service_node.render())
 
     # Adding App Module
     basic_template.add_app_module_file(basic_app_module.render())

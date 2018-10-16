@@ -7,6 +7,7 @@ class AngularProject:
     ENV_FOLDER_KEY = 'environments'
     E2E_KEY = 'e2e'
     APP_KEY = 'app'
+    SERVICES_KEY = 'services'
 
     EDITOR_CONFIG_KEY = '.editorconfig'
     GITIGNORE_KEY = '.gitignore'
@@ -45,6 +46,7 @@ class AngularProject:
         self.project_structure = default_structure if structure == None else structure
         self.write_base_angular_project_file()
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
+        self.services_folder = self.app_folder[self.SERVICES_KEY]
 
     def get_app_name(self):
         return self.app_name
@@ -53,7 +55,6 @@ class AngularProject:
         self.write_editor_config()
         self.write_gitignore()
         self.write_angular_settings()
-        self.write_service_worker_config()
         self.write_package_dependencies()
         self.write_readme()
         self.write_express_server()
@@ -82,9 +83,9 @@ class AngularProject:
         self.project_structure[self.ANGULAR_KEY] = base_file_writer(self.ANGULAR_KEY + '.template',
                                                                     app_name=self.app_name)
 
-    def write_service_worker_config(self):
+    def write_service_worker_config(self, list_of_config):
         self.project_structure[self.NGSW_KEY] = base_file_writer(self.NGSW_KEY + '.template',
-                                                                 app_name=self.app_name)
+                                                                 app_name=self.app_name, data_config=','.join(list_of_config))
 
     def write_package_dependencies(self):
         self.project_structure[self.PACKAGE_KEY] = base_file_writer(self.PACKAGE_KEY + '.template',
@@ -179,5 +180,9 @@ class AngularProject:
     def add_new_component_using_basic_component_folder(self, inserted_component_folder):
         self.app_folder.update(inserted_component_folder)
 
+    def add_service_inside_services_folder(self, inserted_service_file):
+        self.services_folder.update(inserted_service_file)
+
     def return_project_structure(self):
         return {self.app_name: self.project_structure}
+
