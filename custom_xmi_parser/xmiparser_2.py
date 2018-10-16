@@ -115,6 +115,57 @@ def getAttributeValue(domElement, tagName=None, default=_marker, recursive=0, do
 
 # END OF XMI UTILS METHOD#
 
+class UMLSymbolTable:
+
+    def __init__(self):
+        self.table = {}
+
+    def insert(self, symbol):
+        self.table[symbol.id] = symbol
+
+    def inserts(self, dict_symbol):
+        for _, symbol in dict_symbol.items():
+            self.insert(symbol)
+
+    def lookup(self, symbol):
+        try:
+            return self.table[symbol.id]
+        except KeyError:
+            return None
+
+class Symbol(object):
+
+    def __init__(self):
+        self.id = None
+
+class ClassSymbol(Symbol):
+
+    def __init__(self, class_element):
+        super().__init__()
+        self.id = class_element.get_model_id()
+        self.name = class_element.get_model_name()
+
+class DatatypeSymbol(Symbol):
+
+    def __init__(self, id, name):
+        super().__init__()
+        self.id = id
+        self.name = name
+
+class PropertySymbol(Symbol):
+
+    def __init__(self, property_element):
+        super().__init__()
+        self.id = property_element.get_model_id()
+        self.name = property_element.get_model_name()
+        self.type = property_element.get_type()
+
+class OperationSymbol(Symbol):
+
+    def __init__(self, operation_element):
+        super().__init__()
+        self.id = operation_element.get_model_id()
+        self.name = operation_element.get_model_name()
 
 class XMI2_0(object):
     # Main XML Tag
@@ -286,8 +337,8 @@ class XMIElement(object):
     def get_model_name(self):
         return self.model.getAttribute('name')
 
-    def get_value_visibility(self, node):
-        return node.getAttribute(XMI.VISIBILITY)
+    def get_model_id(self):
+        return self.model.getAttribute(XMI.ID)
 
     def get_value_visibility(self, node):
         return node.getAttribute(XMI.VISIBILITY)
@@ -311,6 +362,7 @@ class XMIModel(XMIElement):
     _parent = None
 
     def __init__(self, doc):
+        self.symtab = UMLSymbolTable()
         self._packages = {}
         self._classes = {}
         self._interfaces = {}
@@ -321,6 +373,7 @@ class XMIModel(XMIElement):
         self.content = XMI.get_content(doc, XMI.MODEL)
         self.build_diagrams()
         self._data_types = datatypes.copy()
+        self.buildsymtab()
 
     def build_diagrams(self):
         diagram_els = self.content
@@ -381,6 +434,15 @@ class XMIModel(XMIElement):
             return class_list[id]
         except KeyError:
             return None
+
+    def buildsymtab(self):
+        for _, class_element in self._classes.items():
+            self.symtab.insert(ClassSymbol(class_element))
+            self.symtab.inserts(class_element.symtab.table)
+
+        for _, datatype in self._data_types.items():
+            self.symtab.insert(datatype)
+
 
 
 class XMIPackage(XMIElement):
@@ -473,6 +535,7 @@ class XMIPackage(XMIElement):
 class XMIClass(XMIElement):
 
     def __init__(self, *args, **kw):
+        self.symtab = UMLSymbolTable()
         self._gen = {}
         self._package = None
         self._is_interface = 0
@@ -493,6 +556,7 @@ class XMIClass(XMIElement):
             self.model) != '' else 'public'
         self._is_abstract = 1 if self.set_abstract(self.model) == 'true' else 0
         self._is_leaf = 1 if self.set_leaf(self.model) == 'true' else 0
+        self.buildsymtab()
 
     def set_package(self, new_package):
         self._package = new_package
@@ -512,6 +576,14 @@ class XMIClass(XMIElement):
                     pass
                 else:
                     raise ValueError(XMI.get_type(el)+', not recognized in UML Class Diagram')
+
+    def buildsymtab(self):
+
+        for _, property in self._properties.items():
+            self.symtab.insert(PropertySymbol(property))
+
+        for _, operation in self._operations.items():
+            self.symtab.insert(OperationSymbol(operation))
 
     def _set_generalization(self, node):
         return node.getAttribute('general')
@@ -816,8 +888,10 @@ def buildDataTypes(doc, profile=''):
     if profile:
         log.debug("DataType profile: %s", profile)
         getId = lambda e: profile + "#" + str(e.getAttribute('xmi:id'))
+        getName = lambda e: profile + "#" + str(e.getAttribute('name'))
     else:
         getId = lambda e: str(e.getAttribute('xmi:id'))
+        getName = lambda e: str(e.getAttribute('name'))
 
     dts = doc.getElementsByTagName(XMI.PACKAGED_ELEMENT)  # doc.getElementsByTagName(XMI.DATATYPE)
 
@@ -832,7 +906,11 @@ def buildDataTypes(doc, profile=''):
         if (XMI.get_type(dt) == XMI.DATA_TYPE) or (XMI.get_type(dt) == XMI.CLASS) or \
                 (XMI.get_type(dt) == XMI.INTERFACE) or (XMI.get_type(dt) == XMI.ACTOR) or \
                 (XMI.get_type(dt) == XMI.PRIMITIVE_TYPE):
-            datatypes[getId(dt)] = dt
+
+            id = getId(dt)
+            name = getName(dt)
+
+            datatypes[getId(dt)] = DatatypeSymbol(id, name)
 
     # prefix = profile and profile + "#" or ''
     # XMI.collectTagDefinitions(doc, prefix=prefix)
