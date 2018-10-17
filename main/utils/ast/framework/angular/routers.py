@@ -2,6 +2,8 @@ from main.utils.ast.base import Node
 from main.utils.jinja.angular import base_file_writer, router_file_writer
 from main.utils.ast.language.typescript import TypescriptClassType
 from .base import ANGULAR_CORE_MODULE, IMPORTED_ROUTER_MODULE, IMPORTED_ROUTES, IMPORTED_NG_MODULE, ANGULAR_ROUTER_MODULE
+import logging
+logger_routers = logging.getLogger("main.utils.ast.framework.angular.routers")
 
 class AngularDefaultRouterDefinition(TypescriptClassType):
 
@@ -28,10 +30,10 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
 
     def render(self):
         # Rendering all import statement
+
         import_statement_list = []
         for _, import_statement in self.import_dict.items():
             import_statement_list.append(import_statement.render())
-
         return base_file_writer('src/app/app-routing.module.ts.template',
                                 ngmodule_imports=',\n'.join(self.ngmodule_imports), ngmodule_exports=',\n'.join(self.ngmodule_exports),
                                 list_routes=self.route_hierarchy.render(),
@@ -54,6 +56,7 @@ class RootRoutingNode(BaseRoutingNode):
     def __init__(self, path):
         super().__init__(path)
         self.angular_children_routes = {}
+        self.path_from_root = ''
 
     def render(self):
         #Rendering Children route
@@ -92,8 +95,9 @@ class RouteToModule(RootRoutingNode):
 
     def render(self):
         #Rendering Children route
+        logger_routers.info('Rendering RouteToModule {name}'.format(name=self.path))
         children_routes = []
-        for route_node in self.angular_children_routes:
+        for _, route_node in self.angular_children_routes.items():
             children_routes.append(route_node.render())
         return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE, flag=self.flag, path=self.path, component=self.component, childrens=',\n'.join(children_routes))
 

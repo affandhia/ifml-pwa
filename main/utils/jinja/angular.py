@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 base_env = Environment(loader=PackageLoader('main.template', 'file/angular/base'), autoescape=[''])
 component_env = Environment(loader=PackageLoader('main.template', 'file/angular/component'), autoescape=[''],
@@ -9,6 +9,9 @@ router_env = Environment(loader=PackageLoader('main.template', 'file/angular/rou
                           variable_start_string='{$', variable_end_string='$}')
 model_env = Environment(loader=PackageLoader('main.template', 'file/angular/model'), autoescape=[''],
                           variable_start_string='{$', variable_end_string='$}')
+angular_html_env = Environment(loader=PackageLoader('main.template', 'file/angular/html'), autoescape=[''],
+                          variable_start_string='{$', variable_end_string='$}')
+
 
 def base_file_writer(template_name, *args, **kwargs):
     template = base_env.get_template(template_name)
@@ -29,4 +32,8 @@ def router_file_writer(template_name, *args, **kwargs):
 
 def model_file_writer(template_name, *args, **kwargs):
     template = model_env.get_template(template_name)
+    return template.render(*args, **kwargs)
+
+def angular_html_writer(template_name, *args, **kwargs):
+    template = angular_html_env.get_template(template_name)
     return template.render(*args, **kwargs)

@@ -1,0 +1,6 @@
+<form id='{$ form_dasherize|safe $}' #{$ form_varcamel|safe $}='ngForm' {$ on_submit_call|safe $} class='form view-component'>
+    <h2 id='{$ form_dasherize|safe $}-title' class='form-title'>{$ form_title|safe $}</h2>
+    {$ input_list|safe $}
+</form>
+
+{$ body|safe $}

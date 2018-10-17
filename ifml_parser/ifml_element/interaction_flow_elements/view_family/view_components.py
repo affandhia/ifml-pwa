@@ -1,5 +1,5 @@
 from .base import ViewElement
-from .view_component_parts import ViewComponentPart, SimpleField, Slot, DataBinding, DynamicBehavior
+from .view_component_parts import ViewComponentPart, SimpleField, Slot, DataBinding, DynamicBehavior, VisualizationAttribute
 
 
 class ViewComponent(ViewElement):
@@ -23,6 +23,11 @@ class ViewComponent(ViewElement):
                 dict_view_component_parts_associated.update(
                     {view_component_part_element.get_id(): view_component_part_element})
 
+            elif element_type == VisualizationAttribute.VISUALIZATION_ATTRIBUTE_TYPE:
+                simple_field_element = VisualizationAttribute(part)
+                dict_view_component_parts_associated.update(
+                    {simple_field_element.get_id(): simple_field_element})
+
                 # If element is SimpleField (Ext)
             elif element_type == SimpleField.SIMPLE_FIELD_TYPE:
                 simple_field_element = SimpleField(part)
@@ -35,7 +40,7 @@ class ViewComponent(ViewElement):
                 dict_view_component_parts_associated.update(
                     {slot_element.get_id(): slot_element})
 
-            if element_type == DataBinding.DATA_BINDING_TYPE:
+            elif element_type == DataBinding.DATA_BINDING_TYPE:
                 data_binding_element = DataBinding(part)
                 dict_view_component_parts_associated.update({data_binding_element.get_id(): data_binding_element})
 

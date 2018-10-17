@@ -3,9 +3,12 @@ import logging
 from yattag import Doc
 
 from ifml_parser.ifml_element.interaction_flow_elements.action_family.base import Action
+from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
+from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent
+from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
-    AngularComponentHTML
+    AngularComponentHTML, AngularFormHTML
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
@@ -41,15 +44,18 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.interpret_domain_model()
 
         # Decide whether router-outlet is needed or not
-        self.append_router_outlet()
+        self.append_router_outlet(self.angular_routing, self.root_html)
 
-    def append_router_outlet(self):
-        if len(self.angular_routing.angular_children_routes) > 0:
-            doc_outlet, tag_outlet, text_outlet = Doc().tagtext()
+    def router_outlet_html(self):
+        doc_outlet, tag_outlet, text_outlet = Doc().tagtext()
 
-            with tag_outlet('router-outlet'):
-                text_outlet('')
-            self.root_html.append_html_into_body(doc_outlet.getvalue())
+        with tag_outlet('router-outlet'):
+            text_outlet('')
+        return doc_outlet.getvalue()
+
+    def append_router_outlet(self, angular_routing, html_call):
+        if len(angular_routing.angular_children_routes) > 0:
+            html_call.append_html_into_body(self.router_outlet_html())
 
     def get_root_class(self):
         # Angular Typescript Component for root component
@@ -95,9 +101,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html = HTMLMenuTemplate(typescript_class.selector_name)
 
         # Build All View Element Event Inside
-        events = menu_element.get_view_element_events()
-        for event in events:
-            self.interpret_view_element_event(event, html, typescript_class)
+        for _, event in menu_element.get_view_element_events().items():
+            if isinstance(event, ViewElementEvent):
+                self.interpret_view_element_event(event, html, typescript_class)
 
         # The Component Itself
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
@@ -120,25 +126,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Name of element
         element_name = view_container.get_name()
 
-        # Defining variable for routing node, intialized if this container have inInteractionFlow or isLandmark
-        routing_node = None
+        html, typescript_class, routing_node = self.view_element_definition()
 
-        # Prepare Typescript Class
-        typescript_class = AngularComponentTypescriptClass()
         typescript_class.set_component_selector_class_name(element_name)
-
-        # Prepare HTML
-        html = AngularComponentHTML()
 
         # Decide if this container is callable or using router
         # Checking if its is a Landmark or having an interaction flow
-
         if view_container.get_is_xor():
             routing_node = RouteToModule(typescript_class)
             routing_node.enable_children_routing()
+            html.append_html_into_body(self.router_outlet_html())
 
-        if (view_container.get_is_landmark() or len(
-                view_container.get_in_interaction_flow()) > 0) and routing_node is None:
+        if self.check_if_there_is_an_interaction_flow(view_container) and routing_node is None:
+            routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
+
+        if (view_container.get_is_landmark()):
 
             landmark_path_var_name = typescript_class.class_name+'path'
 
@@ -146,17 +148,22 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             with tag_landmark('button', ('class', 'landmark-event'), ('id', typescript_class.selector_name),
                               ('[routerLink]', typescript_class.class_name+'path')):
                 text_landmark(typescript_class.class_name)
-            routing_node = RouteToModule(typescript_class)
 
-            absolute_path = routing_parent.path + '/' + routing_node.path
+            routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
+
+            absolute_path = routing_node.path
 
             landmark_path_var_decl = VarDeclType(landmark_path_var_name,';')
             landmark_path_var_decl.acc_modifiers = 'public'
-            landmark_path_var_decl.value = absolute_path
+            landmark_path_var_decl.value = "\'{value}\'".format(value=absolute_path)
             landmark_path_var_decl.variable_datatype = 'string'
 
             typescript_calling.set_property_decl(landmark_path_var_decl)
             html_calling.append_html_into_body(doc_landmark.getvalue())
+
+        #Adding Path from root
+        if not(routing_node is None):
+            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
         # TODO Implement, Delete below line after testing use
         doc_test, tag_test, text_test = Doc().tagtext()
@@ -167,29 +174,37 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html.append_html_into_body(doc_test.getvalue())
         # End TODO
 
+        # Build All View Element Event Inside
+        for _, event in view_container.get_view_element_events().items():
+            if isinstance(event, ViewElementEvent):
+                self.interpret_view_element_event(event, html, typescript_class)
+
         #Build All Action inside the Container
-        for action in view_container.get_action():
+        for _, action in view_container.get_action().items():
             self.interpret_action(action)
 
         # Build All Associated View Element
         for key, view_element in view_container.get_assoc_view_element().items():
-            if isinstance(view_element, Menu):
+            if isinstance(view_element, Form):
+                self.interpret_form(view_element, html, typescript_class, routing_node)
+            elif isinstance(view_element, Menu):
                 self.interpret_menu(view_element, html)
             elif isinstance(view_element, ViewContainer):
                 self.interpret_view_container(view_element, html, typescript_class, routing_node)
-
-        # The Component Itself
-        angular_component_node = AngularComponent(component_typescript_class=typescript_class,
-                                                  component_html=html)
 
         # Decide if this container is default in its XOR
         if view_container.get_is_default():
             routing_parent.add_children_routing(RedirectToAnotherPath('', typescript_class.selector_name))
 
+
+        # The Component Itself
+        angular_component_node = AngularComponent(component_typescript_class=typescript_class,
+                                                  component_html=html)
+
         # Add Routing Node and (If exist) any children route
         try:
             routing_parent.add_children_routing(routing_node)
-            angular_component_node.set_routing_node(routing_parent.path + '/' + routing_node.path)
+            angular_component_node.set_routing_node(routing_node.path_from_root)
         # If this container must be called
         except Exception:
             # Calling ViewContainer selector
@@ -201,9 +216,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         #Register to components container
         self.components[view_container.get_id()] = angular_component_node
-
-    def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
-        pass
 
     def interpret_action(self, action_element):
         # Name of element
@@ -223,8 +235,98 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Register service worker config
         self.list_service_worker_config.append(service_typescript.worker_config.render())
 
+    def interpret_form(self, form_element, html_calling, typescript_calling, routing_parent):
+        # Name of element
+        element_name = form_element.get_name()
+
+        #Only need the routing node and typescript_class
+        _, typescript_class, routing_node = self.view_element_definition()
+        typescript_class.set_component_selector_class_name(element_name)
+
+        #The HTML for Form
+        html = AngularFormHTML(element_name)
+
+        # Defining Routing Node
+        routing_node = None
+
+        #Determine if there are any incoming interaction flow
+        if self.check_if_there_is_an_interaction_flow(form_element) and routing_node is None:
+            routing_node = RouteToModule(typescript_class)
+            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
+
+        # Build All View Element Event Inside
+        for _, event in form_element.get_view_element_events().items():
+            if isinstance(event, OnSubmitEvent):
+                self.interpret_onsubmit_event(event, html, typescript_class)
+            elif isinstance(event, ViewElementEvent):
+                self.interpret_view_element_event(event, html, typescript_class)
+
+        #Build all View Component Part
+
+        #Creating the component node
+        # The Component Itself
+        angular_component_node = AngularComponent(component_typescript_class=typescript_class,
+                                                  component_html=html)
+
+        # Add Routing Node and (If exist) any children route
+        try:
+            routing_parent.add_children_routing(routing_node)
+            angular_component_node.set_routing_node(routing_node.path_from_root)
+        # If this container must be called
+        except Exception:
+            # Calling ViewContainer selector
+            doc_selector, tag_selector, text_selector = Doc().tagtext()
+
+            with tag_selector('div', id='div-form-{name}'.format(name=html.form_dasherize), klass='div-form'):
+                with tag_selector(typescript_class.selector_name):
+                    text_selector('')
+            html_calling.append_html_into_body(doc_selector.getvalue())
+
+        # Register to components container
+        self.components[form_element.get_id()] = angular_component_node
+
+    def interpret_detail(self, form_element, html_calling, typescript_calling, parent_routing):
+        pass
+
+    def interpret_list(self, form_element, html_calling, typescript_calling, parent_routing):
+        pass
+
     def interpret_action_event(self, action_event_element, typescript_call):
         pass
 
     def interpret_domain_model(self):
         pass
+
+    def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
+        pass
+
+    def interpret_onsubmit_event(self, view_element_event, html_calling, typescript_calling):
+        pass
+
+    def view_element_definition(self):
+
+        # Defining variable for routing node, intialized if this container have inInteractionFlow or isLandmark
+        routing_node = None
+
+        # Prepare Typescript Class
+        typescript_class = AngularComponentTypescriptClass()
+
+        # Prepare HTML
+        html = AngularComponentHTML()
+
+        return html, typescript_class, routing_node
+
+    def check_if_there_is_an_interaction_flow(self, element):
+        exist = False
+
+        #Check length of array
+        in_flow = element.get_in_interaction_flow()
+        length = len(in_flow)
+        first_element = in_flow[0]
+
+        #If array is not empty and first element is not an empty string
+        if length > 0 and len(first_element) > 0:
+            exist =True
+
+        return exist
+

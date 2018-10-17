@@ -1,0 +1,1 @@
+{path: '{$ path|safe $}', redirectTo: '{$ target_redirect|safe $}', pathMatch: 'full'}

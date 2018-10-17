@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 base_env = Environment(loader=PackageLoader('main.template', 'file/html'), autoescape=[''],
                           variable_start_string='{$', variable_end_string='$}')

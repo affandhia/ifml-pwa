@@ -1,7 +1,8 @@
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType, VarDeclType
-from main.utils.jinja.angular import component_file_writer
-from main.utils.naming_management import camel_classify, dasherize
+from main.utils.jinja.angular import component_file_writer, angular_html_writer
+from main.utils.naming_management import camel_classify, dasherize, camel_function_style, \
+    creating_title_sentence_from_dasherize_word
 
 from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
 
@@ -18,7 +19,7 @@ class AngularComponent(Node):
         self.typescript_component_name = self.component_name + self.SUFFIX_TYPESCRIPT_COMPONENT_FILENAME
         self.typescript_html_name = self.component_name + self.SUFFIX_HTML_COMPONENT_FILENAME
         self.typescript_css_name = self.component_name + self.SUFFIX_CSS_COMPONENT_FILENAME
-        self.routing_path = None
+        self.routing_path = ''
 
     def set_routing_node(self, routing_path):
         self.routing_path = routing_path
@@ -117,4 +118,26 @@ class AngularComponentHTML(Node):
         self.body.append(html_element)
 
     def render(self):
-        return component_file_writer('basic.component.html.template', body='\n'.join(self.body))
+        return angular_html_writer('basic.component.html.template', body='\n'.join(self.body))
+
+
+class AngularFormHTML(AngularComponentHTML):
+
+    def __init__(self, name):
+        super().__init__()
+        self.on_submit_call = ''
+        self.input_list = []
+        self.form_varcamel = camel_function_style(name)
+        self.form_dasherize = dasherize(name)
+        self.form_title = creating_title_sentence_from_dasherize_word(self.form_dasherize)
+
+    def append_input_list(self, input_html_string):
+        self.input_list.append(input_html_string)
+
+    def add_submit_event(self, on_submit):
+        self.on_submit_call = on_submit
+
+    def render(self):
+        return angular_html_writer('angular_form.html.template', form_title=self.form_title,
+                                   form_dasherize=self.form_dasherize, on_submit_call=self.on_submit_call,
+                                   form_varcamel=self.form_varcamel, body='\n'.join(self.body))

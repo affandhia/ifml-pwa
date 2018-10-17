@@ -11,7 +11,8 @@ generate_project('practice_2.core','movies.uml',"D:\\testing")
 
 
 #ifml_movies = parse('movies.core')
-#uml_movies = uml_parse('movies.xmi')
+#uml_movies = uml_parse('movies.uml')
+#print(uml_movies.symtab.table)
 
 #print('-------------')
 #print(ifml_movies.get_domain_model())

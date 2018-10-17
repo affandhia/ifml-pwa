@@ -1,9 +1,9 @@
-{$ import_list $}
+{$ import_list|safe $}
 
-export class {$ class_name $}{
+export class {$ class_name|safe $}{
 
-    {$ constructor $}
+    {$ constructor|safe $}
 
-    {$ body $}
+    {$ body|safe $}
 
 }
