@@ -2,10 +2,13 @@ from enum import Enum
 
 from main.utils.ast.base import Node
 from main.utils.jinja.language_template_writer import typescript_writer
+from main.utils.naming_management import camel_function_style
 
 IMPORT_TYPESCRIPT_TEMPLATE = 'import.ts.template'
 CLASS_TYPESCRIPT_TEMPLATE = 'class.ts.template'
 VARIABLE_DECLARATION_TEMPLATE = 'variable.ts.template'
+ARROW_FUNCTION_DECLARATION_TEMPLATE = 'arrow_function.ts.template'
+FUNCTION_DECLARATION_TEMPLATE = 'function.ts.template'
 
 class ImportStatementType(Node):
 
@@ -48,6 +51,52 @@ class VarDeclType(Node):
                                      acc_modifiers=self.acc_modifiers, decorator=self.decorator,
                                      variable_type=self.variable_type, variable_name=self.variable_name,
                                      variable_datatype=self.variable_datatype, value=self.value, end=self.semicolon)
+
+class ArrowFunctionType(Node):
+
+
+
+    def __init__(self ,name):
+        super().__init__()
+        self.function_name = camel_function_style(name)
+        self.parameter_dict = {}
+        self.function_body = []
+
+    def add_param(self, var_decl):
+        self.parameter_dict[var_decl.variable_name] = var_decl
+
+    def render(self):
+        # Parameter list
+        parameter_list = []
+        for _, param in self.parameter_dict.items():
+            parameter_list.append(param.render())
+
+        return typescript_writer(ARROW_FUNCTION_DECLARATION_TEMPLATE,
+                                 function_name=self.function_name,
+                                 function_body='\n'.join(self.function_body), parameter_list=', '.join(parameter_list))
+
+class FunctionDeclType(ArrowFunctionType):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.function_type = ''
+        self.function_return_type = ''
+
+    def add_param(self, var_decl):
+        self.parameter_dict[var_decl.variable_name] = var_decl
+
+    def render(self):
+
+        #Parameter list
+        parameter_list = []
+        for _, param in self.parameter_dict.items():
+            parameter_list.append(param.render())
+
+        return typescript_writer(FUNCTION_DECLARATION_TEMPLATE,
+                                 function_name=self.function_name, function_type=self.function_type,
+                                 function_body='\n'.join(self.function_body), parameter_list=', '.join(parameter_list),
+                                 function_return_type=self.function_return_type)
+
 
 class TypescriptClassType(Node):
 
