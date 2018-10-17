@@ -402,19 +402,35 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Register to components container
         self.components[list_element.get_id()] = angular_component_node
 
-    def interpret_domain_model(self):
-        pass
-
     # TODO Implement
     def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
+        #Get the name
+        element_name = view_element_event.get_name()
+        print(element_name)
+
+        #Interpret
+
+        #Build all child
+
+        #Call it to the parent
         pass
 
     # TODO Implement
-    def interpret_onsubmit_event(self, view_element_event, html_calling, typescript_calling):
+    def interpret_onsubmit_event(self, onsubmit_event, html_calling, typescript_calling):
+        # Interpret
+
+        # Build all child
+
+        # Call it to the parent
         pass
 
     # TODO Implement
-    def interpret_onclick_event(self, view_element_event, html_calling, typescript_calling):
+    def interpret_onclick_event(self, onselect_event, html_calling, typescript_calling):
+        # Interpret
+
+        # Build all child
+
+        # Call it to the parent
         pass
 
     # TODO Implement
@@ -463,3 +479,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             exist = True
 
         return exist
+
+    # TODO Implement
+    def interpret_domain_model(self):
+        pass

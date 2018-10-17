@@ -61,6 +61,9 @@ class Event(InteractionFlowElement):
     def get_int_flow_expression(self):
         return self._interaction_flow_expression
 
+    def get_name(self):
+        return self._schema.getAttribute('name')
+
     def build_activation_expression(self):
         act_exp_instance = None
         try:
