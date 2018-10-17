@@ -1,0 +1,1 @@
+<{$ selector_name|safe $}{% if parameter_name %} [{$ parameter_name $}]='{$ property_name|safe $}'{% endif %}></{$ selector_name|safe $}>

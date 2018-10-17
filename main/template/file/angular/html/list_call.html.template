@@ -1,0 +1,1 @@
+<ul id='list-{$ selector_name|safe $}'><{$ selector_name|safe $}{% if parameter_name %} *ngFor='let row of {$ property_name|safe $}' [{$ parameter_name|safe $}]='row'{% endif %}></{$ selector_name|safe $}></ul>

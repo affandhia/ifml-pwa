@@ -141,3 +141,48 @@ class AngularFormHTML(AngularComponentHTML):
         return angular_html_writer('angular_form.html.template', form_title=self.form_title,
                                    form_dasherize=self.form_dasherize, on_submit_call=self.on_submit_call,
                                    form_varcamel=self.form_varcamel, body='\n'.join(self.body))
+
+class AngularDetailHTMLCall(Node):
+
+    def __init__(self, name):
+        super().__init__()
+        self.selector_name = name
+        self.parameter_name = ''
+        self.property_name = ''
+
+    def add_parameter_name(self, param):
+        self.parameter_name = param
+
+    def add_property_name(self, prop):
+        self.property_name = prop
+
+    def render(self):
+        return angular_html_writer('detail_call.html.template', selector_name=self.selector_name,
+                                   parameter_name=self.parameter_name, property_name=self.property_name)
+
+class AngularListHTMLCall(Node):
+
+    def __init__(self, name):
+        super().__init__()
+        self.selector_name = name
+        self.parameter_name = ''
+        self.property_name = ''
+
+    def add_parameter_name(self, param):
+        self.parameter_name = param
+
+    def add_property_name(self, prop):
+        self.property_name = prop
+
+    def render(self):
+        return angular_html_writer('list_call.html.template', selector_name=self.selector_name,
+                                   parameter_name=self.parameter_name, property_name=self.property_name)
+
+class AngularListHTMLLayout(AngularComponentHTML):
+
+    def __init__(self):
+        super().__init__()
+
+    def render(self):
+        return angular_html_writer('unordered_list_element.html.template', body='\n'.join(self.body))
+
