@@ -8,6 +8,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_elemen
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
+from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
@@ -406,14 +407,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
         #Get the name
         element_name = view_element_event.get_name()
-        print(element_name)
 
-        #Interpret
+        #Interpret, Defining Typescript function and HTML button
+        func_and_html_event_node = AngularButtonWithFunctionHandler(element_name, type='async')
+
+        #TODO Implement Delete this after test
+        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
 
         #Build all child
 
-        #Call it to the parent
-        pass
+        #Call it to the parent HTML
+        button_html, typescript_function = func_and_html_event_node.render()
+        html_calling.append_html_into_body(button_html)
+
+        #Call it to typescript body
+        typescript_calling.body.append(typescript_function)
 
     # TODO Implement
     def interpret_onsubmit_event(self, onsubmit_event, html_calling, typescript_calling):

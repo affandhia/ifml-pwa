@@ -61,5 +61,5 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
     basic_template.add_app_module_routing(basic_routing.render())
     #print(basic_template.return_project_structure())
-    #create_structure(basic_template.return_project_structure(), target_directory)
+    create_structure(basic_template.return_project_structure(), target_directory)
     logger_angular.info('Angular PWA Project successfully generated at ' + target_directory)

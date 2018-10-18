@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 from main.utils.ast.base import Node
 from main.utils.jinja.language_template_writer import typescript_writer
@@ -54,8 +55,6 @@ class VarDeclType(Node):
 
 class ArrowFunctionType(Node):
 
-
-
     def __init__(self ,name):
         super().__init__()
         self.function_name = camel_function_style(name)
@@ -64,6 +63,9 @@ class ArrowFunctionType(Node):
 
     def add_param(self, var_decl):
         self.parameter_dict[var_decl.variable_name] = var_decl
+
+    def add_statement_to_body(self, statement):
+        self.function_body.append(statement)
 
     def render(self):
         # Parameter list

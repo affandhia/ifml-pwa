@@ -8,10 +8,11 @@ class HTMLMenuTemplate(Node):
         self.menu_name = name
         self.button_list = []
 
-    def add_button_to_menu(self, button):
-        doc, tag, text = Doc.tagtext()
+    def append_html_into_body(self, button):
+
+        doc, tag, text = Doc().tagtext()
         with tag('li'):
-            text(button)
+            doc.asis(button)
         self.button_list.append(doc.getvalue())
 
     def render(self):
