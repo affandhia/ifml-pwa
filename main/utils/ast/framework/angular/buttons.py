@@ -46,6 +46,24 @@ class AngularButtonWithFunctionHandler(Node):
 
         return html, function
 
+class AngularOnclickType(AngularButtonWithFunctionHandler):
+
+    def __init__(self, name, type=''):
+        super().__init__(name, type=type)
+
+    def onclick_html_call(self):
+        ngsubmit_string = '(click)=\'{handler}({obj_param})\''.format(handler=self.function_node.function_name,
+                                                                         obj_param=self.object_param)
+        return ngsubmit_string
+
+    def render(self):
+        # Rendering function first
+        function = self.function_node.render()
+
+        # Rendering OnClick HTML
+        html = self.onclick_html_call()
+
+        return html, function
 
 class AngularSubmitButtonType(AngularButtonWithFunctionHandler):
 
@@ -63,7 +81,6 @@ class AngularSubmitButtonType(AngularButtonWithFunctionHandler):
     def ngsubmit_html_call(self):
         ngsubmit_string = '(ngSubmit)=\'{handler}({obj_param})\''.format(handler=self.function_node.function_name,
                                                                          obj_param=self.object_param)
-
         return ngsubmit_string
 
     def render(self):

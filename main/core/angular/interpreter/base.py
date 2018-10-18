@@ -4,11 +4,13 @@ from yattag import Doc
 
 from ifml_parser.ifml_element.interaction_flow_elements.action_family.base import Action
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
-from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent
+from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
+    OnSelectEvent
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
-from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType
+from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
+    AngularOnclickType
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
@@ -371,7 +373,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in list_element.get_view_element_events().items():
-            if isinstance(event, ViewElementEvent):
+            if isinstance(event, OnSelectEvent):
+                self.interpret_onselect_event(event, html, typescript_class)
+            elif isinstance(event, ViewElementEvent):
                 self.interpret_view_element_event(event, html, typescript_class)
 
         # TODO Implement
@@ -446,13 +450,24 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
 
     # TODO Implement
-    def interpret_onclick_event(self, onselect_event, html_calling, typescript_calling):
+    def interpret_onselect_event(self, onselect_event, html_calling, typescript_calling):
         # Interpret
+        # Get the name
+        element_name = onselect_event.get_name()
 
+        # Interpret, Defining Typescript function and HTML button
+        func_and_html_event_node = AngularOnclickType(element_name, type='async')
+
+        # TODO Implement Delete this after test
+        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
         # Build all child
 
-        # Call it to the parent
-        pass
+        # Call it to the parent and onclick html named add_onclick
+        onclick_html, typescript_function = func_and_html_event_node.render()
+        html_calling.add_onclick(onclick_html)
+
+        # Call it to typescript body
+        typescript_calling.body.append(typescript_function)
 
     # TODO Implement
     def interpret_action_event(self, action_event_element, typescript_call):

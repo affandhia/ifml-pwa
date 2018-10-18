@@ -182,7 +182,11 @@ class AngularListHTMLLayout(AngularComponentHTML):
 
     def __init__(self):
         super().__init__()
+        self.onclick = ''
+
+    def add_onclick(self, onclick):
+        self.onclick = onclick
 
     def render(self):
-        return angular_html_writer('unordered_list_element.html.template', body='\n'.join(self.body))
+        return angular_html_writer('unordered_list_element.html.template', onclick=self.onclick, body='\n'.join(self.body))
 

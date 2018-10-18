@@ -24,7 +24,7 @@ class ViewElement(InteractionFlowElement):
                 dict_view_el_event.update({on_select_event_instance.get_id(): on_select_event_instance})
 
             # If it's On Submit Event
-            if view_el_type == OnSubmitEvent.ON_SUBMIT_EVENT_TYPE:
+            elif view_el_type == OnSubmitEvent.ON_SUBMIT_EVENT_TYPE:
                 on_submit_event_instance = OnSubmitEvent(view_el_event_element)
                 dict_view_el_event.update({on_submit_event_instance.get_id(): on_submit_event_instance})
 
