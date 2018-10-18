@@ -17,7 +17,6 @@ from pathlib import Path
 import os
 import logging
 import jsbeautifier
-from bs4 import BeautifulSoup
 
 ASSETS_EXTENSION = ['.jpg', '.jpeg', '.png', '.ico']
 
@@ -33,9 +32,6 @@ def write_or_copy(filename, target_directory, content):
 def js_linter(content):
     return jsbeautifier.beautify(content)
 
-def html_linter(content):
-    return BeautifulSoup(content).prettify()
-
 #TODO Implement
 def css_linter(content):
     return content
@@ -44,8 +40,8 @@ def linter(filename, content):
     linting_result = None
     if filename.lower().endswith('.ts'):
         linting_result = js_linter(content)
-    #elif filename.lower().endswith('.html'):
-    #    linting_result = html_linter(content)
+    elif filename.lower().endswith('.html'):
+        linting_result = content
     elif filename.lower().endswith('.css'):
         linting_result = css_linter(content)
     else:
