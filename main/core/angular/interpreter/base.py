@@ -15,7 +15,7 @@ from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAn
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
-from main.utils.naming_management import dasherize
+from main.utils.naming_management import dasherize, camel_function_style
 from . import BaseInterpreter
 
 logger_ifml_angular_interpreter = logging.getLogger("main.core.angular.interpreter")
@@ -142,11 +142,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
 
         if (view_container.get_is_landmark()):
-            landmark_path_var_name = typescript_class.class_name + 'path'
+            landmark_path_var_name = camel_function_style(typescript_class.class_name) + 'path'
 
             doc_landmark, tag_landmark, text_landmark = Doc().tagtext()
             with tag_landmark('button', ('class', 'landmark-event'), ('id', typescript_class.selector_name),
-                              ('[routerLink]', typescript_class.class_name + 'path')):
+                              ('[routerLink]', landmark_path_var_name)):
                 text_landmark(typescript_class.class_name)
 
             routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
