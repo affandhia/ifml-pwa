@@ -131,7 +131,7 @@ class AngularFormHTML(AngularComponentHTML):
         self.form_dasherize = dasherize(name)
         self.form_title = creating_title_sentence_from_dasherize_word(self.form_dasherize)
 
-    def append_input_list(self, input_html_string):
+    def append_html_into_body(self, input_html_string):
         self.input_list.append(input_html_string)
 
     def add_submit_event(self, on_submit):
@@ -140,7 +140,7 @@ class AngularFormHTML(AngularComponentHTML):
     def render(self):
         return angular_html_writer('angular_form.html.template', form_title=self.form_title,
                                    form_dasherize=self.form_dasherize, on_submit_call=self.on_submit_call,
-                                   form_varcamel=self.form_varcamel, body='\n'.join(self.body))
+                                   form_varcamel=self.form_varcamel, input_list='\n'.join(self.input_list))
 
 class AngularDetailHTMLCall(Node):
 

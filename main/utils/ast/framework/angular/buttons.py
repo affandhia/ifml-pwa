@@ -32,17 +32,48 @@ class AngularButtonWithFunctionHandler(Node):
         doc, tag, text = Doc().tagtext()
         with tag('button', ('id', 'view-event-{name}'.format(name=self.button_id_name)),
                  ('class', 'event view-element-event'), ('(click)', "{handler}({obj_param})".format(
-                        handler=self.function_node.function_name, obj_param=self.object_param))):
+                    handler=self.function_node.function_name, obj_param=self.object_param))):
             text(self.button_text)
 
         return doc.getvalue()
 
     def render(self):
-
-        #Rendering function first
+        # Rendering function first
         function = self.function_node.render()
 
-        #Rendering Button HTML
+        # Rendering Button HTML
         html = self.button_template()
 
         return html, function
+
+
+class AngularSubmitButtonType(AngularButtonWithFunctionHandler):
+
+    def __init__(self, name, type=''):
+        super().__init__(name, type=type)
+
+    def button_template(self):
+        doc, tag, text = Doc().tagtext()
+        with tag('button', ('type', 'submit'), ('id', 'onsubmit-event-{name}'.format(name=self.button_id_name)),
+                 ('class', 'event onsubmit-event')):
+            text(self.button_text)
+
+        return doc.getvalue()
+
+    def ngsubmit_html_call(self):
+        ngsubmit_string = '(ngSubmit)=\'{handler}({obj_param})\''.format(handler=self.function_node.function_name,
+                                                                         obj_param=self.object_param)
+
+        return ngsubmit_string
+
+    def render(self):
+        # Rendering function first
+        function = self.function_node.render()
+
+        # Rendering Button HTML
+        html = self.button_template()
+
+        # Rendering ngSubmit Call HTML
+        ngsubmit = self.ngsubmit_html_call()
+
+        return html, function, ngsubmit

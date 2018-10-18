@@ -8,7 +8,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_elemen
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
-from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler
+from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
@@ -426,11 +426,24 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     # TODO Implement
     def interpret_onsubmit_event(self, onsubmit_event, html_calling, typescript_calling):
         # Interpret
+        # Get the name
+        element_name = onsubmit_event.get_name()
 
+        # Interpret, Defining Typescript function and HTML button
+        func_and_html_event_node = AngularSubmitButtonType(element_name, type='async')
+
+        # TODO Implement Delete this after test
+        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
         # Build all child
 
-        # Call it to the parent
-        pass
+        # Call it to the parent by binding it to HTML Form on submit method, add_submit_event
+        button_html, typescript_function, ngsubmit = func_and_html_event_node.render()
+        html_calling.append_html_into_body(button_html)
+        html_calling.add_submit_event(ngsubmit)
+
+        # Call it to typescript body
+        typescript_calling.body.append(typescript_function)
+
 
     # TODO Implement
     def interpret_onclick_event(self, onselect_event, html_calling, typescript_calling):
