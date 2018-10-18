@@ -1,4 +1,4 @@
-<div id='div-{dasherize_name|safe}' class='div-simple-field view-component-part'>
-    <label id='label-{dasherize_name|safe}' for='input-{dasherize_name|safe}' class='label-simple-field'>{title_name|safe}</label>
-    <input id='input-{dasherize_name|safe}' type='{$ type|safe $}' #{var_camel_name|safe} ngModel{% if value %} value='{value|safe}'{% endif %}{% if placeholder %} placeholder='Fill the {title_name|safe}'{% endif %}/>
+<div id='div-{$ dasherize_name|safe $}' class='div-simple-field view-component-part'>
+    <label id='label-{$ dasherize_name|safe $}' for='input-{$ dasherize_name|safe $}' class='label-simple-field'>{$ title_name|safe $}</label>
+    <input id='input-{$ dasherize_name|safe $}' type='{$ type|safe $}' #{$ var_camel_name|safe $} ngModel{% if value %} value='{$ value|safe $}'{% endif %}{% if placeholder %} placeholder='Fill the {$ title_name|safe $}'{% endif %}/>
 </div>

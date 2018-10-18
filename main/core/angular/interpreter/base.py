@@ -6,11 +6,13 @@ from ifml_parser.ifml_element.interaction_flow_elements.action_family.base impor
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
     OnSelectEvent
-from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute
+from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute, \
+    SimpleField
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
     AngularOnclickType
+from main.utils.ast.framework.angular.component_parts import InputField
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
@@ -264,18 +266,18 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
         # TODO Implement
+        # Build all View Component Part
+        for _, view_component_part in form_element.get_assoc_view_component_parts().items():
+            if isinstance(view_component_part, SimpleField):
+                self.interpret_simple_field(view_component_part, html, typescript_class)
+
+        # TODO Implement
         # Build All View Element Event Inside
         for _, event in form_element.get_view_element_events().items():
             if isinstance(event, OnSubmitEvent):
                 self.interpret_onsubmit_event(event, html, typescript_class)
             elif isinstance(event, ViewElementEvent):
                 self.interpret_view_element_event(event, html, typescript_class)
-
-        # TODO Implement
-        # Build all View Component Part
-        for _, view_component_part in form_element.get_assoc_view_component_parts():
-            if isinstance(view_component_part, VisualizationAttribute):
-                self.interpret_visualization_attribute(view_component_part, html, typescript_class)
 
         # Creating the component node
         # The Component Itself
@@ -482,8 +484,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         pass
 
     # TODO Implement
-    def interpret_simple_field(self, view_element_event, html_calling, typescript_calling):
-        pass
+    def interpret_simple_field(self, simple_field_element, html_calling, typescript_calling):
+
+        # Get the name and type
+        element_name = simple_field_element.get_name()
+        type = simple_field_element.get_type()
+
+        #Check if this field is under the DataBinding
+        #TODO Implement
+
+        #Create the Input Field
+        input_html = InputField(element_name)
+
+        #Call Into the HTML
+
+        html_calling.append_html_into_body(input_html.render())
 
     # TODO Implement
     def interpret_slot(self, view_element_event, html_calling, typescript_calling):
