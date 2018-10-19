@@ -1,4 +1,5 @@
 from main.utils.ast.base import Node
+from main.utils.ast.language.typescript import VarDeclType
 from main.utils.jinja.angular import angular_html_writer
 from main.utils.naming_management import dasherize, camel_function_style, \
     creating_title_sentence_from_dasherize_word
@@ -13,6 +14,11 @@ class InputField(Node):
         self.placeholder = True
         self.value = ''
         self.type = type
+        self.ngmodel_property = VarDeclType(self.var_camel_name, semicolon=';')
+        self.ngmodel_property.acc_modifiers = 'public'
+
+    def get_ngmodel_property(self):
+        return self.ngmodel_property
 
     def disable_placeholder(self):
         self.placeholder = False

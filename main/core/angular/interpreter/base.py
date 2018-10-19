@@ -497,8 +497,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         input_html = InputField(element_name)
 
         #Call Into the HTML
-
         html_calling.append_html_into_body(input_html.render())
+
+        #Declare property in class, for ngModel two way biding
+        typescript_calling.set_property_decl(input_html.get_ngmodel_property())
 
     # TODO Implement
     def interpret_slot(self, view_element_event, html_calling, typescript_calling):
