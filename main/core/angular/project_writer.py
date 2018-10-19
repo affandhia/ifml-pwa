@@ -115,7 +115,7 @@ class AngularProject:
 
     def write_global_style(self, content=None):
         self.project_structure[self.SRC_FOLDER_KEY][
-            self.GLOBAL_STYLE_KEY] = '/* Style Here */' if content == None else content
+            self.GLOBAL_STYLE_KEY] = '/* Style Here */\n@import \"~ngx-smart-modal/ngx-smart-modal.css\";' if content == None else content
 
     def write_polyfills(self):
         self.project_structure[self.SRC_FOLDER_KEY][self.POLYFILLS_KEY] = base_file_writer(

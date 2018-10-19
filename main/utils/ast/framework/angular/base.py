@@ -1,5 +1,4 @@
-from main.utils.ast.base import Node
-from main.utils.ast.language.typescript import ImportStatementType, TypescriptClassType
+from main.utils.ast.language.typescript import TypescriptClassType
 from main.utils.jinja.angular import base_file_writer
 
 ANGULAR_CORE_MODULE = '@angular/core'
@@ -11,10 +10,12 @@ ENVIRONMENTS_LOCATION = '../environments/environment'
 ANGULAR_ROUTER_MODULE = '@angular/router'
 FORMS_MODULE_LOCATION = '@angular/forms'
 HTTP_MODULE_LOCATION = '@angular/common/http'
+NGX_SMART_MODAL_LOCATION = 'ngx-smart-modal'
 
 IMPORTED_NG_MODULE = 'NgModule'
 IMPORTED_ROUTES = 'Routes'
 IMPORTED_ROUTER_MODULE = 'RouterModule'
+
 
 class AngularMainModule(TypescriptClassType):
     IMPORTED_BROWSER_MODULE = 'BrowserModule'
@@ -24,6 +25,8 @@ class AngularMainModule(TypescriptClassType):
     IMPORTED_ENVIRONMENT = 'environment'
     IMPORTED_FORMS_MODULE = 'FormsModule'
     IMPORTED_HTTP_CLIENT_MODULE = 'HttpClientModule'
+    IMPORTED_SMART_MODAL_MODULE = 'NgxSmartModalModule'
+    IMPORTED_SMART_MODAL_SERVICE = 'NgxSmartModalService'
 
     def __init__(self, app_name):
         super().__init__()
@@ -33,8 +36,11 @@ class AngularMainModule(TypescriptClassType):
 
         service_worker_initialization = "ServiceWorkerModule.register('/" + app_name + "/ngsw-worker.js', { enabled: environment.production })"
         self.ngmodule_declarations = [self.IMPORTED_APP_COMPONENT]
-        self.ngmodule_imports = [self.IMPORTED_BROWSER_MODULE, self.IMPORTED_HTTP_CLIENT_MODULE , self.IMPORTED_APP_ROUTING_MODULE, self.IMPORTED_FORMS_MODULE ,service_worker_initialization]
-        self.ngmodule_providers = ['']
+        self.ngmodule_imports = [self.IMPORTED_BROWSER_MODULE, self.IMPORTED_HTTP_CLIENT_MODULE,
+                                 '{smart_modal}.forRoot()'.format(smart_modal=self.IMPORTED_SMART_MODAL_MODULE),
+                                 self.IMPORTED_APP_ROUTING_MODULE, self.IMPORTED_FORMS_MODULE,
+                                 service_worker_initialization]
+        self.ngmodule_providers = [self.IMPORTED_SMART_MODAL_SERVICE]
         self.ngmodule_bootstraps = [self.IMPORTED_APP_COMPONENT]
 
     def add_element_into_ngmodule_declarations(self, element=None, elements=None):
@@ -47,13 +53,13 @@ class AngularMainModule(TypescriptClassType):
 
     def add_component_to_module(self, component_node):
 
-        #Import into Module
+        # Import into Module
         folder_name = component_node.get_component_name()
-        component_class_name = component_node.get_typescript_class_node().get_class_name()+'Component'
-        self.add_import_statement(main_module='./'+ folder_name +'/' + folder_name + '.component',
-                                 element_imported=component_class_name)
+        component_class_name = component_node.get_typescript_class_node().get_class_name() + 'Component'
+        self.add_import_statement(main_module='./' + folder_name + '/' + folder_name + '.component',
+                                  element_imported=component_class_name)
 
-        #Add to Declarations
+        # Add to Declarations
         self.add_element_into_ngmodule_declarations(component_class_name)
 
     def add_element_into_ngmodule_imports(self, element=None, elements=None):
@@ -92,6 +98,9 @@ class AngularMainModule(TypescriptClassType):
         self.add_import_statement(main_module=ENVIRONMENTS_LOCATION, element_imported=self.IMPORTED_ENVIRONMENT)
         self.add_import_statement(main_module=HTTP_MODULE_LOCATION, element_imported=self.IMPORTED_HTTP_CLIENT_MODULE)
         self.add_import_statement(main_module=FORMS_MODULE_LOCATION, element_imported=self.IMPORTED_FORMS_MODULE)
+        self.add_import_statement(main_module=NGX_SMART_MODAL_LOCATION, element_imported=self.IMPORTED_SMART_MODAL_MODULE)
+        self.add_import_statement(main_module=NGX_SMART_MODAL_LOCATION, element_imported=self.IMPORTED_SMART_MODAL_SERVICE)
+
 
     def render(self):
         # Rendering all import statement
@@ -99,6 +108,9 @@ class AngularMainModule(TypescriptClassType):
         for _, import_statement in self.import_dict.items():
             import_statement_list.append(import_statement.render())
 
-        return base_file_writer('src/app/app.module.ts.template', ngmodule_declarations=',\n'.join(self.ngmodule_declarations),
-                                ngmodule_imports=',\n'.join(self.ngmodule_imports), ngmodule_providers=',\n'.join(self.ngmodule_providers),
-                                ngmodule_bootstrap=',\n'.join(self.ngmodule_bootstraps), import_statement_list='\n'.join(import_statement_list))
+        return base_file_writer('src/app/app.module.ts.template',
+                                ngmodule_declarations=',\n'.join(self.ngmodule_declarations),
+                                ngmodule_imports=',\n'.join(self.ngmodule_imports),
+                                ngmodule_providers=',\n'.join(self.ngmodule_providers),
+                                ngmodule_bootstrap=',\n'.join(self.ngmodule_bootstraps),
+                                import_statement_list='\n'.join(import_statement_list))

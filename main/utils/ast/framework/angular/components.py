@@ -190,3 +190,15 @@ class AngularListHTMLLayout(AngularComponentHTML):
     def render(self):
         return angular_html_writer('unordered_list_element.html.template', onclick=self.onclick, body='\n'.join(self.body))
 
+class AngularModalHTMLLayout(AngularComponentHTML):
+
+    def __init__(self, name):
+        super().__init__()
+        self.var_camel_name = camel_function_style(name)
+        self.dasherize_name = dasherize(name)
+        self.title_name = creating_title_sentence_from_dasherize_word(name)
+
+    def render(self):
+        return angular_html_writer('modal_layout.html.template', var_camel_name=self.var_camel_name, dasherize_name=self.title_name, title_name=self.title_name,
+                                   body='\n'.join(self.body))
+
