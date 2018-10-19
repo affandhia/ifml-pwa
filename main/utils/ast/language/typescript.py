@@ -116,6 +116,12 @@ class TypescriptClassType(Node):
     def get_class_name(self):
         return self.class_name
 
+    def add_import_statement_using_import_node(self, import_node):
+        try:
+            self.import_dict[import_node.main_module].add_imported_elements(import_node.imported_elements)
+        except KeyError:
+            self.import_dict[import_node.main_module] = import_node
+
     def add_import_statement_for_multiple_element(self, main_module, elements_imported):
         try:
             self.import_dict[main_module].add_imported_elements(elements_imported)

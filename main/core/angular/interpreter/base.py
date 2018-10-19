@@ -10,7 +10,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_compone
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
-    AngularOnclickType
+    AngularOnclickType, AngularModalButtonAndFunction
 from main.utils.ast.framework.angular.component_parts import InputField
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
@@ -123,12 +123,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         #Check if it is a landmark
         if (window_element.get_is_landmark()):
             #Append the Button into root HTML
-            doc_button, tag_button, text_button = Doc().tagtext()
+            func_and_html_event_node = AngularModalButtonAndFunction(element_name, type='async')
+            func_and_html_event_node.set_target_modal(html.var_camel_name)
 
-            with tag_button('button'):
-                text_button(typescript_class.class_name)
+            # Import the service, create the constructor param
+            typescript_calling.add_import_statement_using_import_node(func_and_html_event_node.import_ngx_modal_service_node)
+            typescript_calling.set_constructor_param(func_and_html_event_node.ngx_service_constructor)
 
-            html_calling.append_html_into_body(doc_button.getvalue())
+            #Get the function and HTML
+            button_html, typescript_function = func_and_html_event_node.render()
+
+            #Append the Button
+            html_calling.append_html_into_body(button_html)
+
+            #Append the function
+            typescript_calling.body.append(typescript_function)
 
         #Check if there are any interaction flow, but no need to define anything
 
