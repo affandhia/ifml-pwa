@@ -1,5 +1,4 @@
 <ngx-smart-modal id='modal-{$ dasherize_name|safe $}' #{$ var_camel_name|safe $} [identifier]="'{$ var_camel_name|safe $}'">
     <h1>{$ title_name|safe $}</h1>
     {$ body|safe $}
-    <button id='close-button-{$ dasherize_name|safe $}' class='modal-button close-button' (click)='{$ var_camel_name|safe $}.close()'>Close</button>
 </ngx-smart-modal>

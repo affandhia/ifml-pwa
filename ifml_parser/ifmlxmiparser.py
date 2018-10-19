@@ -49,25 +49,20 @@ class InteractionFlowModel(Element):
         for element in list_ifml_elements:
             element_type = element.getAttribute(self.XSI_TYPE)
 
-            #If element is View Container
-            if element_type == ViewContainer.VIEW_CONTAINER_TYPE:
-                view_container_element = ViewContainer(element)
-                dict_ifml_elements.update({view_container_element.get_id(): view_container_element})
-
-            #If element is Menu (Ext)
-            elif element_type == Menu.MENU_TYPE:
+            # If element is Menu (Ext)
+            if element_type == Menu.MENU_TYPE:
                 menu_element = Menu(element)
                 dict_ifml_elements.update({menu_element.get_id(): menu_element})
 
-            #If element is Windows (Ext)
+            # If element is Windows (Ext)
             elif element_type == Window.WINDOWS_TYPE:
                 windows_element = Window(element)
                 dict_ifml_elements.update({windows_element.get_id(): windows_element})
 
-            #If element is View Component
-            elif element_type == ViewComponent.VIEW_COMPONENT_TYPE:
-                view_component_element = ViewComponent(element)
-                dict_ifml_elements.update({view_component_element.get_id(): view_component_element})
+            #If element is View Container
+            elif element_type == ViewContainer.VIEW_CONTAINER_TYPE:
+                view_container_element = ViewContainer(element)
+                dict_ifml_elements.update({view_container_element.get_id(): view_container_element})
 
             #If element is List (Ext)
             elif element_type == List.LIST_TYPE:
@@ -83,6 +78,11 @@ class InteractionFlowModel(Element):
             elif element_type == Details.DETAIL_TYPE:
                 details_element = Details(element)
                 dict_ifml_elements.update({details_element.get_id(): details_element})
+
+            # If element is View Component
+            elif element_type == ViewComponent.VIEW_COMPONENT_TYPE:
+                view_component_element = ViewComponent(element)
+                dict_ifml_elements.update({view_component_element.get_id(): view_component_element})
 
             #If element is View Component Part
             elif element_type == ViewComponentPart.VIEW_COMPONENT_PARTS_TYPE:

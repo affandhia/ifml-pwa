@@ -4,7 +4,7 @@ from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.naming_management import camel_classify, dasherize, camel_function_style, \
     creating_title_sentence_from_dasherize_word
 
-from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
+from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE, NGX_SMART_MODAL_LOCATION, AngularMainModule
 
 
 class AngularComponent(Node):
@@ -44,13 +44,22 @@ class AngularComponent(Node):
                                       self.typescript_html_name: self.component_html.render(),
                                       self.typescript_css_name: ''}}
 
+class AngularComponentForModal(AngularComponent):
+    SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
+    SUFFIX_HTML_COMPONENT_FILENAME = '.component.html'
+    SUFFIX_CSS_COMPONENT_FILENAME = '.component.css'
+
+    def __init__(self, component_typescript_class, component_html):
+        super().__init__(component_typescript_class, component_html)
 
 class AngularComponentTypescriptClass(TypescriptClassType):
     def __init__(self):
         super().__init__()
         self.selector_name = ''
         self.component_name = ''
+        self.set_import_and_constructor()
 
+    def set_import_and_constructor(self):
         # Adding import statement for Basic Component
         import_component_from_angular_core = ImportStatementType()
         import_component_from_angular_core.set_main_module(ANGULAR_CORE_MODULE)

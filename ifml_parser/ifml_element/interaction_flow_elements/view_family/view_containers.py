@@ -128,5 +128,11 @@ class Window(ViewContainer):
     def set_modal_att(self):
         return self._schema.getAttribute(self.MODAL_ATTRIBUTE)
 
+    def get_modal_att(self):
+        return self._is_modal
+
+    def get_new_window_att(self):
+        return self._is_new_window
+
     def set_new_window_att(self):
         return self._schema.getAttribute(self.NEW_WINDOW_ATTRIBUTE)

@@ -6,15 +6,15 @@ from ifml_parser.ifml_element.interaction_flow_elements.action_family.base impor
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
     OnSelectEvent
-from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import VisualizationAttribute, \
-    SimpleField
+from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import SimpleField
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
-from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu
+from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
     AngularOnclickType
 from main.utils.ast.framework.angular.component_parts import InputField
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
-    AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout
+    AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
+    AngularModalHTMLLayout, AngularComponentForModal
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
@@ -83,21 +83,74 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             # If the root have actions
             if isinstance(interaction_flow_model_element, Action):
                 self.interpret_action(interaction_flow_model_element)
+            # If the root have Windows
+            elif isinstance(interaction_flow_model_element, Window):
+                self.check_if_windows_is_different_than_view_container(interaction_flow_model_element, self.root_html,
+                                              self.root_typescript_class, self.angular_routing)
             # If the root have menu
             elif isinstance(interaction_flow_model_element, Menu):
-                logger_ifml_angular_interpreter.info(
-                    "Interpreting a {name} Menu".format(name=interaction_flow_model_element.get_name()))
                 self.interpret_menu(interaction_flow_model_element, self.root_html)
             elif isinstance(interaction_flow_model_element, ViewContainer):
-                logger_ifml_angular_interpreter.info(
-                    "Interpreting a {name} View Container".format(name=interaction_flow_model_element.get_name()))
                 self.interpret_view_container(interaction_flow_model_element, self.root_html,
                                               self.root_typescript_class, self.angular_routing)
+
+    def check_if_windows_is_different_than_view_container(self, window_element, html_calling, typescript_calling,
+                                                          routing_parent):
+        # Check if there is no difference with view container
+        is_new_window = window_element.get_new_window_att()
+        is_modal = window_element.get_modal_att()
+
+        if not (is_modal or is_new_window):
+            self.interpret_view_container(window_element, html_calling, typescript_calling, routing_parent)
+        else:
+            self.interpret_windows(window_element, html_calling, typescript_calling, routing_parent)
+
+    def interpret_windows(self, window_element, html_calling, typescript_calling, routing_parent):
+        # Name of element
+        element_name = window_element.get_name()
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} Windows".format(name=element_name))
+
+        #Modal Typescript class and HTML
+        typescript_class = AngularComponentTypescriptClass()
+        typescript_class.set_component_selector_class_name(element_name)
+
+        html = AngularModalHTMLLayout(element_name)
+
+        #TODO Implement
+        #Check if it is a XOR
+
+        #Check if it is a landmark
+        if (window_element.get_is_landmark()):
+            #Append the Button into root HTML
+            doc_button, tag_button, text_button = Doc().tagtext()
+
+            with tag_button('button'):
+                text_button(typescript_class.class_name)
+
+            html_calling.append_html_into_body(doc_button.getvalue())
+
+        #Check if there are any interaction flow, but no need to define anything
+
+        #Creating the Angular Component Node
+        angular_component_node = AngularComponentForModal(typescript_class, html)
+
+        #Register the Modal Selector the parent HTML
+        doc_selector, tag_selector, text_selector = Doc().tagtext()
+        with tag_selector(typescript_class.selector_name):
+            text_selector('')
+        html_calling.append_html_into_body(doc_selector.getvalue())
+
+        #Registering to Components Container
+        self.components[window_element.get_id()] = angular_component_node
 
     def interpret_menu(self, menu_element, html_calling):
 
         # Name of element
         element_name = menu_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} Menu".format(name=element_name))
 
         # Prepare Typescript Class
         typescript_class = AngularComponentTypescriptClass()
@@ -131,6 +184,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Name of element
         element_name = view_container.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} View Container".format(name=element_name))
 
         html, typescript_class, routing_node = self.view_element_definition()
 
@@ -197,6 +253,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                 self.interpret_detail(view_element, html, typescript_class, routing_node)
             elif isinstance(view_element, Form):
                 self.interpret_form(view_element, html, typescript_class, routing_node)
+            elif isinstance(view_element, Window):
+                self.check_if_windows_is_different_than_view_container(view_element, html, typescript_class, routing_node)
             elif isinstance(view_element, Menu):
                 self.interpret_menu(view_element, html)
             elif isinstance(view_element, ViewContainer):
@@ -231,6 +289,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Name of element
         element_name = action_element.get_name()
 
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} Action".format(name=element_name))
+
         # Defining service typescript, and add the name into AngularService
         service_typescript = AngularService()
         service_typescript.set_endpoint_class_name_and_worker(element_name)
@@ -249,6 +310,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def interpret_form(self, form_element, html_calling, typescript_calling, routing_parent):
         # Name of element
         element_name = form_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} Form".format(name=element_name))
 
         # Only need the routing node and typescript_class
         _, typescript_class, routing_node = self.view_element_definition()
@@ -306,6 +370,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Name of element
         element_name = detail_element.get_name()
 
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} Detail".format(name=element_name))
+
         # HTML, Typescript Class, and Routing Node
         html, typescript_class, routing_node = self.view_element_definition()
         typescript_class.set_component_selector_class_name(element_name)
@@ -356,6 +423,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def interpret_list(self, list_element, html_calling, typescript_calling, routing_parent):
         # Name of element
         element_name = list_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} List".format(name=element_name))
 
         # Typescript Class, and Routing Node
         _, typescript_class, routing_node = self.view_element_definition()
@@ -411,29 +481,35 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     # TODO Implement
     def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
-        #Get the name
+        # Get the name
         element_name = view_element_event.get_name()
 
-        #Interpret, Defining Typescript function and HTML button
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} View Element Event".format(name=element_name))
+
+        # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularButtonWithFunctionHandler(element_name, type='async')
 
-        #TODO Implement Delete this after test
+        # TODO Implement Delete this after test
         func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
 
-        #Build all child
+        # Build all child
 
-        #Call it to the parent HTML
+        # Call it to the parent HTML
         button_html, typescript_function = func_and_html_event_node.render()
         html_calling.append_html_into_body(button_html)
 
-        #Call it to typescript body
+        # Call it to typescript body
         typescript_calling.body.append(typescript_function)
 
     # TODO Implement
     def interpret_onsubmit_event(self, onsubmit_event, html_calling, typescript_calling):
-        # Interpret
+
         # Get the name
         element_name = onsubmit_event.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} OnSubmit Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularSubmitButtonType(element_name, type='async')
@@ -450,12 +526,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Call it to typescript body
         typescript_calling.body.append(typescript_function)
 
-
     # TODO Implement
     def interpret_onselect_event(self, onselect_event, html_calling, typescript_calling):
-        # Interpret
+
         # Get the name
         element_name = onselect_event.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} OnSelect Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularOnclickType(element_name, type='async')
@@ -473,14 +551,30 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     # TODO Implement
     def interpret_action_event(self, action_event_element, typescript_call):
+        # Get the name
+        element_name = action_event_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} ActionEvent".format(name=element_name))
         pass
 
     # TODO Implement
-    def interpret_data_binding(self, view_element_event, html_calling, typescript_calling):
+    def interpret_data_binding(self, data_binding_element, html_calling, typescript_calling):
+        # Get the name
+        element_name = data_binding_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} DataBinding".format(name=element_name))
+
         pass
 
     # TODO Implement
-    def interpret_visualization_attribute(self, view_element_event, html_calling, typescript_calling):
+    def interpret_visualization_attribute(self, visualization_attribute_element, html_calling, typescript_calling):
+        # Get the name
+        element_name = visualization_attribute_element.get_name()
+
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} VisualizationAttribute".format(name=element_name))
         pass
 
     # TODO Implement
@@ -490,16 +584,19 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         element_name = simple_field_element.get_name()
         type = simple_field_element.get_type()
 
-        #Check if this field is under the DataBinding
-        #TODO Implement
+        logger_ifml_angular_interpreter.info(
+            "Interpreting a {name} SimpleField".format(name=element_name))
 
-        #Create the Input Field
+        # Check if this field is under the DataBinding
+        # TODO Implement
+
+        # Create the Input Field
         input_html = InputField(element_name)
 
-        #Call Into the HTML
+        # Call Into the HTML
         html_calling.append_html_into_body(input_html.render())
 
-        #Declare property in class, for ngModel two way biding
+        # Declare property in class, for ngModel two way biding
         typescript_calling.set_property_decl(input_html.get_ngmodel_property())
 
     # TODO Implement
