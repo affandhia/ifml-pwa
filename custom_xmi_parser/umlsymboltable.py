@@ -1,4 +1,3 @@
-
 class UMLSymbolTable(object):
 
     def __init__(self):
@@ -19,37 +18,45 @@ class UMLSymbolTable(object):
 
 class Symbol(object):
 
+    ID_ATTRIBUTE = 'xmi:id'
+    NAME_ATTRIBUTE = 'name'
+    TYPE_ATTRIBUTE = 'xmi:type'
+
     def __init__(self):
         self.id = None
+        self.name = None
+
 
 class ClassSymbol(Symbol):
 
     def __init__(self, class_dom):
         super().__init__()
-        self.id = ''
-        self.name = ''
+        self.id = class_dom.getAttribute(self.ID_ATTRIBUTE)
+        self.name = class_dom.getAttribute(self.NAME_ATTRIBUTE)
 
-class DatatypeSymbol(Symbol):
+class TypeSymbol(Symbol):
 
-    def __init__(self, id, name):
+    def __init__(self, type_dom):
         super().__init__()
-        self.id = id
-        self.name = name
+        self.id = type_dom.getAttribute(self.ID_ATTRIBUTE)
+        self.name = type_dom.getAttribute(self.NAME_ATTRIBUTE)
+        self.type = type_dom.getAttribute(self.TYPE_ATTRIBUTE)
+
 
 class PropertySymbol(Symbol):
 
     def __init__(self, property_element):
         super().__init__()
-        self.id = property_element.get_model_id()
-        self.name = property_element.get_model_name()
-        self.type = property_element.get_type()
+        self.id = property_element.getAttribute(self.ID_ATTRIBUTE)
+        self.name = property_element.getAttribute(self.NAME_ATTRIBUTE)
+        self.type = property_element.getAttribute(self.TYPE_ATTRIBUTE)
 
 class OperationSymbol(Symbol):
 
     def __init__(self, operation_element):
         super().__init__()
-        self.id = operation_element.get_model_id()
-        self.name = operation_element.get_model_name()
+        self.id = operation_element.getAttribute(self.ID_ATTRIBUTE)
+        self.name = operation_element.getAttribute(self.NAME_ATTRIBUTE)
 
 class UMLSymbolTableBuilder(object):
 
