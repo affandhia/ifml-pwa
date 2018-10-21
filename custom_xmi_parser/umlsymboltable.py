@@ -26,7 +26,6 @@ class Symbol(object):
         self.id = None
         self.name = None
 
-
 class ClassSymbol(Symbol):
 
     def __init__(self, class_dom):
