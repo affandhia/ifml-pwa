@@ -1,14 +1,14 @@
 from .base import DomainElement
 
 
-class BehaviorFeatureConcept(DomainElement):
+class BehavioralFeatureConcept(DomainElement):
 
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
 
 
-class UMLBehaviorFeature(BehaviorFeatureConcept):
-    UML_DOMAIN_CONCEPT_TYPE = 'core:UMLBehaviourFeature'
+class UMLBehavioralFeatureConcept(BehavioralFeatureConcept):
+    UML_DOMAIN_CONCEPT_TYPE = 'core:UMLBehavioralFeature'
 
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)

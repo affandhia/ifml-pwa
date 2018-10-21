@@ -10,10 +10,13 @@ logging.basicConfig(level=logging.DEBUG)
 #generate_project('practice_2.core','movies.uml',"D:\\testing")
 
 
-#ifml_movies = parse('movies.core')
-uml_movies, symbol_table = uml_parse('movies.uml')
+ifml_movies, symbol_table = parse('practice_2.core')
 
-print(symbol_table.table)
+print(symbol_table.lookup('//@domainModel/@domainElements.4').name)
+
+#uml_movies, symbol_table = uml_parse('movies.uml')
+
+#print(symbol_table.table)
 
 #print('-------------')
 #print(ifml_movies.get_domain_model())

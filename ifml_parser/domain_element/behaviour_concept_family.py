@@ -7,8 +7,8 @@ class BehaviorConcept(DomainElement):
         super().__init__(xmiSchema)
 
 
-class UMLBehaviorFeature(BehaviorConcept):
-    UML_DOMAIN_CONCEPT_TYPE = 'core:UMLBehaviourFeature'
+class UMLBehavior(BehaviorConcept):
+    UML_DOMAIN_CONCEPT_TYPE = 'core:UMLBehavior'
 
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)

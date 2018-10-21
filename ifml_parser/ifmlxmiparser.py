@@ -27,6 +27,7 @@ from ifml_parser.ifml_element.expression_family.boolean_expression_extension imp
 from ifml_parser.ifml_element.expression_family.conditional_expression_base import ConditionalExpression
 from ifml_parser.ifml_element.expression_family.constraint_extension import ValidationRule
 from ifml_parser.ifml_element.interaction_flow.base import InteractionFlow, DataFlow, NavigationFlow
+from ifml_parser.ifmlsymboltable import IFMLSymbolTableBuilder
 from .general_model import Element, NamedElement
 
 log = logging.getLogger('IFMLparser')
@@ -254,10 +255,14 @@ def build_ifml_model(doc=None):
 
         buildIFMLModel(doc) -> IFMLModel
     """
+
+    #Build the Symbol Table
+    symbol_table = IFMLSymbolTableBuilder(doc).build()
+
     #Parse the UML Model here and become input for IFML Model
     model = IFMLModel(doc.getElementsByTagName('core:IFMLModel')[0])
 
-    return model
+    return model, symbol_table
 
 
 def parse(xmiFileName=None, xmiSchema=None, **kw):

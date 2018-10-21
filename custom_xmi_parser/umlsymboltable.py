@@ -57,6 +57,7 @@ class UMLSymbolTable(object):
 
     def __init__(self):
         self.table = {}
+        self.model_name = ''
 
     def insert(self, symbol):
         self.table[symbol.id] = symbol
@@ -121,12 +122,13 @@ class UMLSymbolTableBuilder(object):
     DATA_TYPE = 'uml:DataType'
 
     def __init__(self, uml_dom):
-        self.uml_dom = uml_dom
+        self.uml_dom = getElementByTagName(uml_dom, 'uml:Model')
         self.uml_symbol_table = UMLSymbolTable()
+        self.uml_symbol_table.model_name = self.uml_dom.getAttribute('name')
         self.build()
 
     def build(self):
-        for child in getElementsByTagName(getElementByTagName(self.uml_dom, 'uml:Model'), 'packagedElement'):
+        for child in getElementsByTagName(self.uml_dom, 'packagedElement'):
             type_of_symbol = child.getAttribute('xmi:type')
 
             if type_of_symbol == self.CLASS:
