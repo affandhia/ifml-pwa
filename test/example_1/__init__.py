@@ -7,12 +7,13 @@ logging.basicConfig(level=logging.DEBUG)
 #target_structure = {"generated-angular-python": default_structure}
 
 #generate_project('movies.core','movies.xmi',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
-generate_project('practice_2.core','movies.uml',"D:\\testing")
+#generate_project('practice_2.core','movies.uml',"D:\\testing")
 
 
 #ifml_movies = parse('movies.core')
-#uml_movies = uml_parse('movies.uml')
-#print(uml_movies.symtab.table)
+uml_movies, symbol_table = uml_parse('movies.uml')
+
+print(symbol_table.table)
 
 #print('-------------')
 #print(ifml_movies.get_domain_model())

@@ -1,3 +1,58 @@
+from six import string_types
+
+class NoObject(object):
+    pass
+
+_marker = NoObject()
+
+def getElementsExceptTextNode(domElement):
+
+    elements = domElement.childNodes
+
+    cleaned_els = []
+
+    for element in elements:
+        if not(element.nodeType == element.TEXT_NODE):
+            cleaned_els.append(element)
+
+    return cleaned_els
+
+def getElementsByTagName(domElement, tagName, recursive=0):
+    """Returns elements by tag name.
+
+    The only difference from the original getElementsByTagName is
+    the optional recursive parameter.
+    """
+    if isinstance(tagName, string_types):
+        tagNames = [tagName]
+    else:
+        tagNames = tagName
+    if recursive:
+        els = []
+        for tag in tagNames:
+            els.extend(domElement.getElementsByTagName(tag))
+    else:
+        els = [el for el in domElement.childNodes
+               if str(getattr(el, 'tagName', None)) in tagNames]
+    return els
+
+
+def getElementByTagName(domElement, tagName, default=_marker, recursive=0):
+    """Returns a single element by name and throws an error if more
+    than one exists.
+    """
+    els = getElementsByTagName(domElement, tagName, recursive=recursive)
+    if len(els) > 1:
+        raise TypeError('more than 1 element found')
+    try:
+        return els[0]
+    except IndexError:
+        if default == _marker:
+            raise
+        else:
+            return default
+
+
 class UMLSymbolTable(object):
 
     def __init__(self):
@@ -59,10 +114,34 @@ class OperationSymbol(Symbol):
 
 class UMLSymbolTableBuilder(object):
 
+    OWNED_ATTRIBUTE = 'ownedAttribute'  # Attribute in element
+    OWNED_OPERATION = 'ownedOperation'  # Opertaion in that element
+    CLASS = 'uml:Class'  # Class tag
+    PRIMITIVE_TYPE = 'uml:PrimitiveType'  # Creating a datatype
+    DATA_TYPE = 'uml:DataType'
+
     def __init__(self, uml_dom):
         self.uml_dom = uml_dom
         self.uml_symbol_table = UMLSymbolTable()
         self.build()
 
     def build(self):
-        pass
+        for child in getElementsByTagName(getElementByTagName(self.uml_dom, 'uml:Model'), 'packagedElement'):
+            type_of_symbol = child.getAttribute('xmi:type')
+
+            if type_of_symbol == self.CLASS:
+                self.build_class(child)
+                self.uml_symbol_table.insert(ClassSymbol(child))
+            elif type_of_symbol == self.PRIMITIVE_TYPE or type_of_symbol == self.DATA_TYPE:
+                self.uml_symbol_table.insert(TypeSymbol(child))
+            else:
+                raise Exception('{name} Not Yet Implemented, please Fix'.format(name=type_of_symbol))
+
+        return self.uml_symbol_table
+
+    def build_class(self, class_dom):
+        for child in getElementsExceptTextNode(class_dom):
+            if child.tagName == self.OWNED_ATTRIBUTE:
+                self.uml_symbol_table.insert(PropertySymbol(child))
+            elif child.tagName == self.OWNED_OPERATION:
+                self.uml_symbol_table.insert(OperationSymbol(child))

@@ -15,6 +15,7 @@ import logging
 import os.path
 from xml.dom import minidom
 from six import string_types
+from .umlsymboltable import UMLSymbolTableBuilder
 
 from enum import Enum
 
@@ -946,8 +947,9 @@ def buildHierarchy(doc):
 
     buildDataTypes(doc)
     buildStereoTypes(doc)
+    symbol_table = UMLSymbolTableBuilder(doc).build()
     res = XMIModel(doc)
-    return res
+    return res, symbol_table
 
 
 def parse(xschemaFileName):
