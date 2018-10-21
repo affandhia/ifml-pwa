@@ -935,7 +935,7 @@ def buildStereoTypes(doc, profile=''):
         # print 'stereotype:', id, XMI.getName(st)
 
 
-def buildHierarchy(doc):
+def buildHierarchy(doc, filename):
     """Builds Hierarchy out of the doc."""
     global datatypes
     global stereotypes
@@ -947,7 +947,7 @@ def buildHierarchy(doc):
 
     buildDataTypes(doc)
     buildStereoTypes(doc)
-    symbol_table = UMLSymbolTableBuilder(doc).build()
+    symbol_table = UMLSymbolTableBuilder(doc, filename).build()
     res = XMIModel(doc)
     return res, symbol_table
 
@@ -979,7 +979,7 @@ def parse(xschemaFileName):
 
     # XMI.generator = generator
 
-    root = buildHierarchy(doc)
+    root = buildHierarchy(doc, xschemaFileName)
     log.debug("Created a root XMI parser.")
 
     return root

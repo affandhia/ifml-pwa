@@ -1,21 +1,24 @@
 from six import string_types
 
+
 class NoObject(object):
     pass
 
+
 _marker = NoObject()
 
-def getElementsExceptTextNode(domElement):
 
+def getElementsExceptTextNode(domElement):
     elements = domElement.childNodes
 
     cleaned_els = []
 
     for element in elements:
-        if not(element.nodeType == element.TEXT_NODE):
+        if not (element.nodeType == element.TEXT_NODE):
             cleaned_els.append(element)
 
     return cleaned_els
+
 
 def getElementsByTagName(domElement, tagName, recursive=0):
     """Returns elements by tag name.
@@ -66,14 +69,22 @@ class UMLSymbolTable(object):
         for _, symbol in dict_symbol.items():
             self.insert(symbol)
 
-    def lookup(self, symbol):
+    def lookup(self, uml_name, id_of_symbol):
+        symbol = None
+
+        if uml_name != self.model_name:
+            raise Exception(
+                'Use {source_name} for building your IFML Model, not {dest_name}'.format(source_name=self.model_name,
+                                                                                         dest_name=uml_name))
         try:
-            return self.table[symbol.id]
+            symbol = self.table[id_of_symbol]
         except KeyError:
-            return None
+            raise Exception('Symbol is not existed in this UML Model')
+
+        return symbol
+
 
 class Symbol(object):
-
     ID_ATTRIBUTE = 'xmi:id'
     NAME_ATTRIBUTE = 'name'
     TYPE_ATTRIBUTE = 'xmi:type'
@@ -82,12 +93,14 @@ class Symbol(object):
         self.id = None
         self.name = None
 
+
 class ClassSymbol(Symbol):
 
     def __init__(self, class_dom):
         super().__init__()
         self.id = class_dom.getAttribute(self.ID_ATTRIBUTE)
         self.name = class_dom.getAttribute(self.NAME_ATTRIBUTE)
+
 
 class TypeSymbol(Symbol):
 
@@ -106,6 +119,7 @@ class PropertySymbol(Symbol):
         self.name = property_element.getAttribute(self.NAME_ATTRIBUTE)
         self.type = property_element.getAttribute(self.TYPE_ATTRIBUTE)
 
+
 class OperationSymbol(Symbol):
 
     def __init__(self, operation_element):
@@ -113,18 +127,18 @@ class OperationSymbol(Symbol):
         self.id = operation_element.getAttribute(self.ID_ATTRIBUTE)
         self.name = operation_element.getAttribute(self.NAME_ATTRIBUTE)
 
-class UMLSymbolTableBuilder(object):
 
+class UMLSymbolTableBuilder(object):
     OWNED_ATTRIBUTE = 'ownedAttribute'  # Attribute in element
     OWNED_OPERATION = 'ownedOperation'  # Opertaion in that element
     CLASS = 'uml:Class'  # Class tag
     PRIMITIVE_TYPE = 'uml:PrimitiveType'  # Creating a datatype
     DATA_TYPE = 'uml:DataType'
 
-    def __init__(self, uml_dom):
+    def __init__(self, uml_dom, filename):
         self.uml_dom = getElementByTagName(uml_dom, 'uml:Model')
         self.uml_symbol_table = UMLSymbolTable()
-        self.uml_symbol_table.model_name = self.uml_dom.getAttribute('name')
+        self.uml_symbol_table.model_name = filename
         self.build()
 
     def build(self):

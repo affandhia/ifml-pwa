@@ -73,6 +73,7 @@ class IFMLSymbolTable(object):
         recursive_reference_array = reference_in_list[3:].split('/@')
         model_name = recursive_reference_array[0]
         scope_in_model = recursive_reference_array[1:]
+
         # Find it in the table, throw exception if it's not found
         try:
             symbol_found = self.table[model_name].lookup(scope_in_model)
@@ -95,7 +96,6 @@ class IFMLElementSymbolTable(IFMLSymbolTable):
             self.table[symbol.tag_name] = [symbol]
 
     def lookup(self, reference_list):
-
         current_scope_tag_name, current_scope_index = reference_list[0].split('.')
         next_scope_reference_list = reference_list[1:]
         symbol_found = None
@@ -133,19 +133,19 @@ class IFMLSymbol(object):
         self.next_scope = symbol_table
 
 
-class ViewContainer(IFMLSymbol):
+class ViewContainerSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Menu(IFMLSymbol):
+class MenuSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Windows(IFMLSymbol):
+class WindowSymbol(IFMLSymbol):
     IS_MODAL_ATTRIBUTE = 'isModal'
 
     def __init__(self, element_dom):
@@ -153,35 +153,40 @@ class Windows(IFMLSymbol):
         self.is_modal = element_dom.getAttribute(self.IS_MODAL_ATTRIBUTE)
 
 
-class List(IFMLSymbol):
+class ListSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Detail(IFMLSymbol):
+class DetailsSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Form(IFMLSymbol):
+class FormSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Action(IFMLSymbol):
+class ActionSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
 
 
-class Parameter(IFMLSymbol):
+class ParameterSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
-        self.type = None
+        self.datatype = None
+        self.datatype_reference = getElementByTagName(element_dom, 'type').getAttribute('href')
+
+    def build_datatype(self, uml_symbol_table):
+        uml_name, id_of_the_symbol = self.datatype_reference.split('#')
+        self.datatype = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
 class VisualizationAttribute(IFMLSymbol):
@@ -191,14 +196,19 @@ class VisualizationAttribute(IFMLSymbol):
         self.type = None
 
 
-class SimpleField(IFMLSymbol):
+class SimpleFieldSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
-        self.type = None
+        self.datatype = None
+        self.datatype_reference = getElementByTagName(element_dom, 'type').getAttribute('href')
+
+    def build_datatype(self, uml_symbol_table):
+        uml_name, id_of_the_symbol = self.datatype_reference.split('#')
+        self.datatype = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
-class DataBinding(IFMLSymbol):
+class DataBindingSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
@@ -213,7 +223,8 @@ class DomainConceptSymbol(IFMLSymbol):
         self.classifier_symbol = None
 
     def build_classifier_symbol(self, uml_symbol_table):
-        self.classifier_symbol = uml_symbol_table.lookup(self.classifier_reference)
+        uml_name, id_of_the_symbol = self.classifier_reference.split('#')
+        self.classifier_symbol = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
 class StructuralFeatureSymbol(IFMLSymbol):
@@ -224,10 +235,11 @@ class StructuralFeatureSymbol(IFMLSymbol):
         self.struct_feature_symbol = None
 
     def build_struct_feature_symbol(self, uml_symbol_table):
-        self.struct_feature_symbol = uml_symbol_table.lookup(self.struct_feature_reference)
+        uml_name, id_of_the_symbol = self.struct_feature_reference.split('#')
+        self.struct_feature_symbol = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
-class BehavioralFeature(IFMLSymbol):
+class BehavioralFeatureSymbol(IFMLSymbol):
 
     def __init__(self, element):
         super().__init__(element)
@@ -235,10 +247,11 @@ class BehavioralFeature(IFMLSymbol):
         self.behavioral_feature_symbol = None
 
     def build_behavioral_feature_symbol(self, uml_symbol_table):
-        self.behavioral_feature_symbol = uml_symbol_table.lookup(self.behavioral_feature_reference)
+        uml_name, id_of_the_symbol = self.behavioral_feature_reference.split('#')
+        self.behavioral_feature_symbol = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
-class Behavior(IFMLSymbol):
+class BehaviorSymbol(IFMLSymbol):
 
     def __init__(self, element):
         super().__init__(element)
@@ -246,53 +259,203 @@ class Behavior(IFMLSymbol):
         self.behavior_symbol = None
 
     def build_behavior_symbol(self, uml_symbol_table):
-        self.behavior_symbol = uml_symbol_table.lookup(self.behavior_reference)
+        uml_name, id_of_the_symbol = self.behavior_reference.split('#')
+        self.behavior_symbol = uml_symbol_table.lookup(uml_name, id_of_the_symbol)
 
 
 class IFMLSymbolTableBuilder(object):
+
     DOMAIN_MODEL_TAG = 'domainModel'
     INTERACTION_FLOW_MODEL_TAG = 'interactionFlowModel'
     IFML_MODEL_TAG = 'core:IFMLModel'
     TYPE_ATTRIBUTE = 'xsi:type'
 
-    def __init__(self, ifml_dom):
+    VIEW_CONTAINER_TYPE = 'core:ViewContainer'
+    WINDOW_TYPE = 'ext:IFMLWindow'
+    MENU_TYPE = 'ext:IFMLMenu'
+
+    LIST_TYPE = 'ext:List'
+    DETAILS_TYPE = 'ext:Details'
+    FORM_TYPE = 'ext:Form'
+
+    ACTION_TYPE = 'core:IFMLAction'
+    PARAMETER_TAGNAME = 'parameters'
+
+    DATA_BINDING = 'core:DataBinding'
+    VISUALIZATION_ATTRIBUTE_TYPE = 'core:VisualizationAttribute'
+    SIMPLE_FIELD_TYPE = 'ext:SimpleField'
+
+    DOMAIN_CONCEPT = 'core:UMLDomainConcept'
+    STRUCTURAL_FEATURE = 'core:UMLStructuralFeature'
+    BEHAVIOR_FEATURE = 'core:UMLBehaviorFeature'
+    BEHAVIOR = 'core:UMLBehavior'
+
+
+    def __init__(self, ifml_dom, uml_sym):
         self.ifml_dom = getElementByTagName(ifml_dom, self.IFML_MODEL_TAG)
         self.ifml_symbol_table = IFMLSymbolTable()
+        self.uml_symbol_table = uml_sym
 
     def build(self):
+
+        self.domain_model_table = IFMLElementSymbolTable()
+        self.domain_model_table.model_name = self.DOMAIN_MODEL_TAG
         self.build_domain_model()
-        self.build_interaction_flow_model()
+        self.ifml_symbol_table.insert(self.domain_model_table)
+
+        self.interaction_flow_model_table = IFMLElementSymbolTable()
+        self.interaction_flow_model_table.model_name = self.INTERACTION_FLOW_MODEL_TAG
+
+        self.build_interaction_flow_model(self.interaction_flow_model_table)
+        self.ifml_symbol_table.insert(self.interaction_flow_model_table)
         return self.ifml_symbol_table
 
     def build_domain_model(self):
 
-        DOMAIN_CONCEPT = 'core:UMLDomainConcept'
-        STRUCTURAL_FEATURE = 'core:UMLStructuralFeature'
-        BEHAVIOR_FEATURE = 'core:UMLBehaviorFeature'
-        BEHAVIOR = 'core:UMLBehavior'
-
         domain_model = getElementByTagName(self.ifml_dom, self.DOMAIN_MODEL_TAG)
-        domain_model_table = IFMLElementSymbolTable()
-        domain_model_table.model_name = self.DOMAIN_MODEL_TAG
 
         for child in getElementsExceptTextNode(domain_model):
             symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
-            if symbol_type == DOMAIN_CONCEPT:
-                domain_model_table.insert(DomainConceptSymbol(child))
-            elif symbol_type == STRUCTURAL_FEATURE:
-                domain_model_table.insert(StructuralFeatureSymbol(child))
-            elif symbol_type == BEHAVIOR_FEATURE:
-                domain_model_table.insert(BehavioralFeature(child))
-            elif symbol_type == BEHAVIOR:
-                domain_model_table.insert(Behavior(child))
+            if symbol_type == self.DOMAIN_CONCEPT:
+                symbol = DomainConceptSymbol(child)
+                symbol.build_classifier_symbol(self.uml_symbol_table)
+                self.domain_model_table.insert(symbol)
+            elif symbol_type == self.STRUCTURAL_FEATURE:
+                symbol = StructuralFeatureSymbol(child)
+                symbol.build_struct_feature_symbol(self.uml_symbol_table)
+                self.domain_model_table.insert(symbol)
+            elif symbol_type == self.BEHAVIOR_FEATURE:
+                symbol = BehavioralFeatureSymbol(child)
+                symbol.build_behavioral_feature_symbol(self.uml_symbol_table)
+                self.domain_model_table.insert(symbol)
+            elif symbol_type == self.BEHAVIOR:
+                symbol = BehaviorSymbol(child)
+                symbol.build_behavior_symbol(self.uml_symbol_table)
+                self.domain_model_table.insert(symbol)
 
-        self.ifml_symbol_table.insert(domain_model_table)
+    def build_interaction_flow_model(self, current_scope_symbol_table):
 
-    def build_interaction_flow_model(self):
         interaction_flow_model = getElementByTagName(self.ifml_dom, self.INTERACTION_FLOW_MODEL_TAG)
-        interaction_flow_model_table = IFMLElementSymbolTable()
-        interaction_flow_model_table.model_name = self.INTERACTION_FLOW_MODEL_TAG
 
         for child in getElementsExceptTextNode(interaction_flow_model):
-            pass
-            # print(child)
+            symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
+            next_scope_symbol_table = IFMLElementSymbolTable()
+            if symbol_type == self.VIEW_CONTAINER_TYPE:
+                symbol = ViewContainerSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.WINDOW_TYPE:
+                symbol = WindowSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.MENU_TYPE:
+                symbol = MenuSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.ACTION_TYPE:
+                symbol = ActionSymbol(child)
+                self.build_action(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+    def build_view_container(self, element, current_scope_symbol_table):
+
+        #Get all parameter
+        for child in getElementsByTagName(element, 'parameters'):
+            symbol = ParameterSymbol(child)
+            symbol.build_datatype(self.uml_symbol_table)
+            current_scope_symbol_table.insert(symbol)
+
+        #Get child element beside text node and parameter
+        for child in getElementsExceptTextNode(element):
+            symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
+            next_scope_symbol_table = IFMLElementSymbolTable()
+
+            if symbol_type == self.VIEW_CONTAINER_TYPE:
+                symbol = ViewContainerSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.WINDOW_TYPE:
+                symbol = WindowSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.MENU_TYPE:
+                symbol = MenuSymbol(child)
+                self.build_view_container(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.ACTION_TYPE:
+                symbol = ActionSymbol(child)
+                self.build_action(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.LIST_TYPE:
+                symbol = ListSymbol(child)
+                self.build_view_component(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.DETAILS_TYPE:
+                symbol = DetailsSymbol(child)
+                self.build_view_component(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+            elif symbol_type == self.FORM_TYPE:
+                symbol = FormSymbol(child)
+                self.build_view_component(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+
+    def build_view_component(self, element, current_scope_symbol_table):
+        # Get all parameter
+        for child in getElementsByTagName(element, 'parameters'):
+            symbol = ParameterSymbol(child)
+            symbol.build_datatype(self.uml_symbol_table)
+            current_scope_symbol_table.insert(symbol)
+
+        # Get child element beside text node and parameter
+        for child in getElementsExceptTextNode(element):
+            symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
+            next_scope_symbol_table = IFMLElementSymbolTable()
+
+            if symbol_type == self.DATA_BINDING:
+                symbol = DataBindingSymbol(child)
+                self.build_view_component_part(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+            elif symbol_type == self.SIMPLE_FIELD_TYPE:
+                symbol = SimpleFieldSymbol(child)
+                symbol.build_datatype(self.uml_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+    def build_action(self, element, current_scope_symbol_table):
+        # Get all parameter
+        for child in getElementsByTagName(element, 'parameters'):
+            symbol = ParameterSymbol(child)
+            symbol.build_datatype(self.uml_symbol_table)
+            current_scope_symbol_table.insert(symbol)
+
+    def build_view_component_part(self, element, current_scope_symbol_table):
+        # Get child element beside text node and parameter
+        for child in getElementsExceptTextNode(element):
+            symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
+            next_scope_symbol_table = IFMLElementSymbolTable()
+
+            if symbol_type == self.SIMPLE_FIELD_TYPE:
+                symbol = SimpleFieldSymbol(child)
+                self.build_view_component_part(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+            elif symbol_type == self.VISUALIZATION_ATTRIBUTE_TYPE:
+                symbol = VisualizationAttribute(child)
+                self.build_view_component_part(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)

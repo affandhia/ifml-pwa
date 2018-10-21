@@ -16,9 +16,9 @@ logger_angular = logging.getLogger("main.core.angular.main")
 
 def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=''):
     target_project_directory = sys.path[0] if target_directory == '' else target_directory
-
-    interpreting_result = IFMLtoAngularInterpreter(ifml_xmi=ifml_parse(path_to_ifml_file),
-                                                class_diagram_xmi=uml_parse(path_to_class_diagram))
+    uml_structure, uml_symbol_table = uml_parse(path_to_class_diagram)
+    ifml_structure, ifml_symbol_table = ifml_parse(path_to_ifml_file, uml_symbol_table)
+    interpreting_result = IFMLtoAngularInterpreter(ifml_structure, ifml_symbol_table, uml_structure, uml_symbol_table)
     basic_template = AngularProject(app_name=interpreting_result.get_project_name())
     # Adding app.component.ts
     root_component_name = 'app'

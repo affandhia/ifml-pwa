@@ -249,7 +249,7 @@ class IFMLModel(NamedElement):
         return self._domain_model
 
 
-def build_ifml_model(doc=None):
+def build_ifml_model(doc=None, uml_sym=None):
     """
         This method used for build IFMLModel Structure
 
@@ -257,7 +257,7 @@ def build_ifml_model(doc=None):
     """
 
     #Build the Symbol Table
-    symbol_table = IFMLSymbolTableBuilder(doc).build()
+    symbol_table = IFMLSymbolTableBuilder(doc, uml_sym).build()
 
     #Parse the UML Model here and become input for IFML Model
     model = IFMLModel(doc.getElementsByTagName('core:IFMLModel')[0])
@@ -265,7 +265,7 @@ def build_ifml_model(doc=None):
     return model, symbol_table
 
 
-def parse(xmiFileName=None, xmiSchema=None, **kw):
+def parse(xmiFileName=None, umlSymbolTable=None, xmiSchema=None, **kw):
     """
     This method used for initializing IFML parser
 
@@ -291,6 +291,8 @@ def parse(xmiFileName=None, xmiSchema=None, **kw):
     else:
         doc = minidom.parseString(xmiSchema)
 
-    root = build_ifml_model(doc=doc)
+    if not umlSymbolTable:
+        raise TypeError('UML Symbol Table Not Found, please provide it')
+    root = build_ifml_model(doc=doc, uml_sym=umlSymbolTable)
     log.debug("Created a root IFML parser.")
     return root
