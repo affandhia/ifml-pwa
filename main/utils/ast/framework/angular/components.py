@@ -4,7 +4,7 @@ from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.naming_management import camel_classify, dasherize, camel_function_style, \
     creating_title_sentence_from_dasherize_word
 
-from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE, NGX_SMART_MODAL_LOCATION, AngularMainModule
+from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
 
 
 class AngularComponent(Node):
@@ -44,6 +44,7 @@ class AngularComponent(Node):
                                       self.typescript_html_name: self.component_html.render(),
                                       self.typescript_css_name: ''}}
 
+
 class AngularComponentForModal(AngularComponent):
     SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
     SUFFIX_HTML_COMPONENT_FILENAME = '.component.html'
@@ -51,6 +52,7 @@ class AngularComponentForModal(AngularComponent):
 
     def __init__(self, component_typescript_class, component_html):
         super().__init__(component_typescript_class, component_html)
+
 
 class AngularComponentTypescriptClass(TypescriptClassType):
     def __init__(self):
@@ -116,7 +118,8 @@ class AngularComponentTypescriptClass(TypescriptClassType):
                                      class_name=self.class_name, component_name=self.component_name,
                                      constructor_param=', '.join(constructor_param_list), body='\n'.join(self.body),
                                      import_statement_list='\n'.join(import_statement_list),
-                                     property_decl='\n'.join(property_decl_list))
+                                     property_decl='\n'.join(property_decl_list),
+                                     constructor_body='\n'.join(self.constructor_body))
 
 
 class AngularComponentHTML(Node):
@@ -151,6 +154,7 @@ class AngularFormHTML(AngularComponentHTML):
                                    form_dasherize=self.form_dasherize, on_submit_call=self.on_submit_call,
                                    form_varcamel=self.form_varcamel, input_list='\n'.join(self.input_list))
 
+
 class AngularDetailHTMLCall(Node):
 
     def __init__(self, name):
@@ -168,6 +172,7 @@ class AngularDetailHTMLCall(Node):
     def render(self):
         return angular_html_writer('detail_call.html.template', selector_name=self.selector_name,
                                    parameter_name=self.parameter_name, property_name=self.property_name)
+
 
 class AngularListHTMLCall(Node):
 
@@ -187,6 +192,7 @@ class AngularListHTMLCall(Node):
         return angular_html_writer('list_call.html.template', selector_name=self.selector_name,
                                    parameter_name=self.parameter_name, property_name=self.property_name)
 
+
 class AngularListHTMLLayout(AngularComponentHTML):
 
     def __init__(self):
@@ -197,7 +203,9 @@ class AngularListHTMLLayout(AngularComponentHTML):
         self.onclick = onclick
 
     def render(self):
-        return angular_html_writer('unordered_list_element.html.template', onclick=self.onclick, body='\n'.join(self.body))
+        return angular_html_writer('unordered_list_element.html.template', onclick=self.onclick,
+                                   body='\n'.join(self.body))
+
 
 class AngularModalHTMLLayout(AngularComponentHTML):
 
@@ -208,6 +216,6 @@ class AngularModalHTMLLayout(AngularComponentHTML):
         self.title_name = creating_title_sentence_from_dasherize_word(name)
 
     def render(self):
-        return angular_html_writer('modal_layout.html.template', var_camel_name=self.var_camel_name, dasherize_name=self.title_name, title_name=self.title_name,
+        return angular_html_writer('modal_layout.html.template', var_camel_name=self.var_camel_name,
+                                   dasherize_name=self.title_name, title_name=self.title_name,
                                    body='\n'.join(self.body))
-

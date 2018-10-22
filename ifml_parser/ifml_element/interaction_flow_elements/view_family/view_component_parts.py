@@ -2,7 +2,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.interaction_flow_base im
 from ifml_parser.ifml_element.expression_family.boolean_expression_extension import ActivationExpression
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.parameter_family.parameters import Parameter
-
+from ifml_parser.ifml_element.expression_family.base import Expression
 
 class ViewComponentPart(InteractionFlowElement):
     TYPE_TAGNAME = 'type'
@@ -214,7 +214,6 @@ class DataBinding(ContentBinding):
         return self._data_context_variable
 
     def build_conditional_expressions(self):
-        from ifml_parser.ifml_element.expression_family.conditional_expression_base import ConditionalExpression
         dict_conditional_expressions = {}
         list_conditional_expressions_node = self.getElementsByTagName(
             ConditionalExpression.CONDITIONAL_EXPRESSION_TAGNAME)
@@ -243,3 +242,10 @@ class DynamicBehavior(ContentBinding):
 
     def get_action(self):
         return self._action
+
+class ConditionalExpression(Expression, ViewComponentPart):
+    CONDITIONAL_EXPRESSION_TYPE = 'core:ConditionalExpression'
+    CONDITIONAL_EXPRESSION_TAGNAME = 'conditionalExpression'
+
+    def __init__(self, xmiSchema):
+        super().__init__(xmiSchema)

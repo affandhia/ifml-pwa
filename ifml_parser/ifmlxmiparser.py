@@ -24,7 +24,6 @@ from ifml_parser.ifml_element.ifml_elements_general import InteractionFlowModelE
 from ifml_parser.ifml_element.parameter_family.parameters import Parameter, ParameterBinding, ParameterBindingGroup
 from ifml_parser.ifml_element.expression_family.base import Expression, InteractionFlowExpression, BooleanExpression
 from ifml_parser.ifml_element.expression_family.boolean_expression_extension import ActivationExpression, Constraint
-from ifml_parser.ifml_element.expression_family.conditional_expression_base import ConditionalExpression
 from ifml_parser.ifml_element.expression_family.constraint_extension import ValidationRule
 from ifml_parser.ifml_element.interaction_flow.base import InteractionFlow, DataFlow, NavigationFlow
 from ifml_parser.ifmlsymboltable import IFMLSymbolTableBuilder

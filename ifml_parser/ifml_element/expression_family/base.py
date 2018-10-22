@@ -13,6 +13,12 @@ class Expression(InteractionFlowModelElement):
         self._language = self._schema.getAttribute(self.LANGUAGE_ATTRIBUTE)
         self._body = self._schema.getAttribute(self.BODY_ATTRIBUTE)
 
+    def get_language(self):
+        return self._language
+
+    def get_body(self):
+        return self._body
+
 class InteractionFlowExpression(Expression):
     INTERACTION_FLOW_EXPRESSION_ATTRIBUTE = 'interactionFlowExpression'
     MULTIPLE_INT_FLOW_EXP_IN_EVENT = "Event can't have more than one Interaction Flow Expression"

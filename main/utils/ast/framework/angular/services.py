@@ -19,7 +19,7 @@ class AngularService(TypescriptClassType):
 
     def set_endpoint_class_name_and_worker(self, name):
         self.api_endpoint = dasherize(name)
-        self.class_name = camel_classify(name)
+        self.class_name = camel_classify(change_slash_and_dot_into_dash(name))
         self.worker_config = WorkerConfig(self.api_endpoint)
         self.worker_config.add_url(self.api_endpoint)
         self.filename = change_slash_and_dot_into_dash(self.api_endpoint) + self.SERVICE_FILE_NAME
