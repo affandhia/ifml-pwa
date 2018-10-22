@@ -48,3 +48,7 @@ def camel_function_style(word):
 
 def creating_title_sentence_from_dasherize_word(word):
     return word.replace('-',' ').title()
+
+#Specially used for ABS Microservice Framework naming convention
+def change_slash_and_dot_into_dash(word):
+    return word.replace('/','-').replace('.','-')

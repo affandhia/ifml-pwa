@@ -6,7 +6,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.action_family.base impor
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
     OnSelectEvent
-from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import SimpleField
+from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import SimpleField, DataBinding
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
@@ -343,6 +343,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, view_component_part in form_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, SimpleField):
                 self.interpret_simple_field(view_component_part, html, typescript_class)
+            elif isinstance(view_component_part, DataBinding):
+                self.interpret_data_binding(view_component_part, html, typescript_class)
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -395,6 +397,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.path_from_root = detail_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
+        for _, parameter in detail_element.get_parameters().items():
+            self.interpret_parameter(parameter, html, typescript_class)
+
+        # TODO Implement
         # Build All View Element Event Inside
         for _, event in detail_element.get_view_element_events().items():
             if isinstance(event, ViewElementEvent):
@@ -403,7 +409,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Build all View Component Part
         for _, view_component_part in detail_element.get_assoc_view_component_parts():
-            pass
+            if isinstance(view_component_part, DataBinding):
+                self.interpret_data_binding(view_component_part, html, typescript_class)
 
         # Preparation to Call Detail
         detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
@@ -452,6 +459,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.path_from_root = list_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
+        for _, parameter in list_element.get_parameters().items():
+            self.interpret_parameter(parameter, html, typescript_class)
+
+        # TODO Implement
         # Build All View Element Event Inside
         for _, event in list_element.get_view_element_events().items():
             if isinstance(event, OnSelectEvent):
@@ -461,8 +472,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # TODO Implement
         # Build all View Component Part
-        for _, view_component_part in list_element.get_assoc_view_component_parts():
-            pass
+        for _, view_component_part in list_element.get_assoc_view_component_parts().items():
+            if isinstance(view_component_part, DataBinding):
+                self.interpret_data_binding(view_component_part, html, typescript_class)
 
         # Preparation to Call Detail
         detail_call = AngularListHTMLCall(typescript_class.selector_name)
@@ -591,7 +603,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Get the name and type
         element_name = simple_field_element.get_name()
-        type = simple_field_element.get_type()
+        uml_model_name, id_of_type = simple_field_element.get_type().split('#')
+        print(id_of_type)
+        #Find the type in the UML Symbol Table
+        datatype_of_field = self.uml_symbol_table.lookup(uml_model_name, id_of_type)
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
@@ -600,7 +615,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
 
         # Create the Input Field
-        input_html = InputField(element_name)
+        input_html = InputField(element_name, datatype_of_field)
 
         # Call Into the HTML
         html_calling.append_html_into_body(input_html.render())
@@ -610,6 +625,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     # TODO Implement
     def interpret_slot(self, view_element_event, html_calling, typescript_calling):
+        pass
+
+    # TODO Implement
+    def interpret_parameter(self, parameter_element, html_calling, typescript_calling):
         pass
 
     def view_element_definition(self):

@@ -75,7 +75,7 @@ class ViewComponentPart(InteractionFlowElement):
             type_node = self.getElementByTagName('type')
             uml_type = type_node.getAttribute(self.XSI_TYPE)
             href = type_node.getAttribute('href')
-            type_returned = uml_type + ' ' + href
+            type_returned = href
         except IndexError:
             pass
         return type_returned

@@ -7,15 +7,25 @@ from main.utils.naming_management import dasherize, camel_function_style, \
 
 class InputField(Node):
 
+    ANGULAR_TPYE_TO_HTML_CONVERSION = {'string': 'text', 'number': 'number', 'boolean': 'text'}
+
     def __init__(self, name, type='text'):
         self.dasherize_name = dasherize(name)
         self.title_name = creating_title_sentence_from_dasherize_word(name)
         self.var_camel_name = camel_function_style(name)
         self.placeholder = True
         self.value = ''
-        self.type = type
+        self.type = self.build_type(type)
         self.ngmodel_property = VarDeclType(self.var_camel_name, semicolon=';')
         self.ngmodel_property.acc_modifiers = 'public'
+
+    def build_type(self, type):
+        returned_type = None
+        try:
+            returned_type = self.ANGULAR_TPYE_TO_HTML_CONVERSION[type]
+        except KeyError:
+            returned_type = 'text'
+        return returned_type
 
     def get_ngmodel_property(self):
         return self.ngmodel_property

@@ -1,7 +1,8 @@
 from main.utils.ast.framework.angular.worker_configs import WorkerConfig
 from main.utils.ast.language.typescript import TypescriptClassType
 from main.utils.jinja.angular import service_file_writer
-from main.utils.naming_management import dasherize, camel_classify
+from main.utils.naming_management import dasherize, camel_classify, \
+    change_slash_and_dot_into_dash
 
 
 class AngularService(TypescriptClassType):
@@ -12,6 +13,7 @@ class AngularService(TypescriptClassType):
         super().__init__()
         self.api_endpoint = ''
         self.call_param = ''
+        self.filename = ''
         self.typescript_call = None
         self.worker_config = None
 
@@ -20,6 +22,7 @@ class AngularService(TypescriptClassType):
         self.class_name = camel_classify(name)
         self.worker_config = WorkerConfig(self.api_endpoint)
         self.worker_config.add_url(self.api_endpoint)
+        self.filename = change_slash_and_dot_into_dash(self.api_endpoint) + self.SERVICE_FILE_NAME
 
     def param_exist(self):
         self.param = 'param'
@@ -43,9 +46,7 @@ class AngularService(TypescriptClassType):
         for _, prop in self.property_decl.items():
             property_decl_list.append(prop.render())
 
-        filename = self.api_endpoint+self.SERVICE_FILE_NAME
-
-        return {filename : service_file_writer('basic.service.ts.template', class_name=self.class_name,
+        return {self.filename : service_file_writer('basic.service.ts.template', class_name=self.class_name,
                                      api_endpoint=self.api_endpoint, call_param=self.call_param,
                                      constructor_param=', '.join(constructor_param_list),
                                      import_statement_list='\n'.join(import_statement_list),
