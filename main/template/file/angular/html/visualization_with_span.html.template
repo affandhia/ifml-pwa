@@ -1,0 +1,4 @@
+<div id='div-vis-{$ dasherize_name|safe $}' class='view-component-part visualization-attribute'>
+    <span id='label-vis-{$ dasherize_name|safe $}' class='label-visualization'>{$ title_name|safe $}</span>
+    <span id='vs-{$ dasherize_name|safe $}' class='class-attribute'>{{ {$ class_name|safe $}.{$ attribute_name $} }}</span>
+</div>

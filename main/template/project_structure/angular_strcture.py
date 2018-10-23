@@ -12,6 +12,7 @@ default_structure = {
     'src': {
         'app': {
             'services': {},
+            'models': {},
             'app-routing.module.ts': '',
             'app.component.css': '',
             'app.component.html': '',

@@ -8,6 +8,7 @@ class AngularProject:
     E2E_KEY = 'e2e'
     APP_KEY = 'app'
     SERVICES_KEY = 'services'
+    MODELS_KEY = 'models'
 
     EDITOR_CONFIG_KEY = '.editorconfig'
     GITIGNORE_KEY = '.gitignore'
@@ -47,6 +48,7 @@ class AngularProject:
         self.write_base_angular_project_file()
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
         self.services_folder = self.app_folder[self.SERVICES_KEY]
+        self.models_folder = self.app_folder[self.MODELS_KEY]
 
     def get_app_name(self):
         return self.app_name
@@ -182,6 +184,9 @@ class AngularProject:
 
     def add_service_inside_services_folder(self, inserted_service_file):
         self.services_folder.update(inserted_service_file)
+
+    def add_model_inside_models_folder(self, inserted_model_file):
+        self.models_folder.update(inserted_model_file)
 
     def return_project_structure(self):
         return {self.app_name: self.project_structure}

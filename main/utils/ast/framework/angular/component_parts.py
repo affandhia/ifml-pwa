@@ -22,7 +22,7 @@ class DataBindingFunction(Node):
         self.import_statement = ImportStatementType()
         self.import_statement.add_imported_element(classifier_name)
 
-        classifier_location = '../'+dasherize(classifier_name)+'/'+dasherize(classifier_name)+'.model.ts'
+        classifier_location = '../models/'+dasherize(classifier_name)+'.model'
         self.import_statement.set_main_module(classifier_location)
 
     def add_statement_to_body(self, statement):
@@ -72,3 +72,16 @@ class InputField(Node):
         return angular_html_writer('form_input.html.template', dasherize_name=self.dasherize_name,
                                    title_name=self.title_name, var_camel_name=self.var_camel_name,
                                    placeholder=self.placeholder, value=self.value, type=self.type)
+
+class VisualizationWithSpan(Node):
+
+    def __init__(self, name, structural_feature_name, data_binding_name=''):
+        self.title_name = creating_title_sentence_from_dasherize_word(name)
+        self.dasherize_name = dasherize(name)
+        self.attribute_name = structural_feature_name
+        self.class_name = data_binding_name
+
+    def render(self):
+        return angular_html_writer('visualization_with_span.html.template', title_name=self.title_name,
+                                   dasherize_name=self.dasherize_name, attribute_name=self.attribute_name,
+                                   class_name=self.class_name)

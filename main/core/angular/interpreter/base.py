@@ -13,7 +13,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_compone
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
     AngularOnclickType, AngularModalButtonAndFunction
-from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction
+from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction, VisualizationWithSpan
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal
@@ -590,8 +590,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} DataBinding".format(name=element_name))
-        domain_concept = self.ifml_symbol_table.lookup(data_binding_element.get_domain_concept())
-        classifier = domain_concept.classifier_symbol
+        classifier = self.ifml_symbol_table.lookup(data_binding_element.get_domain_concept()).classifier_symbol
 
         # Interpreting Data Binding
         data_binding_function = DataBindingFunction(element_name, classifier.name)
@@ -603,9 +602,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Build (If any) Visualization Attribute or Simple Field
         for _, sub_view_component_part in data_binding_element.get_sub_view_component_parts().items():
             if isinstance(sub_view_component_part, VisualizationAttribute):
-                self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling)
+                self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling, data_binding_function.property_declaration)
             elif isinstance(sub_view_component_part, SimpleField):
-                self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling)
+                self.interpret_simple_field(sub_view_component_part, html_calling, typescript_calling)
             elif isinstance(sub_view_component_part, ConditionalExpression):
                 self.interpret_conditional_expression(sub_view_component_part, data_binding_function.func_decl)
 
@@ -622,13 +621,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         typescript_calling.body.append(data_binding_function.get_function_declaration())
 
     # TODO Implement
-    def interpret_visualization_attribute(self, visualization_attribute_element, html_calling, typescript_calling):
+    def interpret_visualization_attribute(self, visualization_attribute_element, html_calling, typescript_calling, data_binding_property):
         # Get the name
         element_name = visualization_attribute_element.get_name()
-
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} VisualizationAttribute".format(name=element_name))
-        pass
+
+        #Get the structural feature
+        structural_feature = self.ifml_symbol_table.lookup(visualization_attribute_element.get_feature_concept()).struct_feature_symbol
+
+        #Interpret the notation
+        visualization_span = VisualizationWithSpan(element_name, structural_feature.name, data_binding_property.variable_name)
+
+        #Append to the HTML
+        html_calling.append_html_into_body(visualization_span.render())
+
 
     # TODO Implement
     def interpret_simple_field(self, simple_field_element, html_calling, typescript_calling):
