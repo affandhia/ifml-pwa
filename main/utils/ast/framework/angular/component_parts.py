@@ -7,22 +7,22 @@ from main.utils.naming_management import dasherize, camel_function_style, \
 
 class DataBindingFunction(Node):
 
-    def __init__(self, name, classfier_name):
+    def __init__(self, name, model_node):
         self.var_camel_name = camel_function_style(name)
         self.property_declaration = None
         self.import_statement = None
-        self.build_import_statement_and_property_declaration(classfier_name)
+        self.build_import_statement_and_property_declaration(model_node)
         self.func_decl = FunctionDeclType('attach'+camel_classify(name))
 
-    def build_import_statement_and_property_declaration(self, classifier_name):
+    def build_import_statement_and_property_declaration(self, model_node):
         self.property_declaration = VarDeclType(self.var_camel_name, ';')
-        self.property_declaration.variable_datatype = classifier_name
+        self.property_declaration.variable_datatype = model_node.class_name
         self.property_declaration.acc_modifiers = 'public'
 
         self.import_statement = ImportStatementType()
-        self.import_statement.add_imported_element(classifier_name)
+        self.import_statement.add_imported_element(model_node.class_name)
 
-        classifier_location = '../models/'+dasherize(classifier_name)+'.model'
+        classifier_location = '../models/'+dasherize(model_node.class_name)+'.model'
         self.import_statement.set_main_module(classifier_location)
 
     def add_statement_to_body(self, statement):

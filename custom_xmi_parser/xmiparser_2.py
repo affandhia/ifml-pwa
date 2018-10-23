@@ -374,7 +374,6 @@ class XMIModel(XMIElement):
         self.content = XMI.get_content(doc, XMI.MODEL)
         self.build_diagrams()
         self._data_types = datatypes.copy()
-        self.buildsymtab()
 
     def build_diagrams(self):
         diagram_els = self.content
@@ -435,14 +434,6 @@ class XMIModel(XMIElement):
             return class_list[id]
         except KeyError:
             return None
-
-    def buildsymtab(self):
-        for _, class_element in self._classes.items():
-            self.symtab.insert(ClassSymbol(class_element))
-            self.symtab.inserts(class_element.symtab.table)
-
-        for _, datatype in self._data_types.items():
-            self.symtab.insert(datatype)
 
 
 
@@ -557,7 +548,6 @@ class XMIClass(XMIElement):
             self.model) != '' else 'public'
         self._is_abstract = 1 if self.set_abstract(self.model) == 'true' else 0
         self._is_leaf = 1 if self.set_leaf(self.model) == 'true' else 0
-        self.buildsymtab()
 
     def set_package(self, new_package):
         self._package = new_package
@@ -577,14 +567,6 @@ class XMIClass(XMIElement):
                     pass
                 else:
                     raise ValueError(XMI.get_type(el)+', not recognized in UML Class Diagram')
-
-    def buildsymtab(self):
-
-        for _, property in self._properties.items():
-            self.symtab.insert(PropertySymbol(property))
-
-        for _, operation in self._operations.items():
-            self.symtab.insert(OperationSymbol(operation))
 
     def _set_generalization(self, node):
         return node.getAttribute('general')
@@ -909,9 +891,8 @@ def buildDataTypes(doc, profile=''):
                 (XMI.get_type(dt) == XMI.PRIMITIVE_TYPE):
 
             id = getId(dt)
-            name = getName(dt)
 
-            datatypes[getId(dt)] = DatatypeSymbol(id, name)
+            datatypes[id] = id
 
     # prefix = profile and profile + "#" or ''
     # XMI.collectTagDefinitions(doc, prefix=prefix)

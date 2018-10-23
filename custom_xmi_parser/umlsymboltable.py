@@ -83,6 +83,14 @@ class UMLSymbolTable(object):
 
         return symbol
 
+    def lookup_by_uml_element(self, id_of_symbol):
+        symbol = None
+        try:
+            symbol = self.table[id_of_symbol]
+        except KeyError:
+            raise Exception('Symbol is not existed in this UML Model')
+        return symbol
+
 
 class Symbol(object):
     ID_ATTRIBUTE = 'xmi:id'

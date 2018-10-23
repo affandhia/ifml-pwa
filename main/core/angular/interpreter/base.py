@@ -17,6 +17,7 @@ from main.utils.ast.framework.angular.component_parts import InputField, DataBin
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal
+from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
@@ -36,6 +37,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.project_name = dasherize(self.root_ifml.name)
         self.components = {}
         self.services = {}
+        self.models = {}
         self.list_service_worker_config = []
         self.angular_routing = RootRoutingNode('')
         self.root_html = self.get_root_html()
@@ -46,10 +48,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Getting All IFML Elements
         self.ifml_expressing_ui_design = self.root_ifml.get_interaction_flow_model().get_interaction_flow_model_elements()
 
-        # Getting All Domain Model Elements
-        self.domain_model_used_by_ifml = self.root_ifml.get_domain_model()
-        self.interpret_interaction_flow_model()
+        # Interpret all Domain Model Elements
         self.interpret_domain_model()
+
+        # Interpret all Interaction Flow Model Elements
+        self.interpret_interaction_flow_model()
 
         # Decide whether router-outlet is needed or not
         self.append_router_outlet(self.angular_routing, self.root_html)
@@ -590,10 +593,15 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} DataBinding".format(name=element_name))
+        #Get the classifier
         classifier = self.ifml_symbol_table.lookup(data_binding_element.get_domain_concept()).classifier_symbol
 
+        #Find it in the models container, and use it for declaring Data Binding Property
+        intended_model = self.models.get(classifier.id)
+        print(intended_model)
+
         # Interpreting Data Binding
-        data_binding_function = DataBindingFunction(element_name, classifier.name)
+        data_binding_function = DataBindingFunction(element_name, intended_model)
 
         #Build all Conditional Expression
         for _, conditional_expression in data_binding_element.get_conditional_expressions().items():
@@ -709,4 +717,32 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     # TODO Implement
     def interpret_domain_model(self):
-        pass
+        #Build all Class used
+        for _, class_xmi in self.root_class_diagram_xmi.get_classes().items():
+            self.interpret_uml_class(class_xmi)
+
+
+    def interpret_uml_class(self, class_xmi):
+        # Get class name
+        element_name = class_xmi.get_model_name()
+
+        # Interpret it
+        model_from_class = ModelFromUMLClass(element_name)
+
+        # Build the owned attribute
+        for _, attribute in class_xmi.get_properties().items():
+            self.interpret_owned_attribute(attribute, model_from_class)
+
+        #TODO Implement
+        #Build the owned operation
+
+        # Register to models container
+        self.models[class_xmi.get_model_id()] = model_from_class
+
+    def interpret_owned_attribute(self, class_attribute_xmi, model_element):
+        #Get attribute name, and type of the attribute
+        element_name = class_attribute_xmi.get_model_name()
+        element_type = self.uml_symbol_table.lookup_by_uml_element(class_attribute_xmi.get_type()).name
+
+        #Interpret it
+        model_element.add_owned_attribute_to_class(element_name, element_type)

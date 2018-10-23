@@ -1,0 +1,9 @@
+export class {$ class_name|safe $}{
+    {$ property_declaration|safe $}
+
+    constructor(obj?: any){
+        {$ constructor_body|safe $}
+    }
+
+    {$ body|safe $}
+}

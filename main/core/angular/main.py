@@ -35,8 +35,12 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
     basic_routing = AngularDefaultRouterDefinition()
     basic_routing.add_routing_hierarchy(interpreting_result.angular_routing)
 
-    #Adding service worker cofig
+    #Adding service worker config
     basic_template.write_service_worker_config(interpreting_result.list_service_worker_config)
+
+    #Adding each service into the AngularProject
+    for _, model_node in interpreting_result.models.items():
+        basic_template.add_model_inside_models_folder(model_node.render())
 
     #Adding each component of interpreting into the AngularProject
     for _, component_node in interpreting_result.components.items():
@@ -50,7 +54,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
         #Insert the component definition into src folder
         basic_template.add_new_component_using_basic_component_folder(component_node.build())
 
-    #Adding each service and worker configuration into the AngularProject
+    #Adding each service into the AngularProject
     for _, service_node in interpreting_result.services.items():
 
         #Insert the service into the services folder
