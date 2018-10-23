@@ -362,8 +362,9 @@ class XMIModel(XMIElement):
     _isroot = 1
     _parent = None
 
-    def __init__(self, doc):
+    def __init__(self, doc, filename):
         self.symtab = UMLSymbolTable()
+        self._filename = filename
         self._packages = {}
         self._classes = {}
         self._interfaces = {}
@@ -374,6 +375,9 @@ class XMIModel(XMIElement):
         self.content = XMI.get_content(doc, XMI.MODEL)
         self.build_diagrams()
         self._data_types = datatypes.copy()
+
+    def get_filename(self):
+        return self._filename
 
     def build_diagrams(self):
         diagram_els = self.content
@@ -929,7 +933,7 @@ def buildHierarchy(doc, filename):
     buildDataTypes(doc)
     buildStereoTypes(doc)
     symbol_table = UMLSymbolTableBuilder(doc, filename).build()
-    res = XMIModel(doc)
+    res = XMIModel(doc, filename)
     return res, symbol_table
 
 

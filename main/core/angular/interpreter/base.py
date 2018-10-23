@@ -598,7 +598,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         #Find it in the models container, and use it for declaring Data Binding Property
         intended_model = self.models.get(classifier.id)
-        print(intended_model)
 
         # Interpreting Data Binding
         data_binding_function = DataBindingFunction(element_name, intended_model)
@@ -742,7 +741,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def interpret_owned_attribute(self, class_attribute_xmi, model_element):
         #Get attribute name, and type of the attribute
         element_name = class_attribute_xmi.get_model_name()
-        element_type = self.uml_symbol_table.lookup_by_uml_element(class_attribute_xmi.get_type()).name
+        id_of_type_symbol = class_attribute_xmi.get_type()
+        uml_filename = self.root_class_diagram_xmi.get_filename()
+        element_type = self.uml_symbol_table.lookup(uml_filename, id_of_type_symbol).name
 
         #Interpret it
         model_element.add_owned_attribute_to_class(element_name, element_type)
