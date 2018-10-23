@@ -314,7 +314,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # TODO Implement
         # Calling ActionEvent and build it
-        for action_event in action_element.get_action_event():
+        for _, action_event in action_element.get_action_event().items():
             self.interpret_action_event(action_event, service_typescript)
 
         # Register to services container
