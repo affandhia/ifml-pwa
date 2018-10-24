@@ -10,9 +10,12 @@ class InteractionFlow(InteractionFlowModelElement):
     OUT_INTERACTION_FLOWS_TAGNAME = 'outInteractionFlows'
     IN_INTERACTION_FLOWS_TAGNAME = 'inInteractionFlows'
 
+    TARGET_INTERACTION_FLOW_ELEMENT_ATTRIBUTE = 'targetInteractionFlowElement'
+
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
         self._parameter_binding_group = self.build_param_binding_group()
+        self._target_interaction_flow_element = xmiSchema.getAttribute(self.TARGET_INTERACTION_FLOW_ELEMENT_ATTRIBUTE)
 
     def build_param_binding_group(self):
         dict_param_binding_groups = {}
@@ -24,6 +27,9 @@ class InteractionFlow(InteractionFlowModelElement):
 
     def get_parameter_binding_groups(self):
         return self._parameter_binding_group
+
+    def get_target_interaction_flow_element(self):
+        return self._target_interaction_flow_element
 
 
 class NavigationFlow(InteractionFlow):

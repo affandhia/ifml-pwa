@@ -3,6 +3,7 @@ import logging
 from yattag import Doc
 
 from custom_xmi_parser.umlsymboltable import ClassSymbol
+from ifml_parser.ifml_element.interaction_flow.base import NavigationFlow, DataFlow
 from ifml_parser.ifml_element.interaction_flow_elements.action_family.base import Action
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
@@ -537,6 +538,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
 
         # Build all child
+        for _, interaction_flow in view_element_event.get_out_interaction_flow().items():
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
 
         # Call it to the parent HTML
         button_html, typescript_function = func_and_html_event_node.render()
@@ -559,7 +562,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # TODO Implement Delete this after test
         func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
+
         # Build all child
+        for _, interaction_flow in onsubmit_event.get_out_interaction_flow().items():
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
 
         # Call it to the parent by binding it to HTML Form on submit method, add_submit_event
         button_html, typescript_function, ngsubmit = func_and_html_event_node.render()
@@ -583,7 +589,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # TODO Implement Delete this after test
         func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
+
         # Build all child
+        for _, interaction_flow in onselect_event.get_out_interaction_flow().items():
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
 
         # Call it to the parent and onclick html named add_onclick
         onclick_html, typescript_function = func_and_html_event_node.render()
@@ -835,6 +844,27 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             elif isinstance(view_element_event, ViewElementEvent):
                 self.interpret_view_element_event(view_element_event, component_node.component_html,
                                               component_node.component_typescript_class)
+
+
+    def interpret_interaction_flow(self, interaction_flow_element, func_and_html_calling):
+        if isinstance(interaction_flow_element, NavigationFlow):
+            self.interpret_navigation_flow(interaction_flow_element, func_and_html_calling)
+        elif isinstance(interaction_flow_element, DataFlow):
+            self.interpret_data_flow(interaction_flow_element, func_and_html_calling)
+
+    #TODO Implement
+    def interpret_navigation_flow(self, navigation_flow_element, func_and_html_calling):
+
+        #Get element target
+        element_target = navigation_flow_element.get_target_interaction_flow_element()
+        print(self.ifml_symbol_table.lookup(element_target))
+
+    # TODO Implement
+    def interpret_data_flow(self, data_flow_element, func_and_html_calling):
+
+        # Get element target
+        element_target = data_flow_element.get_target_interaction_flow_element()
+        print(self.ifml_symbol_table.lookup(element_target))
 
     # TODO Implement
     def interpret_domain_model(self):
