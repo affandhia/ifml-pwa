@@ -118,13 +118,17 @@ class TypescriptClassType(Node):
 
     def add_import_statement_using_import_node(self, import_node):
         try:
-            self.import_dict[import_node.main_module].add_imported_elements(import_node.imported_elements)
+            #Check if the imported element already exist, if not then insert it
+            for element in import_node.imported_elements:
+                self.add_import_statement(import_node.main_module, element)
         except KeyError:
+            #In case the import from the main module is never been declared before, then do the full import statement
             self.import_dict[import_node.main_module] = import_node
 
     def add_import_statement_for_multiple_element(self, main_module, elements_imported):
         try:
-            self.import_dict[main_module].add_imported_elements(elements_imported)
+            for element in elements_imported:
+                self.add_import_statement(main_module, element)
         except KeyError:
             new_import_statement_node = ImportStatementType()
             new_import_statement_node.set_main_module(main_module)
@@ -133,7 +137,10 @@ class TypescriptClassType(Node):
 
     def add_import_statement(self, main_module, element_imported):
         try:
-            self.import_dict[main_module].add_imported_element(element_imported)
+            # Check if the imported element already exist, if not then insert it
+            existing_import_node = self.import_dict[main_module]
+            if not (element_imported in existing_import_node.imported_elements):
+                self.import_dict[main_module].add_imported_element(element_imported)
         except KeyError:
             new_import_statement_node = ImportStatementType()
             new_import_statement_node.set_main_module(main_module)

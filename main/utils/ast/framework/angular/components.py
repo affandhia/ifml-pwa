@@ -121,6 +121,14 @@ class AngularComponentTypescriptClass(TypescriptClassType):
                                      property_decl='\n'.join(property_decl_list),
                                      constructor_body='\n'.join(self.constructor_body))
 
+class AngularComponentWithInputTypescriptClass(AngularComponentTypescriptClass):
+    def __init__(self):
+        super().__init__()
+        self.import_input_decorator_from_angular_core()
+
+    def import_input_decorator_from_angular_core(self):
+        # Adding import statement for Basic Component
+        self.add_import_statement(ANGULAR_CORE_MODULE, 'Input')
 
 class AngularComponentHTML(Node):
     def __init__(self):
@@ -160,18 +168,16 @@ class AngularDetailHTMLCall(Node):
     def __init__(self, name):
         super().__init__()
         self.selector_name = name
-        self.parameter_name = ''
-        self.property_name = ''
+        self.parameter_and_property_pair_list = []
 
-    def add_parameter_name(self, param):
-        self.parameter_name = param.variable_name
-
-    def add_property_name(self, prop):
-        self.property_name = prop.variable_name
+    def add_parameter_and_property_pair(self, parameter, property):
+        parameter_name = parameter.variable_name
+        property_name = property.variable_name
+        self.parameter_and_property_pair_list.append((parameter_name, property_name))
 
     def render(self):
         return angular_html_writer('detail_call.html.template', selector_name=self.selector_name,
-                                   parameter_name=self.parameter_name, property_name=self.property_name)
+                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularListHTMLCall(Node):
@@ -179,18 +185,15 @@ class AngularListHTMLCall(Node):
     def __init__(self, name):
         super().__init__()
         self.selector_name = name
-        self.parameter_name = ''
-        self.property_name = ''
+        self.parameter_and_property_pair_list = []
 
-    def add_parameter_name(self, param):
-        self.parameter_name = param.variable_name
-
-    def add_property_name(self, prop):
-        self.property_name = prop.variable_name
+    def add_parameter_and_property_pair(self, parameter, property):
+        tuple_param_prop_pair = (parameter.variable_name, property.variable_name)
+        self.parameter_and_property_pair_list.append(tuple_param_prop_pair)
 
     def render(self):
         return angular_html_writer('list_call.html.template', selector_name=self.selector_name,
-                                   parameter_name=self.parameter_name, property_name=self.property_name)
+                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularListHTMLLayout(AngularComponentHTML):

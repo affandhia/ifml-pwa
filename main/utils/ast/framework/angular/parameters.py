@@ -68,6 +68,5 @@ class InParameter(Parameter):
 
     def build_child_param(self):
         self.child_property = VarDeclType(self.var_camel_name, ';')
-        self.child_property.acc_modifiers = 'public'
         self.child_property.variable_datatype = self.type_name
         self.child_property.decorator = '@Input()'

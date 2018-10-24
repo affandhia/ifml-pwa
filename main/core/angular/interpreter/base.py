@@ -16,7 +16,7 @@ from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHa
 from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction, VisualizationWithSpan
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
-    AngularModalHTMLLayout, AngularComponentForModal
+    AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
@@ -204,7 +204,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} View Container".format(name=element_name))
 
-        html, typescript_class, routing_node = self.view_element_definition()
+        html, typescript_class, routing_node = self.view_container_definition()
 
         typescript_class.set_component_selector_class_name(element_name)
 
@@ -332,7 +332,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} Form".format(name=element_name))
 
         # Only need the routing node and typescript_class
-        _, typescript_class, routing_node = self.view_element_definition()
+        _, typescript_class, routing_node = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         # The HTML for Form
@@ -393,7 +393,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} Detail".format(name=element_name))
 
         # HTML, Typescript Class, and Routing Node
-        html, typescript_class, routing_node = self.view_element_definition()
+        html, typescript_class, routing_node = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         #HTML Call for Detail
@@ -458,7 +458,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} List".format(name=element_name))
 
         # Typescript Class, and Routing Node
-        _, typescript_class, routing_node = self.view_element_definition()
+        _, typescript_class, routing_node = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         # List HTML Layout
@@ -749,7 +749,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Creating Input Parameter in child
         print(type)
 
-    def view_element_definition(self):
+    def view_container_definition(self):
 
         # Defining variable for routing node, intialized if this container have inInteractionFlow or isLandmark
         routing_node = None
@@ -760,6 +760,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Prepare HTML
         html = AngularComponentHTML()
 
+        return html, typescript_class, routing_node
+
+    def view_component_definition(self):
+
+        html, _, routing_node = self.view_container_definition()
+        typescript_class = AngularComponentWithInputTypescriptClass()
         return html, typescript_class, routing_node
 
     def check_if_there_is_an_interaction_flow(self, element):
@@ -779,18 +785,20 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def build_in_parameter_for_parent(self, call_html, parent_typescript, list_param):
 
         #TODO Implement
-        #For now just use the last parameter, improve this logic
-        used_param = None
-        for index, param in enumerate(list_param):
-            call_html.add_parameter_name(param.child_property)
-            call_html.add_property_name(param.parent_property)
-            used_param = index
+        #This logic is only good for parameter inside form and detail
+        #Improve this logic for list
+        for param in list_param:
 
-        # TODO Implement
-        # For now just use the last parameter, improve this logic
-        parent_typescript.set_property_decl(list_param[used_param].parent_property)
-        if list_param[used_param].needed_import:
-            parent_typescript.add_import_statement_using_import_node(list_param[used_param].needed_import)
+            #Adding the parameter to HTML Call
+            call_html.add_parameter_and_property_pair(param.child_property, param.parent_property)
+
+            #Adding needed property for parent component
+            parent_typescript.set_property_decl(param.parent_property)
+
+            #Check if the declaration of property need to import a model class
+            if param.needed_import:
+                parent_typescript.add_import_statement_using_import_node(param.needed_import)
+
 
     # TODO Implement
     def interpret_domain_model(self):
