@@ -30,9 +30,14 @@ class ActionEvent(CatchingEvent):
 class ViewElementEvent(CatchingEvent):
 
     VIEW_ELEMENT_EVENT_TAGNAME = 'viewElementEvents'
+    PARENT_VIEW_ELEMENT_ATTRIBUTE = 'viewElement'
 
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
+        self.parent_view_element = xmiSchema.getAttribute(self.PARENT_VIEW_ELEMENT_ATTRIBUTE)
+
+    def get_parent_view_element_reference(self):
+        return self.parent_view_element
 
 class LandingEvent(CatchingEvent):
 

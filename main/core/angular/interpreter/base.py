@@ -39,6 +39,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.components = {}
         self.services = {}
         self.models = {}
+        self.action_events = []
+        self.view_element_events = []
         self.list_service_worker_config = []
         self.angular_routing = RootRoutingNode('')
         self.root_html = self.get_root_html()
@@ -54,6 +56,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Interpret all Interaction Flow Model Elements
         self.interpret_interaction_flow_model()
+
+        # Interpret all Action Event Elements with it's corresponding navigation
+        self.interpret_all_action_events()
+
+        # Interpret all View Element Elements with it's corresponding navigation
+        self.interpret_all_view_element_events()
 
         # Decide whether router-outlet is needed or not
         self.append_router_outlet(self.angular_routing, self.root_html)
@@ -123,6 +131,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         html = AngularModalHTMLLayout(element_name)
 
+        # Build All View Element Event Inside
+        for _, event in window_element.get_view_element_events().items():
+            self.view_element_events.append(event)
+
         # TODO Implement
         # Check if it is a XOR
 
@@ -177,8 +189,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Build All View Element Event Inside
         for _, event in menu_element.get_view_element_events().items():
-            if isinstance(event, ViewElementEvent):
-                self.interpret_view_element_event(event, html, typescript_class)
+            self.view_element_events.append(event)
 
         # The Component Itself
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
@@ -254,12 +265,13 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Build All View Element Event Inside
         for _, event in view_container.get_view_element_events().items():
             if isinstance(event, ViewElementEvent):
-                self.interpret_view_element_event(event, html, typescript_class)
+                # self.interpret_view_element_event(event, html, typescript_class)
+                self.view_element_events.append(event)
 
         # TODO Implement
         # Build All Action inside the Container
         for _, action in view_container.get_action().items():
-            self.interpret_action(action)
+            self.action_events.append(action)
 
         # Build All Associated View Element
         for key, view_element in view_container.get_assoc_view_element().items():
@@ -357,10 +369,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in form_element.get_view_element_events().items():
-            if isinstance(event, OnSubmitEvent):
-                self.interpret_onsubmit_event(event, html, typescript_class)
-            elif isinstance(event, ViewElementEvent):
-                self.interpret_view_element_event(event, html, typescript_class)
+            self.view_element_events.append(event)
 
         # Creating the component node
         # The Component Itself
@@ -396,7 +405,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html, typescript_class, routing_node = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
-        #HTML Call for Detail
+        # HTML Call for Detail
         # Preparation to Call Detail
         detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
 
@@ -413,15 +422,13 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, parameter in detail_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
 
-        #TODO Implement Building all In Direction Parameter
+        # TODO Implement Building all In Direction Parameter
         self.build_in_parameter_for_parent(detail_call, typescript_calling, list_in_param)
-
 
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in detail_element.get_view_element_events().items():
-            if isinstance(event, ViewElementEvent):
-                self.interpret_view_element_event(event, html, typescript_class)
+            self.view_element_events.append(event)
 
         # TODO Implement
         # Build all View Component Part
@@ -486,10 +493,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in list_element.get_view_element_events().items():
-            if isinstance(event, OnSelectEvent):
-                self.interpret_onselect_event(event, html, typescript_class)
-            elif isinstance(event, ViewElementEvent):
-                self.interpret_view_element_event(event, html, typescript_class)
+            self.view_element_events.append(event)
 
         # TODO Implement
         # Build all View Component Part
@@ -714,29 +718,31 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             parameter_element.name = 'out' + element_name
             self.interpret_out_parameter(parameter_element, html_calling, typescript_calling)
         else:
-            raise TypeError('No Parameter will have {direction} direction, Please verify the validity of your IFML'.format(direction=direction))
+            raise TypeError(
+                'No Parameter will have {direction} direction, Please verify the validity of your IFML'.format(
+                    direction=direction))
 
     # TODO Implement
     def interpret_in_parameter(self, in_parameter_element, typescript_calling, list_in_direction_parameter):
 
-        #Get element name and type
+        # Get element name and type
         element_name = in_parameter_element.get_name()
         uml_name, id_of_symbol = in_parameter_element.get_type().split('#')
         type_used_by_parameter = self.uml_symbol_table.lookup(uml_name, id_of_symbol)
 
-        #If type is class then take the model frommodel container, else just take the string name
+        # If type is class then take the model frommodel container, else just take the string name
         if isinstance(type_used_by_parameter, ClassSymbol):
             type_used_by_parameter = self.models[type_used_by_parameter.id]
 
-        #Creating @Input Property Declaration in child
+        # Creating @Input Property Declaration in child
         input_node = InParameter(element_name, type_used_by_parameter)
 
-        #Declare it in the child typescript, and if the type is class, import the class
+        # Declare it in the child typescript, and if the type is class, import the class
         typescript_calling.set_property_decl(input_node.child_property)
         if input_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(input_node.needed_import)
 
-        #Add it into InDirectionInput List at Child Component
+        # Add it into InDirectionInput List at Child Component
         list_in_direction_parameter.append(input_node)
 
     # TODO Implement
@@ -794,21 +800,41 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     def build_in_parameter_for_parent(self, call_html, parent_typescript, list_param):
 
-        #TODO Implement
-        #This logic is only good for parameter inside form and detail
-        #Improve this logic for list
+        # TODO Implement
+        # This logic is only good for parameter inside form and detail
+        # Improve this logic for list
         for param in list_param:
 
-            #Adding the parameter to HTML Call
+            # Adding the parameter to HTML Call
             call_html.add_parameter_and_property_pair(param.child_property, param.parent_property)
 
-            #Adding needed property for parent component
+            # Adding needed property for parent component
             parent_typescript.set_property_decl(param.parent_property)
 
-            #Check if the declaration of property need to import a model class
+            # Check if the declaration of property need to import a model class
             if param.needed_import:
                 parent_typescript.add_import_statement_using_import_node(param.needed_import)
 
+    # TODO Implement
+    def interpret_all_action_events(self):
+        for action_event in self.action_events:
+            print(action_event)
+
+    # TODO Implement
+    def interpret_all_view_element_events(self):
+        for view_element_event in self.view_element_events:
+            view_element_parent_symbol = self.ifml_symbol_table.lookup(
+                view_element_event.get_parent_view_element_reference())
+            component_node = self.components[view_element_parent_symbol.id]
+            if isinstance(view_element_event, OnSelectEvent):
+                self.interpret_onselect_event(view_element_event, component_node.component_html,
+                                              component_node.component_typescript_class)
+            elif isinstance(view_element_event, OnSubmitEvent):
+                self.interpret_onsubmit_event(view_element_event, component_node.component_html,
+                                              component_node.component_typescript_class)
+            elif isinstance(view_element_event, ViewElementEvent):
+                self.interpret_view_element_event(view_element_event, component_node.component_html,
+                                              component_node.component_typescript_class)
 
     # TODO Implement
     def interpret_domain_model(self):
