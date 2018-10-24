@@ -43,6 +43,14 @@ class OutParameter(Parameter):
 
     def __init__(self, name, type_node):
         super().__init__(name, type_node)
+        self.property = None
+        self.build_param()
+
+    def build_param(self):
+        # Declaring the property
+        self.property = VarDeclType(self.var_camel_name, ';')
+        self.property.acc_modifiers = 'public'
+        self.property.variable_datatype = self.type_name
 
 
 class InParameter(Parameter):

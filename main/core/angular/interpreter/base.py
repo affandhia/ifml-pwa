@@ -18,7 +18,7 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
-from main.utils.ast.framework.angular.parameters import InParameter
+from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
@@ -744,10 +744,20 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Get element name and type
         element_name = out_parameter_calling.get_name()
         uml_name, id_of_symbol = out_parameter_calling.get_type().split('#')
-        type = self.uml_symbol_table.lookup(uml_name, id_of_symbol)
+        type_used_by_parameter = self.uml_symbol_table.lookup(uml_name, id_of_symbol)
 
-        # Creating Input Parameter in child
-        print(type)
+        # If type is class then take the model frommodel container, else just take the string name
+        if isinstance(type_used_by_parameter, ClassSymbol):
+            type_used_by_parameter = self.models[type_used_by_parameter.id]
+
+        # Creating Output Parameter in child
+        output_node = OutParameter(element_name, type_used_by_parameter)
+
+        # Declare it in the child typescript, and if the type is class, import the class
+        child_typescript_calling.set_property_decl(output_node.property)
+
+        if output_node.needed_import:
+            child_typescript_calling.add_import_statement_using_import_node(output_node.needed_import)
 
     def view_container_definition(self):
 
