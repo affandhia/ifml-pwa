@@ -164,10 +164,10 @@ class AngularDetailHTMLCall(Node):
         self.property_name = ''
 
     def add_parameter_name(self, param):
-        self.parameter_name = param
+        self.parameter_name = param.variable_name
 
     def add_property_name(self, prop):
-        self.property_name = prop
+        self.property_name = prop.variable_name
 
     def render(self):
         return angular_html_writer('detail_call.html.template', selector_name=self.selector_name,
@@ -183,10 +183,10 @@ class AngularListHTMLCall(Node):
         self.property_name = ''
 
     def add_parameter_name(self, param):
-        self.parameter_name = param
+        self.parameter_name = param.variable_name
 
     def add_property_name(self, prop):
-        self.property_name = prop
+        self.property_name = prop.variable_name
 
     def render(self):
         return angular_html_writer('list_call.html.template', selector_name=self.selector_name,

@@ -40,9 +40,9 @@ class Parameter(InteractionFlowModelElement, NamedElement):
         type_returned = ''
         try:
             type_node = self.getElementByTagName('type')
-            uml_type = type_node.getAttribute(self.XSI_TYPE)
-            href = type_node.getAttribute('href')
-            type_returned = uml_type + ' ' + href
+            #uml_type = type_node.getAttribute(self.XSI_TYPE)
+            #href = type_node.getAttribute('href')
+            type_returned = type_node.getAttribute('href')
         except IndexError:
             pass
         return type_returned

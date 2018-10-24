@@ -2,7 +2,7 @@ import logging
 
 from yattag import Doc
 
-
+from custom_xmi_parser.umlsymboltable import ClassSymbol
 from ifml_parser.ifml_element.interaction_flow_elements.action_family.base import Action
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.catching_event_extension import ViewElementEvent
 from ifml_parser.ifml_element.interaction_flow_elements.event_family.view_element_event_extension import OnSubmitEvent, \
@@ -18,6 +18,7 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
+from main.utils.ast.framework.angular.parameters import InParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
@@ -395,6 +396,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html, typescript_class, routing_node = self.view_element_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
+        #HTML Call for Detail
+        # Preparation to Call Detail
+        detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
+
         # Defining Routing Node
         routing_node = None
 
@@ -404,8 +409,13 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.path_from_root = detail_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
+        list_in_param = []
         for _, parameter in detail_element.get_parameters().items():
-            self.interpret_parameter(parameter, html, typescript_class)
+            self.interpret_parameter(parameter, html, typescript_class, list_in_param)
+
+        #TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(detail_call, typescript_calling, list_in_param)
+
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -418,9 +428,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, view_component_part in detail_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, DataBinding):
                 self.interpret_data_binding(view_component_part, html, typescript_class)
-
-        # Preparation to Call Detail
-        detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
 
         # Creating the component node
         # The Component Itself
@@ -457,6 +464,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # List HTML Layout
         html = AngularListHTMLLayout()
 
+        # Preparation to Call List selector in parent
+        list_call = AngularListHTMLCall(typescript_class.selector_name)
+
         # Defining Routing Node
         routing_node = None
 
@@ -466,8 +476,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.path_from_root = list_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
+        list_in_param = []
         for _, parameter in list_element.get_parameters().items():
-            self.interpret_parameter(parameter, html, typescript_class)
+            self.interpret_parameter(parameter, html, typescript_class, list_in_param)
+
+        # TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(list_call, typescript_calling, list_in_param)
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -482,9 +496,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, view_component_part in list_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, DataBinding):
                 self.interpret_data_binding(view_component_part, html, typescript_class)
-
-        # Preparation to Call Detail
-        detail_call = AngularListHTMLCall(typescript_class.selector_name)
 
         # Creating the component node
         # The Component Itself
@@ -501,7 +512,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             doc_selector, tag_selector, text_selector = Doc().tagtext()
             with tag_selector('div', id='div-list-{name}'.format(name=typescript_class.selector_name),
                               klass='div-list view-component'):
-                doc_selector.asis(detail_call.render())
+                doc_selector.asis(list_call.render())
             html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
@@ -593,23 +604,24 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} DataBinding".format(name=element_name))
-        #Get the classifier
+        # Get the classifier
         classifier = self.ifml_symbol_table.lookup(data_binding_element.get_domain_concept()).classifier_symbol
 
-        #Find it in the models container, and use it for declaring Data Binding Property
+        # Find it in the models container, and use it for declaring Data Binding Property
         intended_model = self.models.get(classifier.id)
 
         # Interpreting Data Binding
         data_binding_function = DataBindingFunction(element_name, intended_model)
 
-        #Build all Conditional Expression
+        # Build all Conditional Expression
         for _, conditional_expression in data_binding_element.get_conditional_expressions().items():
             self.interpret_conditional_expression(conditional_expression, data_binding_function.func_decl)
 
         # Build (If any) Visualization Attribute or Simple Field
         for _, sub_view_component_part in data_binding_element.get_sub_view_component_parts().items():
             if isinstance(sub_view_component_part, VisualizationAttribute):
-                self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling, data_binding_function.property_declaration)
+                self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling,
+                                                       data_binding_function.property_declaration)
             elif isinstance(sub_view_component_part, SimpleField):
                 self.interpret_simple_field(sub_view_component_part, html_calling, typescript_calling)
             elif isinstance(sub_view_component_part, ConditionalExpression):
@@ -618,7 +630,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Add the import statement
         typescript_calling.add_import_statement_using_import_node(data_binding_function.import_statement)
 
-        #Add the property from Data Binding
+        # Add the property from Data Binding
         typescript_calling.set_property_decl(data_binding_function.property_declaration)
 
         # Call the function in the constructor
@@ -628,21 +640,23 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         typescript_calling.body.append(data_binding_function.get_function_declaration())
 
     # TODO Implement
-    def interpret_visualization_attribute(self, visualization_attribute_element, html_calling, typescript_calling, data_binding_property):
+    def interpret_visualization_attribute(self, visualization_attribute_element, html_calling, typescript_calling,
+                                          data_binding_property):
         # Get the name
         element_name = visualization_attribute_element.get_name()
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} VisualizationAttribute".format(name=element_name))
 
-        #Get the structural feature
-        structural_feature = self.ifml_symbol_table.lookup(visualization_attribute_element.get_feature_concept()).struct_feature_symbol
+        # Get the structural feature
+        structural_feature = self.ifml_symbol_table.lookup(
+            visualization_attribute_element.get_feature_concept()).struct_feature_symbol
 
-        #Interpret the notation
-        visualization_span = VisualizationWithSpan(element_name, structural_feature.name, data_binding_property.variable_name)
+        # Interpret the notation
+        visualization_span = VisualizationWithSpan(element_name, structural_feature.name,
+                                                   data_binding_property.variable_name)
 
-        #Append to the HTML
+        # Append to the HTML
         html_calling.append_html_into_body(visualization_span.render())
-
 
     # TODO Implement
     def interpret_simple_field(self, simple_field_element, html_calling, typescript_calling):
@@ -672,11 +686,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     # TODO Implement
     def interpret_conditional_expression(self, conditional_expression_element, data_binding_function_declaration):
 
-        #Get the language and body from the element
+        # Get the language and body from the element
         element_name = conditional_expression_element.get_name()
         body = conditional_expression_element.get_body()
 
-        #Append Conditional Expression body into statement inside Data Binding Function
+        # Append Conditional Expression body into statement inside Data Binding Function
         data_binding_function_declaration.add_statement_to_body(body)
 
     # TODO Implement
@@ -684,8 +698,56 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         pass
 
     # TODO Implement
-    def interpret_parameter(self, parameter_element, html_calling, typescript_calling):
-        pass
+    def interpret_parameter(self, parameter_element, html_calling, typescript_calling, list_in_direction_parameter):
+
+        # Get element name, and parameter direction
+        element_name = parameter_element.get_name()
+        direction = parameter_element.get_direction()
+
+        if direction == 'in':
+            self.interpret_in_parameter(parameter_element, typescript_calling, list_in_direction_parameter)
+        elif direction == 'out':
+            self.interpret_out_parameter(parameter_element, html_calling, typescript_calling)
+        elif direction == 'inout':
+            parameter_element.name = 'in' + element_name
+            self.interpret_in_parameter(parameter_element, typescript_calling, list_in_direction_parameter)
+            parameter_element.name = 'out' + element_name
+            self.interpret_out_parameter(parameter_element, html_calling, typescript_calling)
+        else:
+            raise TypeError('No Parameter will have {direction} direction, Please verify the validity of your IFML'.format(direction=direction))
+
+    # TODO Implement
+    def interpret_in_parameter(self, in_parameter_element, typescript_calling, list_in_direction_parameter):
+
+        #Get element name and type
+        element_name = in_parameter_element.get_name()
+        uml_name, id_of_symbol = in_parameter_element.get_type().split('#')
+        type_used_by_parameter = self.uml_symbol_table.lookup(uml_name, id_of_symbol)
+
+        #If type is class then take the model frommodel container, else just take the string name
+        if isinstance(type_used_by_parameter, ClassSymbol):
+            type_used_by_parameter = self.models[type_used_by_parameter.id]
+
+        #Creating @Input Property Declaration in child
+        input_node = InParameter(element_name, type_used_by_parameter)
+
+        #Declare it in the child typescript, and if the type is class, import the class
+        typescript_calling.set_property_decl(input_node.child_property)
+        if input_node.needed_import:
+            typescript_calling.add_import_statement_using_import_node(input_node.needed_import)
+
+        #Add it into InDirectionInput List at Child Component
+        list_in_direction_parameter.append(input_node)
+
+    # TODO Implement
+    def interpret_out_parameter(self, out_parameter_calling, child_html_calling, child_typescript_calling):
+        # Get element name and type
+        element_name = out_parameter_calling.get_name()
+        uml_name, id_of_symbol = out_parameter_calling.get_type().split('#')
+        type = self.uml_symbol_table.lookup(uml_name, id_of_symbol)
+
+        # Creating Input Parameter in child
+        print(type)
 
     def view_element_definition(self):
 
@@ -714,12 +776,27 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         return exist
 
+    def build_in_parameter_for_parent(self, call_html, parent_typescript, list_param):
+
+        #TODO Implement
+        #For now just use the last parameter, improve this logic
+        used_param = None
+        for index, param in enumerate(list_param):
+            call_html.add_parameter_name(param.child_property)
+            call_html.add_property_name(param.parent_property)
+            used_param = index
+
+        # TODO Implement
+        # For now just use the last parameter, improve this logic
+        parent_typescript.set_property_decl(list_param[used_param].parent_property)
+        if list_param[used_param].needed_import:
+            parent_typescript.add_import_statement_using_import_node(list_param[used_param].needed_import)
+
     # TODO Implement
     def interpret_domain_model(self):
-        #Build all Class used
+        # Build all Class used
         for _, class_xmi in self.root_class_diagram_xmi.get_classes().items():
             self.interpret_uml_class(class_xmi)
-
 
     def interpret_uml_class(self, class_xmi):
         # Get class name
@@ -732,18 +809,18 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, attribute in class_xmi.get_properties().items():
             self.interpret_owned_attribute(attribute, model_from_class)
 
-        #TODO Implement
-        #Build the owned operation
+        # TODO Implement
+        # Build the owned operation
 
         # Register to models container
         self.models[class_xmi.get_model_id()] = model_from_class
 
     def interpret_owned_attribute(self, class_attribute_xmi, model_element):
-        #Get attribute name, and type of the attribute
+        # Get attribute name, and type of the attribute
         element_name = class_attribute_xmi.get_model_name()
         id_of_type_symbol = class_attribute_xmi.get_type()
         uml_filename = self.root_class_diagram_xmi.get_filename()
         element_type = self.uml_symbol_table.lookup(uml_filename, id_of_type_symbol).name
 
-        #Interpret it
+        # Interpret it
         model_element.add_owned_attribute_to_class(element_name, element_type)

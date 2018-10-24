@@ -1,0 +1,3 @@
+this.route.queryParams.subscribe(params => { this. X = params. X });
+
+this.route.queryParams.subscribe(params => { {$ list_param|safe $} })

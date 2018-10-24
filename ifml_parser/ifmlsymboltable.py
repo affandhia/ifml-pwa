@@ -181,6 +181,7 @@ class ParameterSymbol(IFMLSymbol):
 
     def __init__(self, element_dom):
         super().__init__(element_dom)
+        self.direction = element_dom.getAttribute('direction')
         self.datatype = None
         self.datatype_reference = getElementByTagName(element_dom, 'type').getAttribute('href')
 
