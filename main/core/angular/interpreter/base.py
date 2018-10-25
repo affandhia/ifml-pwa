@@ -22,7 +22,7 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
-    RouteToComponentPage, RouteToAction
+    RouteToComponentPage, RouteToAction, GettingQueryParam
 from main.utils.ast.framework.angular.services import AngularService, ActionEventInterpretation
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
@@ -632,17 +632,16 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} ActionEvent".format(name=element_name))
 
-        #TODO Implement, imporve this logic
-        #The idea is to create fake button and HTML handler
+        # TODO Implement, imporve this logic
+        # The idea is to create fake button and HTML handler
         action_event_node = ActionEventInterpretation(element_name)
 
-        #Build the interaction flow inside this element
+        # Build the interaction flow inside this element
         for _, interaction_flow in action_event_element.get_out_interaction_flow().items():
             self.interpret_interaction_flow(interaction_flow, action_event_node, from_action=True)
 
-        #Register to the Action Container
+        # Register to the Action Container
         action_event_container.add_action_event(action_event_node)
-
 
     # TODO Implement
     def interpret_data_binding(self, data_binding_element, html_calling, typescript_calling):
@@ -846,6 +845,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # This logic is only good for parameter inside form and detail
         # Improve this logic for list
+        constructor_body_statement = GettingQueryParam()
         for param in list_param:
 
             # Adding the parameter to HTML Call
@@ -854,9 +854,17 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             # Adding needed property for parent component
             parent_typescript.set_property_decl(param.parent_property)
 
-            # Check if the declaration of property need to import a model class
+            # Check if the declaration of property need to import a model class, else no import needed
             if param.needed_import:
+                query_param_name, property_name, class_type = param.parent_property.variable_name, param.parent_property.variable_name, param.parent_property.variable_datatype
                 parent_typescript.add_import_statement_using_import_node(param.needed_import)
+                constructor_body_statement.add_statement_for_saving_query_param_value_into_property_typed_class(
+                    query_param_name, property_name, class_type)
+            else:
+                query_param_name, property_name = param.parent_property.variable_name, param.parent_property.variable_name
+                constructor_body_statement.add_statement_for_saving_query_param_value_into_property(query_param_name, property_name)
+
+        parent_typescript.constructor_body.append(constructor_body_statement.render())
 
     # TODO Implement
     def interpret_all_action_events(self):
@@ -947,8 +955,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         service_class_name = service_node.class_name
         service_filename = service_node.filename
 
-        #TODO implement
-        #Improve this logic to handle multiple action event
+        # TODO implement
+        # Improve this logic to handle multiple action event
         service_action_event = service_node.action_event
 
         # Creating statement for navigation into service
@@ -956,7 +964,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Build the param binding group
 
-        #Build the after effect of calling service
+        # Build the after effect of calling service
         service_call_statement.after_statement = service_action_event.function_body
 
         # Append to the event function handler. add import and constructor param

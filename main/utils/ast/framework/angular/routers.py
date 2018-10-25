@@ -3,9 +3,9 @@ import logging
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import TypescriptClassType, VarDeclType, ImportStatementType
 from main.utils.jinja.angular import base_file_writer, router_file_writer
+from main.utils.naming_management import camel_function_style
 from .base import ANGULAR_CORE_MODULE, IMPORTED_ROUTER_MODULE, IMPORTED_ROUTES, IMPORTED_NG_MODULE, \
     ANGULAR_ROUTER_MODULE
-from main.utils.naming_management import camel_function_style
 
 logger_routers = logging.getLogger("main.utils.ast.framework.angular.routers")
 
@@ -127,6 +127,7 @@ class RedirectToAnotherPath(BaseRoutingNode):
         return router_file_writer(self.REDIRECT_TO_PATH_TEMPLATE, path=self.path, target_redirect=self.target_redirect,
                                   path_match=self.path_match)
 
+
 class RouteUsingInteractionFlow(Node):
 
     def __init__(self):
@@ -135,6 +136,7 @@ class RouteUsingInteractionFlow(Node):
     def add_param_binding_group(self, param_binding_group):
         self.param_binding_group = param_binding_group
 
+
 class RouteToComponentPage(RouteUsingInteractionFlow):
     ROUTE_TO_COMPONENT_PAGE_TEMPLATE = 'route_to_component_page.ts.template'
 
@@ -142,17 +144,17 @@ class RouteToComponentPage(RouteUsingInteractionFlow):
         super().__init__()
         self.routing_path = routing_path
 
-
     def render(self):
         return router_file_writer(self.ROUTE_TO_COMPONENT_PAGE_TEMPLATE, routing_path=self.routing_path,
                                   param_binding_group=self.param_binding_group)
+
 
 class RouteToAction(RouteUsingInteractionFlow):
     ROUTE_TO_ACTION_PAGE_TEMPLATE = 'route_to_action.ts.template'
 
     def __init__(self, service_class_name, service_filename):
         super().__init__()
-        self.service_class_name = service_class_name+'Service'
+        self.service_class_name = service_class_name + 'Service'
         self.service_filename = service_filename
         self.after_statement = []
         self.import_statement = None
@@ -162,7 +164,7 @@ class RouteToAction(RouteUsingInteractionFlow):
 
     def build_import_statement(self):
         self.import_statement = ImportStatementType()
-        #Service location
+        # Service location
         service_location = '../services/{service_filename}.service'.format(service_filename=self.service_filename)
         self.import_statement.set_main_module(service_location)
         self.import_statement.add_imported_element(self.service_class_name)
@@ -173,5 +175,27 @@ class RouteToAction(RouteUsingInteractionFlow):
         self.constructor_param.variable_datatype = self.service_class_name
 
     def render(self):
-        return router_file_writer(self.ROUTE_TO_ACTION_PAGE_TEMPLATE, service_name=camel_function_style(self.service_class_name),
-                                  param_binding_group=self.param_binding_group, after_statement='\n'.join(self.after_statement))
+        return router_file_writer(self.ROUTE_TO_ACTION_PAGE_TEMPLATE,
+                                  service_name=camel_function_style(self.service_class_name),
+                                  param_binding_group=self.param_binding_group,
+                                  after_statement='\n'.join(self.after_statement))
+
+
+class GettingQueryParam(Node):
+
+    def __init__(self):
+        self.list_query_param_and_property_pair = []
+
+    def add_statement_for_saving_query_param_value_into_property(self, query_param_name, property_name):
+        self.list_query_param_and_property_pair.append(
+            'this.{property_name} = JSON.parse(params.{query_param_name});'.format(query_param_name=query_param_name,
+                                                                     property_name=property_name))
+
+    def add_statement_for_saving_query_param_value_into_property_typed_class(self, query_param_name, property_name, class_type):
+        self.list_query_param_and_property_pair.append(
+            'this.{property_name} = new {class_type}(JSON.parse(params.{query_param_name}));'.format(query_param_name=query_param_name,
+                                                                     property_name=property_name, class_type=class_type))
+
+    def render(self):
+        return router_file_writer('getting_query_params.ts.template',
+                                  list_of_param='\n'.join(self.list_query_param_and_property_pair))
