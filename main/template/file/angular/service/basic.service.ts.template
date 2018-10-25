@@ -31,6 +31,6 @@ export class {$ class_name|safe $}Service {
     });
     this.httpOptions['params'] = httpParams;
     {% endif %}
-    return this.http.get(this.endpoint{% if call_param %}, {$ call_param|safe $}{% endif %}, this.httpOptions).toPromise();
+    return this.http.get(this.endpoint, this.httpOptions).toPromise();
   }
 }
