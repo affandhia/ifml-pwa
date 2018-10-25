@@ -12,6 +12,7 @@ from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_compone
     DataBinding, VisualizationAttribute, ConditionalExpression
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
+from ifml_parser.ifmlsymboltable import ViewContainerSymbol, WindowSymbol, ActionSymbol
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
     AngularOnclickType, AngularModalButtonAndFunction
 from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction, VisualizationWithSpan
@@ -20,7 +21,8 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
     AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
-from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode
+from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
+    RouteToComponentPage
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
@@ -114,7 +116,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Check if there is no difference with view container
         is_new_window = window_element.get_new_window_att()
         is_modal = window_element.get_modal_att()
-
         if not (is_modal or is_new_window):
             self.interpret_view_container(window_element, html_calling, typescript_calling, routing_parent)
         else:
@@ -545,8 +546,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         button_html, typescript_function = func_and_html_event_node.render()
         html_calling.append_html_into_body(button_html)
 
-        # Call it to typescript body
+        # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
+
+        for import_node in func_and_html_event_node.needed_import:
+            typescript_calling.add_import_statement_using_import_node(import_node)
+
+        for constructor_param in func_and_html_event_node.needed_constructor_param:
+            typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
     def interpret_onsubmit_event(self, onsubmit_event, html_calling, typescript_calling):
@@ -572,8 +579,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html_calling.append_html_into_body(button_html)
         html_calling.add_submit_event(ngsubmit)
 
-        # Call it to typescript body
+        # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
+
+        for import_node in func_and_html_event_node.needed_import:
+            typescript_calling.add_import_statement_using_import_node(import_node)
+
+        for constructor_param in func_and_html_event_node.needed_constructor_param:
+            typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
     def interpret_onselect_event(self, onselect_event, html_calling, typescript_calling):
@@ -598,8 +611,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         onclick_html, typescript_function = func_and_html_event_node.render()
         html_calling.add_onclick(onclick_html)
 
-        # Call it to typescript body
+        # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
+
+        for import_node in func_and_html_event_node.needed_import:
+            typescript_calling.add_import_statement_using_import_node(import_node)
+
+        for constructor_param in func_and_html_event_node.needed_constructor_param:
+            typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
     def interpret_action_event(self, action_event_element, typescript_call):
@@ -857,14 +876,61 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         #Get element target
         element_target = navigation_flow_element.get_target_interaction_flow_element()
-        print(self.ifml_symbol_table.lookup(element_target))
+        target_symbol = self.ifml_symbol_table.lookup(element_target)
+
+        if isinstance(target_symbol, ViewContainerSymbol) or isinstance(target_symbol, WindowSymbol):
+            self.interaction_with_container_as_target(self.components.get(target_symbol.id), func_and_html_calling)
+        elif isinstance(target_symbol, ActionSymbol):
+            self.interaction_with_action_as_target(self.services.get(target_symbol.id), func_and_html_calling)
+
+    #TODO Implement
+    def interaction_with_container_as_target(self, container_node, function_and_html_of_event):
+
+        if isinstance(container_node, AngularComponentForModal):
+            self.route_to_component_modal(container_node, function_and_html_of_event)
+        elif isinstance(container_node, AngularComponent):
+            self.route_to_component_page(container_node, function_and_html_of_event)
+
+    #TODO implement
+    def route_to_component_page(self, component_page_node, function_and_html_of_event):
+
+        #Get routing path of that page
+        route_path_from_root = component_page_node.get_routing_path()
+
+        #Build the param binding group
+
+        #Creating statement for navigation into page
+        router_statement = RouteToComponentPage(route_path_from_root)
+
+        #Append to the event function handler
+        function_and_html_of_event.add_statement_into_function_body(router_statement.render())
+
+    #TODO Implement, improve this logic
+    def route_to_component_modal(self, component_modal_node, function_and_html_of_event):
+        # Get modal identifier for that page
+        modal_identifier = component_modal_node.modal_identifier
+
+        #Add Open Modal Statement and import ngxmodal service
+        modal_handler_template = AngularModalButtonAndFunction(modal_identifier, 'async')
+        modal_handler_template.set_target_modal(modal_identifier)
+
+        # Build the param binding group
+
+        #Append to the event function handler. add import and constructor param
+        function_and_html_of_event.add_needed_import(modal_handler_template.import_ngx_modal_service_node)
+        function_and_html_of_event.add_needed_constructor_param(modal_handler_template.ngx_service_constructor)
+        function_and_html_of_event.add_statements_into_function_body(modal_handler_template.function_node.function_body)
+
+    #TODO Implement
+    def interaction_with_action_as_target(self, service_node, function_and_html_of_event):
+        pass
 
     # TODO Implement
     def interpret_data_flow(self, data_flow_element, func_and_html_calling):
 
         # Get element target
         element_target = data_flow_element.get_target_interaction_flow_element()
-        print(self.ifml_symbol_table.lookup(element_target))
+        pass
 
     # TODO Implement
     def interpret_domain_model(self):

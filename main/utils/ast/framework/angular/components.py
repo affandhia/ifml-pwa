@@ -52,6 +52,7 @@ class AngularComponentForModal(AngularComponent):
 
     def __init__(self, component_typescript_class, component_html):
         super().__init__(component_typescript_class, component_html)
+        self.modal_identifier = self.component_html.var_camel_name
 
 
 class AngularComponentTypescriptClass(TypescriptClassType):
