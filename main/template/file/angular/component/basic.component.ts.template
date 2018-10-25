@@ -5,11 +5,15 @@
   templateUrl: './{$ component_name|safe $}.component.html',
   styleUrls: ['./{$ component_name|safe $}.component.css']
 })
-export class {$ class_name|safe $}Component {
+export class {$ class_name|safe $}Component implements OnInit {
 
   {$ property_decl|safe $}
 
   constructor({$ constructor_param|safe $}){
+
+  }
+
+  ngOnInit(){
     {$ constructor_body|safe $}
   }
 

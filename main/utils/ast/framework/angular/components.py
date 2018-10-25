@@ -67,6 +67,7 @@ class AngularComponentTypescriptClass(TypescriptClassType):
         import_component_from_angular_core = ImportStatementType()
         import_component_from_angular_core.set_main_module(ANGULAR_CORE_MODULE)
         import_component_from_angular_core.add_imported_element('Component')
+        import_component_from_angular_core.add_imported_element('OnInit')
         self.import_dict[ANGULAR_CORE_MODULE] = import_component_from_angular_core
 
         # Importing Routing Purpose
