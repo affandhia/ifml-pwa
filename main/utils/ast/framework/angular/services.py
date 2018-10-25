@@ -7,7 +7,7 @@ from main.utils.naming_management import dasherize, camel_classify, \
 
 class AngularService(TypescriptClassType):
 
-    SERVICE_FILE_NAME = '.service.ts'
+    SERVICE_FILE_NAME = '{service_filename}.service.ts'
 
     def __init__(self):
         super().__init__()
@@ -22,7 +22,7 @@ class AngularService(TypescriptClassType):
         self.class_name = camel_classify(change_slash_and_dot_into_dash(name))
         self.worker_config = WorkerConfig(self.api_endpoint)
         self.worker_config.add_url(self.api_endpoint)
-        self.filename = change_slash_and_dot_into_dash(self.api_endpoint) + self.SERVICE_FILE_NAME
+        self.filename = change_slash_and_dot_into_dash(self.api_endpoint)
 
     def param_exist(self):
         self.param = 'param'
@@ -46,7 +46,7 @@ class AngularService(TypescriptClassType):
         for _, prop in self.property_decl.items():
             property_decl_list.append(prop.render())
 
-        return {self.filename : service_file_writer('basic.service.ts.template', class_name=self.class_name,
+        return {self.SERVICE_FILE_NAME.format(service_filename=self.filename) : service_file_writer('basic.service.ts.template', class_name=self.class_name,
                                      api_endpoint=self.api_endpoint, call_param=self.call_param,
                                      constructor_param=', '.join(constructor_param_list),
                                      import_statement_list='\n'.join(import_statement_list),

@@ -22,7 +22,7 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
-    RouteToComponentPage
+    RouteToComponentPage, RouteToAction
 from main.utils.ast.framework.angular.services import AngularService
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
@@ -923,7 +923,20 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     #TODO Implement
     def interaction_with_action_as_target(self, service_node, function_and_html_of_event):
-        pass
+        #Get the service name, and filename
+        service_class_name = service_node.class_name
+        service_filename = service_node.filename
+
+        # Creating statement for navigation into service
+        service_call_statement = RouteToAction(service_class_name, service_filename)
+
+        # Build the param binding group
+
+        # Append to the event function handler. add import and constructor param
+        function_and_html_of_event.add_needed_import(service_call_statement.import_statement)
+        function_and_html_of_event.add_needed_constructor_param(service_call_statement.constructor_param)
+        function_and_html_of_event.add_statement_into_function_body(service_call_statement.render())
+
 
     # TODO Implement
     def interpret_data_flow(self, data_flow_element, func_and_html_calling):

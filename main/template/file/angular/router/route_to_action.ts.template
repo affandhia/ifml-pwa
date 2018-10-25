@@ -1,0 +1,1 @@
+{$ is_await|safe $} this.{$ service_name $}.call({% if param_binding_group %}{$ param_binding_group|safe $}{% endif %}).then({% if after_statement %}data => { {$ after_statement|safe $} }{% endif %});
