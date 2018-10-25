@@ -1,1 +1,1 @@
-this.router.navigate(['{$ routing_path|safe $}']{% if param_binding_group %}, {queryParams: {$ param_binding_group $}}{% endif %});
+this.router.navigate(['{$ routing_path|safe $}']{% if param_binding_group %}, {queryParams: {$ param_binding_group|safe $}}{% endif %});

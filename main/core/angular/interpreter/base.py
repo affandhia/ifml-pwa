@@ -20,7 +20,8 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
-from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
+from main.utils.ast.framework.angular.parameters import InParameter, OutParameter, ParamGroup, \
+    ParameterBindingInterpretation
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
     RouteToComponentPage, RouteToAction, GettingQueryParam
 from main.utils.ast.framework.angular.services import AngularService, ActionEventInterpretation
@@ -323,9 +324,20 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} Action".format(name=element_name))
 
+        any_in_param = False
+        #Check if there are any in parameter being defined
+        all_param_inside_action = action_element.get_parameters()
+        while len(all_param_inside_action) and not any_in_param:
+            arbitary_param_inside_action = all_param_inside_action.popitem()[1]
+            any_in_param = arbitary_param_inside_action.get_direction() == 'in'
+
         # Defining service typescript, and add the name into AngularService
         service_typescript = AngularService()
         service_typescript.set_endpoint_class_name_and_worker(element_name)
+
+        print(any_in_param)
+        if any_in_param:
+            service_typescript.param_exist()
 
         # TODO Implement
         # Calling ActionEvent and build it
@@ -535,9 +547,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularButtonWithFunctionHandler(element_name, type='async')
 
-        # TODO Implement Delete this after test
-        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
-
         # Build all child
         for _, interaction_flow in view_element_event.get_out_interaction_flow().items():
             self.interpret_interaction_flow(interaction_flow, func_and_html_event_node.function_node)
@@ -566,9 +575,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularSubmitButtonType(element_name, type='async')
-
-        # TODO Implement Delete this after test
-        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
 
         # Build all child
         for _, interaction_flow in onsubmit_event.get_out_interaction_flow().items():
@@ -599,9 +605,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Interpret, Defining Typescript function and HTML button
         func_and_html_event_node = AngularOnclickType(element_name, type='async')
-
-        # TODO Implement Delete this after test
-        func_and_html_event_node.add_statement_into_function_body('console.log(\'Click Activated\');')
 
         # Build all child
         for _, interaction_flow in onselect_event.get_out_interaction_flow().items():
@@ -924,11 +927,13 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Get routing path of that page
         route_path_from_root = component_page_node.get_routing_path()
 
-        # Build the param binding group
-        param_binding_group_node = param_binding_group
-
         # Creating statement for navigation into page
         router_statement = RouteToComponentPage(route_path_from_root)
+
+        # Build the param binding group
+        if param_binding_group:
+            param_binding_group_node = self.interpret_param_binding(param_binding_group, from_action, is_query_param=True)
+            router_statement.add_param_binding_group(param_binding_group_node.render())
 
         # Append to the event function handler
         function_node.add_statement_to_body(router_statement.render())
@@ -943,6 +948,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         modal_handler_template.set_target_modal(modal_identifier)
 
         # Build the param binding group
+        if param_binding_group:
+            param_binding_group_node = self.interpret_param_binding(param_binding_group, from_action)
 
         # Append to the event function handler. add import and constructor param
         function_node.add_needed_import(modal_handler_template.import_ngx_modal_service_node)
@@ -963,6 +970,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         service_call_statement = RouteToAction(service_class_name, service_filename)
 
         # Build the param binding group
+        if param_binding_group:
+            param_binding_group_node = self.interpret_param_binding(param_binding_group)
+            service_call_statement.add_param_binding_group(param_binding_group_node.render())
 
         # Build the after effect of calling service
         service_call_statement.after_statement = service_action_event.function_body
@@ -978,6 +988,22 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Get element target
         element_target = data_flow_element.get_target_interaction_flow_element()
         pass
+
+    def interpret_param_binding(self, param_binding_group, from_action=False, is_query_param=False):
+
+        #Create ParamGroup Node
+        param_group = ParamGroup()
+
+        #Build all Parameter Binding inside Parameter Binding Group
+        for _, param_binding in param_binding_group.get_parameter_bindings().items():
+            source_param_symbol = self.ifml_symbol_table.lookup(param_binding.get_source_parameter())
+            target_param_symbol = self.ifml_symbol_table.lookup(param_binding.get_target_parameter())
+
+            param_binding_statement = ParameterBindingInterpretation(source_param_symbol.name, target_param_symbol.name, from_action, is_query_param)
+            param_group.add_param_statement(param_binding_statement)
+
+        #Let the Interaction Flow Render the node
+        return param_group
 
     # TODO Implement
     def interpret_domain_model(self):

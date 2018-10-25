@@ -180,7 +180,6 @@ class RouteToAction(RouteUsingInteractionFlow):
                                   param_binding_group=self.param_binding_group,
                                   after_statement='\n'.join(self.after_statement))
 
-
 class GettingQueryParam(Node):
 
     def __init__(self):

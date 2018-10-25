@@ -32,7 +32,7 @@ class AngularService(TypescriptClassType):
         self.filename = change_slash_and_dot_into_dash(self.api_endpoint)
 
     def param_exist(self):
-        self.param = 'param'
+        self.call_param = 'param'
 
     def calling_behaviour(self, typescript_call):
         self.typescript_call = typescript_call

@@ -1,6 +1,7 @@
 from custom_xmi_parser.umlsymboltable import TypeSymbol
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import VarDeclType, ImportStatementType
+from main.utils.jinja.angular import router_file_writer
 from main.utils.naming_management import camel_function_style, dasherize
 
 
@@ -38,6 +39,7 @@ class Parameter(Node):
             returned_import_node.set_main_module(classifier_location)
 
         return returned_import_node
+
 
 class OutParameter(Parameter):
 
@@ -78,3 +80,37 @@ class InParameter(Parameter):
         self.child_property = VarDeclType(self.var_camel_name, ';')
         self.child_property.variable_datatype = self.type_name
         self.child_property.decorator = '@Input()'
+
+
+class ParamGroup(Node):
+
+    def __init__(self):
+        self.list_param = []
+
+    def add_param_statement(self, param_statement):
+        self.list_param.append(param_statement.render())
+
+    def render(self):
+        object_json_template = '{' + ','.join(self.list_param) + '}'
+        return object_json_template
+
+
+class ParameterBindingInterpretation(Node):
+
+    def __init__(self, source_param_name, dest_param_name, from_action, is_sent_through_routing):
+        self.source_param_is_a_result_of_action = from_action
+        self.this_param_binding_is_query_param = is_sent_through_routing
+        self.source_param_name = camel_function_style(source_param_name)
+        self.dest_param_name = camel_function_style(dest_param_name)
+
+    def render(self):
+        returned_statement = None
+        if self.this_param_binding_is_query_param:
+            returned_statement = router_file_writer('query_parameter_binding_interpretation.ts.template' ,target_param=self.dest_param_name,
+                                                    source_param=self.source_param_name,
+                                                    from_action=self.source_param_is_a_result_of_action)
+        else:
+            returned_statement = router_file_writer('parameter_binding_interpretation.ts.template', target_param=self.dest_param_name,
+                                                    source_param=self.source_param_name,
+                                                    from_action=self.source_param_is_a_result_of_action)
+        return returned_statement
