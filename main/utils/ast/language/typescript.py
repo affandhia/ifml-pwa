@@ -60,9 +60,21 @@ class ArrowFunctionType(Node):
         self.function_name = camel_function_style(name)
         self.parameter_dict = {}
         self.function_body = []
+        self.needed_constructor_param = []
+        self.needed_import = []
+
+    def add_needed_import(self, import_node):
+        self.needed_import.append(import_node)
+
+    def add_needed_constructor_param(self, constructor_param):
+        self.needed_constructor_param.append(constructor_param)
 
     def add_param(self, var_decl):
         self.parameter_dict[var_decl.variable_name] = var_decl
+
+    def add_statements_to_body(self, list_of_statements):
+        for statement in list_of_statements:
+            self.add_statement_to_body(statement)
 
     def add_statement_to_body(self, statement):
         self.function_body.append(statement)

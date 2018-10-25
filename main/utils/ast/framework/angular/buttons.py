@@ -19,17 +19,9 @@ class AngularButtonWithFunctionHandler(Node):
         self.function_node = FunctionDeclType(self.function_handler_name)
         self.function_node.function_type = type
         self.object_param = ''
-        self.needed_import = []
-        self.needed_constructor_param = []
-
-    def add_needed_constructor_param(self, constructor_param):
-        self.needed_constructor_param.append(constructor_param)
 
     def add_function_param(self, param):
         self.function_node.add_param(param)
-
-    def add_needed_import(self, import_node):
-        self.needed_import.append(import_node)
 
     def add_html_object_param(self, object_param):
         self.object_param = object_param

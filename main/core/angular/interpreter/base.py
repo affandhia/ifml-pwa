@@ -23,7 +23,7 @@ from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
     RouteToComponentPage, RouteToAction
-from main.utils.ast.framework.angular.services import AngularService
+from main.utils.ast.framework.angular.services import AngularService, ActionEventInterpretation
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style
@@ -330,7 +330,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Calling ActionEvent and build it
         for _, action_event in action_element.get_action_event().items():
-            self.interpret_action_event(action_event, service_typescript)
+            self.action_events.append((action_element.get_id(), action_event))
 
         # Register to services container
         self.services[action_element.get_id()] = service_typescript
@@ -540,7 +540,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Build all child
         for _, interaction_flow in view_element_event.get_out_interaction_flow().items():
-            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node.function_node)
 
         # Call it to the parent HTML
         button_html, typescript_function = func_and_html_event_node.render()
@@ -549,10 +549,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
 
-        for import_node in func_and_html_event_node.needed_import:
+        for import_node in func_and_html_event_node.function_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(import_node)
 
-        for constructor_param in func_and_html_event_node.needed_constructor_param:
+        for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
             typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
@@ -572,7 +572,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Build all child
         for _, interaction_flow in onsubmit_event.get_out_interaction_flow().items():
-            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node.function_node)
 
         # Call it to the parent by binding it to HTML Form on submit method, add_submit_event
         button_html, typescript_function, ngsubmit = func_and_html_event_node.render()
@@ -582,10 +582,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
 
-        for import_node in func_and_html_event_node.needed_import:
+        for import_node in func_and_html_event_node.function_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(import_node)
 
-        for constructor_param in func_and_html_event_node.needed_constructor_param:
+        for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
             typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
@@ -605,7 +605,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Build all child
         for _, interaction_flow in onselect_event.get_out_interaction_flow().items():
-            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node)
+            self.interpret_interaction_flow(interaction_flow, func_and_html_event_node.function_node)
 
         # Call it to the parent and onclick html named add_onclick
         onclick_html, typescript_function = func_and_html_event_node.render()
@@ -614,20 +614,35 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Call it to typescript body, and possibly add import node and constructor param to the class
         typescript_calling.body.append(typescript_function)
 
-        for import_node in func_and_html_event_node.needed_import:
+        for import_node in func_and_html_event_node.function_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(import_node)
 
-        for constructor_param in func_and_html_event_node.needed_constructor_param:
+        for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
             typescript_calling.set_constructor_param(constructor_param)
 
     # TODO Implement
-    def interpret_action_event(self, action_event_element, typescript_call):
+    def interpret_action_event(self, action_id_action_event_tuple):
         # Get the name
+        action_id = action_id_action_event_tuple[0]
+        action_event_element = action_id_action_event_tuple[1]
         element_name = action_event_element.get_name()
+
+        action_event_container = self.services.get(action_id)
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} ActionEvent".format(name=element_name))
-        pass
+
+        #TODO Implement, imporve this logic
+        #The idea is to create fake button and HTML handler
+        action_event_node = ActionEventInterpretation(element_name)
+
+        #Build the interaction flow inside this element
+        for _, interaction_flow in action_event_element.get_out_interaction_flow().items():
+            self.interpret_interaction_flow(interaction_flow, action_event_node, from_action=True)
+
+        #Register to the Action Container
+        action_event_container.add_action_event(action_event_node)
+
 
     # TODO Implement
     def interpret_data_binding(self, data_binding_element, html_calling, typescript_calling):
@@ -845,8 +860,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
     # TODO Implement
     def interpret_all_action_events(self):
-        for action_event in self.action_events:
-            print(action_event)
+        for action_id_action_event_tuple in self.action_events:
+            self.interpret_action_event(action_id_action_event_tuple)
 
     # TODO Implement
     def interpret_all_view_element_events(self):
@@ -862,84 +877,95 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                                               component_node.component_typescript_class)
             elif isinstance(view_element_event, ViewElementEvent):
                 self.interpret_view_element_event(view_element_event, component_node.component_html,
-                                              component_node.component_typescript_class)
+                                                  component_node.component_typescript_class)
 
+    def interpret_interaction_flow(self, interaction_flow_element, function_node, from_action=False):
 
-    def interpret_interaction_flow(self, interaction_flow_element, func_and_html_calling):
+        param_binding_group = interaction_flow_element.get_parameter_binding_groups()
+
         if isinstance(interaction_flow_element, NavigationFlow):
-            self.interpret_navigation_flow(interaction_flow_element, func_and_html_calling)
+            self.interpret_navigation_flow(interaction_flow_element, function_node, param_binding_group, from_action)
         elif isinstance(interaction_flow_element, DataFlow):
-            self.interpret_data_flow(interaction_flow_element, func_and_html_calling)
+            self.interpret_data_flow(interaction_flow_element, function_node, param_binding_group, from_action)
 
-    #TODO Implement
-    def interpret_navigation_flow(self, navigation_flow_element, func_and_html_calling):
+    # TODO Implement
+    def interpret_navigation_flow(self, navigation_flow_element, function_node, param_binding_group, from_action=False):
 
-        #Get element target
+        # Get element target
         element_target = navigation_flow_element.get_target_interaction_flow_element()
         target_symbol = self.ifml_symbol_table.lookup(element_target)
 
         if isinstance(target_symbol, ViewContainerSymbol) or isinstance(target_symbol, WindowSymbol):
-            self.interaction_with_container_as_target(self.components.get(target_symbol.id), func_and_html_calling)
+            self.interaction_with_container_as_target(self.components.get(target_symbol.id), function_node,
+                                                      param_binding_group, from_action)
         elif isinstance(target_symbol, ActionSymbol):
-            self.interaction_with_action_as_target(self.services.get(target_symbol.id), func_and_html_calling)
+            self.interaction_with_action_as_target(self.services.get(target_symbol.id), function_node,
+                                                   param_binding_group)
 
-    #TODO Implement
-    def interaction_with_container_as_target(self, container_node, function_and_html_of_event):
+    # TODO Implement
+    def interaction_with_container_as_target(self, container_node, function_node, param_binding_group, from_action):
 
         if isinstance(container_node, AngularComponentForModal):
-            self.route_to_component_modal(container_node, function_and_html_of_event)
+            self.route_to_component_modal(container_node, function_node, param_binding_group, from_action)
         elif isinstance(container_node, AngularComponent):
-            self.route_to_component_page(container_node, function_and_html_of_event)
+            self.route_to_component_page(container_node, function_node, param_binding_group, from_action)
 
-    #TODO implement
-    def route_to_component_page(self, component_page_node, function_and_html_of_event):
+    # TODO implement
+    def route_to_component_page(self, component_page_node, function_node, param_binding_group, from_action):
 
-        #Get routing path of that page
+        # Get routing path of that page
         route_path_from_root = component_page_node.get_routing_path()
 
-        #Build the param binding group
+        # Build the param binding group
+        param_binding_group_node = param_binding_group
 
-        #Creating statement for navigation into page
+        # Creating statement for navigation into page
         router_statement = RouteToComponentPage(route_path_from_root)
 
-        #Append to the event function handler
-        function_and_html_of_event.add_statement_into_function_body(router_statement.render())
+        # Append to the event function handler
+        function_node.add_statement_to_body(router_statement.render())
 
-    #TODO Implement, improve this logic
-    def route_to_component_modal(self, component_modal_node, function_and_html_of_event):
+    # TODO Implement, improve this logic
+    def route_to_component_modal(self, component_modal_node, function_node, param_binding_group, from_action):
         # Get modal identifier for that page
         modal_identifier = component_modal_node.modal_identifier
 
-        #Add Open Modal Statement and import ngxmodal service
+        # Add Open Modal Statement and import ngxmodal service
         modal_handler_template = AngularModalButtonAndFunction(modal_identifier, 'async')
         modal_handler_template.set_target_modal(modal_identifier)
 
         # Build the param binding group
 
-        #Append to the event function handler. add import and constructor param
-        function_and_html_of_event.add_needed_import(modal_handler_template.import_ngx_modal_service_node)
-        function_and_html_of_event.add_needed_constructor_param(modal_handler_template.ngx_service_constructor)
-        function_and_html_of_event.add_statements_into_function_body(modal_handler_template.function_node.function_body)
+        # Append to the event function handler. add import and constructor param
+        function_node.add_needed_import(modal_handler_template.import_ngx_modal_service_node)
+        function_node.add_needed_constructor_param(modal_handler_template.ngx_service_constructor)
+        function_node.add_statements_to_body(modal_handler_template.function_node.function_body)
 
-    #TODO Implement
-    def interaction_with_action_as_target(self, service_node, function_and_html_of_event):
-        #Get the service name, and filename
+    # TODO Implement
+    def interaction_with_action_as_target(self, service_node, function_node, param_binding_group):
+        # Get the service name, and filename
         service_class_name = service_node.class_name
         service_filename = service_node.filename
+
+        #TODO implement
+        #Improve this logic to handle multiple action event
+        service_action_event = service_node.action_event
 
         # Creating statement for navigation into service
         service_call_statement = RouteToAction(service_class_name, service_filename)
 
         # Build the param binding group
 
-        # Append to the event function handler. add import and constructor param
-        function_and_html_of_event.add_needed_import(service_call_statement.import_statement)
-        function_and_html_of_event.add_needed_constructor_param(service_call_statement.constructor_param)
-        function_and_html_of_event.add_statement_into_function_body(service_call_statement.render())
+        #Build the after effect of calling service
+        service_call_statement.after_statement = service_action_event.function_body
 
+        # Append to the event function handler. add import and constructor param
+        function_node.add_needed_import(service_call_statement.import_statement)
+        function_node.add_needed_constructor_param(service_call_statement.constructor_param)
+        function_node.add_statement_to_body(service_call_statement.render())
 
     # TODO Implement
-    def interpret_data_flow(self, data_flow_element, func_and_html_calling):
+    def interpret_data_flow(self, data_flow_element, function_node, param_binding_group, from_action):
 
         # Get element target
         element_target = data_flow_element.get_target_interaction_flow_element()

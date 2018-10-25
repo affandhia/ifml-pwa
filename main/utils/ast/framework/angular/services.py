@@ -1,5 +1,5 @@
 from main.utils.ast.framework.angular.worker_configs import WorkerConfig
-from main.utils.ast.language.typescript import TypescriptClassType
+from main.utils.ast.language.typescript import TypescriptClassType, FunctionDeclType
 from main.utils.jinja.angular import service_file_writer
 from main.utils.naming_management import dasherize, camel_classify, \
     change_slash_and_dot_into_dash
@@ -16,6 +16,13 @@ class AngularService(TypescriptClassType):
         self.filename = ''
         self.typescript_call = None
         self.worker_config = None
+
+        # TODO Implement
+        #Improve this logic to handle multiple action event
+        self.action_event = None
+
+    def add_action_event(self, action_event_behavior):
+        self.action_event = action_event_behavior
 
     def set_endpoint_class_name_and_worker(self, name):
         self.api_endpoint = dasherize(name)
@@ -51,3 +58,8 @@ class AngularService(TypescriptClassType):
                                      constructor_param=', '.join(constructor_param_list),
                                      import_statement_list='\n'.join(import_statement_list),
                                      property_decl='\n'.join(property_decl_list))}
+
+class ActionEventInterpretation(FunctionDeclType):
+
+    def __init__(self, name):
+        super().__init__(name)

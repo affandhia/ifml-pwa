@@ -152,9 +152,9 @@ class RouteToAction(RouteUsingInteractionFlow):
 
     def __init__(self, service_class_name, service_filename):
         super().__init__()
-        self.service_class_name = service_class_name
+        self.service_class_name = service_class_name+'Service'
         self.service_filename = service_filename
-        self.after_statement = None
+        self.after_statement = []
         self.import_statement = None
         self.constructor_param = None
         self.build_import_statement()
@@ -174,4 +174,4 @@ class RouteToAction(RouteUsingInteractionFlow):
 
     def render(self):
         return router_file_writer(self.ROUTE_TO_ACTION_PAGE_TEMPLATE, service_name=camel_function_style(self.service_class_name),
-                                  param_binding_group=self.param_binding_group, after_statement=self.after_statement)
+                                  param_binding_group=self.param_binding_group, after_statement='\n'.join(self.after_statement))
