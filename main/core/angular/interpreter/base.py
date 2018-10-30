@@ -134,6 +134,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         html = AngularModalHTMLLayout(element_name)
 
+        # Build All Associated View Element
+        for key, view_element in window_element.get_assoc_view_element().items():
+            if isinstance(view_element, List):
+                self.interpret_list(view_element, html, typescript_class, routing_parent)
+
         # Build All View Element Event Inside
         for _, event in window_element.get_view_element_events().items():
             self.view_element_events.append(event)

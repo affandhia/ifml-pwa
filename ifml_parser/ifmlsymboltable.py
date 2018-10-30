@@ -215,6 +215,11 @@ class DataBindingSymbol(IFMLSymbol):
         super().__init__(element_dom)
         self.classifier = None
 
+class ConditionalExpressionSymbol(IFMLSymbol):
+
+    def __init__(self, element):
+        super().__init__(element)
+        self.body = element.getAttribute('body')
 
 class DomainConceptSymbol(IFMLSymbol):
 
@@ -290,6 +295,7 @@ class IFMLSymbolTableBuilder(object):
     STRUCTURAL_FEATURE = 'core:UMLStructuralFeature'
     BEHAVIOR_FEATURE = 'core:UMLBehaviorFeature'
     BEHAVIOR = 'core:UMLBehavior'
+    CONDITIONAL_EXPRESSION_TYPE = 'core:ConditionalExpression'
 
 
     def __init__(self, ifml_dom, uml_sym):
@@ -457,6 +463,12 @@ class IFMLSymbolTableBuilder(object):
 
             elif symbol_type == self.VISUALIZATION_ATTRIBUTE_TYPE:
                 symbol = VisualizationAttribute(child)
+                self.build_view_component_part(child, next_scope_symbol_table)
+                symbol.set_next_scope(next_scope_symbol_table)
+                current_scope_symbol_table.insert(symbol)
+
+            elif symbol_type == self.CONDITIONAL_EXPRESSION_TYPE:
+                symbol = ConditionalExpressionSymbol(child)
                 self.build_view_component_part(child, next_scope_symbol_table)
                 symbol.set_next_scope(next_scope_symbol_table)
                 current_scope_symbol_table.insert(symbol)
