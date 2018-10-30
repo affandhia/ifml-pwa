@@ -36,7 +36,7 @@ logger_ifml_angular_interpreter = logging.getLogger("main.core.angular.interpret
 # Processing the all model and will return the AST of Angular that define the project structure of the IFML design
 class IFMLtoAngularInterpreter(BaseInterpreter):
 
-    def __init__(self, ifml_xmi, ifml_symbol_table, class_diagram_xmi, class_diagram_symbol_table):
+    def __init__(self, ifml_xmi, ifml_symbol_table, class_diagram_xmi, class_diagram_symbol_table, enable_guard=False):
         self.root_ifml, self.ifml_symbol_table = ifml_xmi, ifml_symbol_table
         self.root_class_diagram_xmi, self.uml_symbol_table = class_diagram_xmi, class_diagram_symbol_table
         self.project_name = dasherize(self.root_ifml.name)

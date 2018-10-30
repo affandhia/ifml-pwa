@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 #target_structure = {"generated-angular-python": default_structure}
 
 #generate_project('movies.core','movies.xmi',"/Users/hafiyyansayyidfadhlillah/generated-pwa/")
-generate_project('practice.core','movies.uml',"D:\\testing")
+generate_project('practice.core','movies.uml', target_directory="D:\\testing", enable_login=True)
 
 #uml_movies, uml_symbol_table = uml_parse('movies.uml')
 #ifml_movies, ifml_symbol_table = parse(xmiFileName='practice_2.core', umlSymbolTable=uml_symbol_table)

@@ -1,0 +1,4 @@
+<div id='div-login' class='section'>
+    <button *ngIf="this.isLoggedIn == false" id="google-sign-in" class="sign-in button" (click)="socialSignIn()">Sign In Google</button>
+    <button *ngIf="this.isLoggedIn == true" id="logout" class="logout button" (click)="logout()">Logout</button>
+</div>

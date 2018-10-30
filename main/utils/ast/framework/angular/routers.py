@@ -19,6 +19,9 @@ class AngularDefaultRouterDefinition(TypescriptClassType):
         self.ngmodule_exports = ["RouterModule"]
         self.base_element_import_statement_for_router()
 
+    def enable_authentication_service(self):
+        self.add_import_statement('./guard/auth.guard','AuthGuard')
+
     def add_routing_hierarchy(self, routing_hierarchy):
         self.route_hierarchy = routing_hierarchy
 

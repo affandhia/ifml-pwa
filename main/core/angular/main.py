@@ -14,12 +14,13 @@ from main.utils.jinja.angular import base_file_writer
 logger_angular = logging.getLogger("main.core.angular.main")
 
 
-def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=''):
+def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory='', enable_login=False):
     target_project_directory = sys.path[0] if target_directory == '' else target_directory
     uml_structure, uml_symbol_table = uml_parse(path_to_class_diagram)
     ifml_structure, ifml_symbol_table = ifml_parse(path_to_ifml_file, uml_symbol_table)
     interpreting_result = IFMLtoAngularInterpreter(ifml_structure, ifml_symbol_table, uml_structure, uml_symbol_table)
     basic_template = AngularProject(app_name=interpreting_result.get_project_name())
+
     # Adding app.component.ts
     root_component_name = 'app'
     root_class_name = 'App'
@@ -59,6 +60,12 @@ def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory=
 
         #Insert the service into the services folder
         basic_template.add_service_inside_services_folder(service_node.render())
+
+    # If user wants the predefined login to be used, then it will generate the predefined Authentication by Google
+    if enable_login:
+        basic_app_module.enable_authentication_service()
+        basic_template.enable_authentication_service()
+        basic_routing.enable_authentication_service()
 
     # Adding App Module
     basic_template.add_app_module_file(basic_app_module.render())

@@ -1,5 +1,19 @@
 {{ import_statement_list|safe }}
 
+{% if google_sign_in_config %}
+export function getAuthServiceConfigs() {
+  let config = new AuthServiceConfig(
+      [
+        {
+          id: GoogleLoginProvider.PROVIDER_ID,
+          provider: new GoogleLoginProvider({{ google_client_id|safe }})
+        }
+      ]
+  );
+  return config;
+}
+{% endif %}
+
 @NgModule({
   declarations: [
     {{ ngmodule_declarations|safe }}

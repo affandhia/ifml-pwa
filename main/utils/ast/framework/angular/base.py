@@ -11,11 +11,12 @@ ANGULAR_ROUTER_MODULE = '@angular/router'
 FORMS_MODULE_LOCATION = '@angular/forms'
 HTTP_MODULE_LOCATION = '@angular/common/http'
 NGX_SMART_MODAL_LOCATION = 'ngx-smart-modal'
+ANGULAR_6_SOCIAL_LOGIN = 'angular-6-social-login-v2'
 
 IMPORTED_NG_MODULE = 'NgModule'
 IMPORTED_ROUTES = 'Routes'
 IMPORTED_ROUTER_MODULE = 'RouterModule'
-
+IMPORTED_GOOGLE_LOGIN_PROVIDER = 'GoogleLoginProvider'
 
 class AngularMainModule(TypescriptClassType):
     IMPORTED_BROWSER_MODULE = 'BrowserModule'
@@ -27,10 +28,15 @@ class AngularMainModule(TypescriptClassType):
     IMPORTED_HTTP_CLIENT_MODULE = 'HttpClientModule'
     IMPORTED_SMART_MODAL_MODULE = 'NgxSmartModalModule'
     IMPORTED_SMART_MODAL_SERVICE = 'NgxSmartModalService'
+    IMPORTED_AUTH_SERVICE_CONFIG = 'AuthServiceConfig'
+    IMPORTED_SOCIAL_LOGIN_MODULE = 'SocialLoginModule'
+
+    # Edit this to change Google Client ID
+    GOOGLE_CLIENT_ID = '\"980984936575-0lo321pevqjlul7nsdk441ccjah11b1f.apps.googleusercontent.com\"'
 
     def __init__(self, app_name):
         super().__init__()
-
+        self.google_sign_in_config = False
         # Importing basic requirement of app module
         self.base_element_import_statement_for_module()
 
@@ -42,6 +48,24 @@ class AngularMainModule(TypescriptClassType):
                                  service_worker_initialization]
         self.ngmodule_providers = [self.IMPORTED_SMART_MODAL_SERVICE]
         self.ngmodule_bootstraps = [self.IMPORTED_APP_COMPONENT]
+
+    def enable_authentication_service(self):
+        #Adding import statement for Social Login
+        self.add_import_statement(main_module=ANGULAR_6_SOCIAL_LOGIN, element_imported=IMPORTED_GOOGLE_LOGIN_PROVIDER)
+        self.add_import_statement(main_module=ANGULAR_6_SOCIAL_LOGIN,
+                                  element_imported=self.IMPORTED_AUTH_SERVICE_CONFIG)
+        self.add_import_statement(main_module=ANGULAR_6_SOCIAL_LOGIN,
+                                  element_imported=self.IMPORTED_SOCIAL_LOGIN_MODULE)
+
+        # Angular Social Login Provider Setting
+        social_login_provider = '{ provide: ' + self.IMPORTED_AUTH_SERVICE_CONFIG + ', useFactory: getAuthServiceConfigs }'
+        self.ngmodule_providers.append(social_login_provider)
+
+        #Adding Social Login Module
+        self.ngmodule_imports.append(self.IMPORTED_SOCIAL_LOGIN_MODULE)
+
+        #Enabling Google Sign In Configuration
+        self.google_sign_in_config = True
 
     def add_element_into_ngmodule_declarations(self, element=None, elements=None):
         if element:
@@ -113,4 +137,5 @@ class AngularMainModule(TypescriptClassType):
                                 ngmodule_imports=',\n'.join(self.ngmodule_imports),
                                 ngmodule_providers=',\n'.join(self.ngmodule_providers),
                                 ngmodule_bootstrap=',\n'.join(self.ngmodule_bootstraps),
-                                import_statement_list='\n'.join(import_statement_list))
+                                import_statement_list='\n'.join(import_statement_list),
+                                google_client_id=self.GOOGLE_CLIENT_ID, google_sign_in_config=self.google_sign_in_config)

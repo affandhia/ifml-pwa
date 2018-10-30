@@ -2,13 +2,15 @@ from main.template.project_structure.angular_strcture import default_structure
 from main.utils.jinja.angular import base_file_writer
 
 
-class AngularProject:
+class AngularProject(object):
     SRC_FOLDER_KEY = 'src'
     ENV_FOLDER_KEY = 'environments'
     E2E_KEY = 'e2e'
     APP_KEY = 'app'
     SERVICES_KEY = 'services'
     MODELS_KEY = 'models'
+    GUARD_KEY = 'guard'
+    LOGIN_KEY = 'login'
 
     EDITOR_CONFIG_KEY = '.editorconfig'
     GITIGNORE_KEY = '.gitignore'
@@ -39,16 +41,17 @@ class AngularProject:
     APP_COMPONENT_KEY = 'app.component.ts'
     APP_MODULE_KEY = 'app.module.ts'
     APP_ROUTING_KEY = 'app-routing.module.ts'
-
-
+    AUTH_GUARD_KEY = 'auth.guard.ts'
+    LOGIN_COMPONENT_KEY = 'login.component.ts'
+    LOGIN_HTML_KEY = 'login.component.html'
 
     def __init__(self, app_name, structure=None):
         self.app_name = app_name
         self.project_structure = default_structure if structure == None else structure
-        self.write_base_angular_project_file()
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY][self.APP_KEY]
         self.services_folder = self.app_folder[self.SERVICES_KEY]
         self.models_folder = self.app_folder[self.MODELS_KEY]
+        self.write_base_angular_project_file()
 
     def get_app_name(self):
         return self.app_name
@@ -74,6 +77,7 @@ class AngularProject:
         self.write_e2e_protractor()
         self.write_e2e_protractor_definition()
         self.write_e2e_spec_definition()
+        self.enable_authentication_service()
 
     def write_editor_config(self):
         self.project_structure[self.EDITOR_CONFIG_KEY] = base_file_writer(self.EDITOR_CONFIG_KEY + '.template')
@@ -87,7 +91,8 @@ class AngularProject:
 
     def write_service_worker_config(self, list_of_config):
         self.project_structure[self.NGSW_KEY] = base_file_writer(self.NGSW_KEY + '.template',
-                                                                 app_name=self.app_name, data_config=','.join(list_of_config))
+                                                                 app_name=self.app_name,
+                                                                 data_config=','.join(list_of_config))
 
     def write_package_dependencies(self):
         self.project_structure[self.PACKAGE_KEY] = base_file_writer(self.PACKAGE_KEY + '.template',
@@ -188,6 +193,21 @@ class AngularProject:
     def add_model_inside_models_folder(self, inserted_model_file):
         self.models_folder.update(inserted_model_file)
 
+    def enable_authentication_service(self):
+        # Adding Auth Guard
+        content_of_auth_guard = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.GUARD_KEY + '/' + self.AUTH_GUARD_KEY + '.template')
+        self.app_folder.update({self.GUARD_KEY: {self.AUTH_GUARD_KEY: content_of_auth_guard}})
+
+        # Create Google Sign In Button with its Handler
+        login_component_ts = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.LOGIN_KEY + '/' + self.LOGIN_COMPONENT_KEY + '.template')
+
+        login_component_html = base_file_writer(
+            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.LOGIN_KEY + '/' + self.LOGIN_HTML_KEY + '.template')
+
+        self.app_folder.update({self.LOGIN_KEY: {self.LOGIN_COMPONENT_KEY: login_component_ts,
+                                                 self.LOGIN_HTML_KEY: login_component_html, 'login.component.css': ''}})
+
     def return_project_structure(self):
         return {self.app_name: self.project_structure}
-

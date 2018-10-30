@@ -1,0 +1,42 @@
+import { Component, OnInit } from '@angular/core';
+import {
+    AuthService,
+    GoogleLoginProvider
+} from 'angular-6-social-login-v2';
+
+@Component({
+  selector: 'login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
+})
+export class LoginComponent implements OnInit {
+
+  constructor(private socialAuthService: AuthService) { }
+
+  public isLoggedIn = false;
+
+  ngOnInit() {
+  	if(localStorage.getItem('token')){
+  	  this.isLoggedIn = true;
+  	}else{
+  	  this.isLoggedIn = false;
+  	}
+  }
+
+  public socialSignIn() {
+  	let socialPlatformProvider = GoogleLoginProvider.PROVIDER_ID;
+    this.socialAuthService.signIn(socialPlatformProvider).then(
+      (data) => {
+        let userData = data;
+        localStorage.setItem('token', JSON.stringify(data['token']));
+        location.reload();
+      }
+    );
+  }
+
+  public logout() {
+    localStorage.removeItem('token');
+    location.reload();
+  }
+
+}
