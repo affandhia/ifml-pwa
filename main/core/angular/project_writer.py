@@ -199,15 +199,5 @@ class AngularProject(object):
             self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.GUARD_KEY + '/' + self.AUTH_GUARD_KEY + '.template')
         self.app_folder.update({self.GUARD_KEY: {self.AUTH_GUARD_KEY: content_of_auth_guard}})
 
-        # Create Google Sign In Button with its Handler
-        login_component_ts = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.LOGIN_KEY + '/' + self.LOGIN_COMPONENT_KEY + '.template')
-
-        login_component_html = base_file_writer(
-            self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.LOGIN_KEY + '/' + self.LOGIN_HTML_KEY + '.template')
-
-        self.app_folder.update({self.LOGIN_KEY: {self.LOGIN_COMPONENT_KEY: login_component_ts,
-                                                 self.LOGIN_HTML_KEY: login_component_html, 'login.component.css': ''}})
-
     def return_project_structure(self):
         return {self.app_name: self.project_structure}

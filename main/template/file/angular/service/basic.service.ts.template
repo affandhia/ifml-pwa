@@ -18,18 +18,23 @@ export class {$ class_name|safe $}Service {
 
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
-    })
+    }),
+    params: new HttpParams()
   };
 
   endpoint: string = environment.rootApi + '{$ api_endpoint|safe $}';
 
   call({$ call_param|safe $}){
+    {% if enable_auth %}
+    let key_token = 'token';
+    let googleToken = localStorage.getItem(key_token);
+    this.httpOptions['params'].append(key_token, googleToken);
+    {% endif %}
     {% if call_param %}
     let httpParams = new HttpParams();
     Object.keys(param).forEach(function (key) {
-         httpParams = httpParams.append(key, param[key]);
+         this.httpOptions['params'].append(key, param[key]);
     });
-    this.httpOptions['params'] = httpParams;
     {% endif %}
     return this.http.get(this.endpoint, this.httpOptions).toPromise();
   }

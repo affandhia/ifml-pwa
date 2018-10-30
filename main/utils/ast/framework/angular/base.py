@@ -67,6 +67,12 @@ class AngularMainModule(TypescriptClassType):
         #Enabling Google Sign In Configuration
         self.google_sign_in_config = True
 
+        #Adding Login Component to NgModule
+        login_component_location = './login/login.component'
+        login_component_class_name = 'LoginComponent'
+        self.add_import_statement(login_component_location, login_component_class_name)
+        self.ngmodule_declarations.append(login_component_class_name)
+
     def add_element_into_ngmodule_declarations(self, element=None, elements=None):
         if element:
             self.ngmodule_declarations.append(element)

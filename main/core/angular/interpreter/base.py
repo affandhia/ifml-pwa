@@ -19,6 +19,7 @@ from main.utils.ast.framework.angular.component_parts import InputField, DataBin
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
+from main.utils.ast.framework.angular.google_sign_in import LoginHTML, LoginTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter, ParamGroup, \
     ParameterBindingInterpretation
@@ -36,10 +37,11 @@ logger_ifml_angular_interpreter = logging.getLogger("main.core.angular.interpret
 # Processing the all model and will return the AST of Angular that define the project structure of the IFML design
 class IFMLtoAngularInterpreter(BaseInterpreter):
 
-    def __init__(self, ifml_xmi, ifml_symbol_table, class_diagram_xmi, class_diagram_symbol_table, enable_guard=False):
+    def __init__(self, ifml_xmi, ifml_symbol_table, class_diagram_xmi, class_diagram_symbol_table, enable_authentication_guard=False):
         self.root_ifml, self.ifml_symbol_table = ifml_xmi, ifml_symbol_table
         self.root_class_diagram_xmi, self.uml_symbol_table = class_diagram_xmi, class_diagram_symbol_table
         self.project_name = dasherize(self.root_ifml.name)
+        self.enable_authentication_guard = enable_authentication_guard
         self.components = {}
         self.services = {}
         self.models = {}
@@ -69,6 +71,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Decide whether router-outlet is needed or not
         self.append_router_outlet(self.angular_routing, self.root_html)
+
+        # Deciding How to show Login Button
+        self.show_login_button_in_root()
 
     def router_outlet_html(self):
         doc_outlet, tag_outlet, text_outlet = Doc().tagtext()
@@ -230,11 +235,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Decide if this container is callable or using router
         # Checking if its is a Landmark or having an interaction flow
         if view_container.get_is_xor():
-            routing_node = RouteToModule(typescript_class)
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
             routing_node.enable_children_routing()
 
         if self.check_if_there_is_an_interaction_flow(view_container) and routing_node is None:
-            routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
 
         if (view_container.get_is_landmark()):
             landmark_path_var_name = camel_function_style(typescript_class.class_name) + 'path'
@@ -244,7 +249,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                               ('[routerLink]', landmark_path_var_name)):
                 text_landmark(typescript_class.class_name)
 
-            routing_node = RouteToModule(typescript_class) if routing_node is None else routing_node
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
 
             absolute_path = routing_node.path
 
@@ -374,7 +379,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Determine if there are any incoming interaction flow
         if self.check_if_there_is_an_interaction_flow(form_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class)
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
             routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
         # TODO Implement
@@ -433,7 +438,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Determine if there are any incoming interaction flow
         if self.check_if_there_is_an_interaction_flow(detail_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class)
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
             routing_node.path_from_root = detail_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
@@ -498,7 +503,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Determine if there are any incoming interaction flow
         if self.check_if_there_is_an_interaction_flow(list_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class)
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
             routing_node.path_from_root = list_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
@@ -1038,3 +1043,20 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Interpret it
         model_element.add_owned_attribute_to_class(element_name, element_type)
+
+    def show_login_button_in_root(self):
+        #If there are any navigation inside, then create a login page in the routing, else, call the button
+        if len(self.angular_routing.angular_children_routes) > 0:
+
+            #TODO Implement, improve this logic
+            #Create dummy AngularComponent
+            html, typescript_class = LoginHTML(), LoginTypescriptClass()
+            angular_component_node = AngularComponent(typescript_class, html)
+            routing_node = RouteToModule(typescript_class)
+            self.angular_routing.add_children_routing(routing_node)
+            self.components['login'] = angular_component_node
+        else:
+            doc_google_sign_in_button, tag_google_sign_in_button, text_google_sign_in_button = Doc().tagtext()
+            with tag_google_sign_in_button('login'):
+                text_google_sign_in_button('Google Sign In')
+            self.root_html.append_html_into_body(doc_google_sign_in_button.getvalue())

@@ -9,13 +9,14 @@ class AngularService(TypescriptClassType):
 
     SERVICE_FILE_NAME = '{service_filename}.service.ts'
 
-    def __init__(self):
+    def __init__(self, enable_auth=False):
         super().__init__()
         self.api_endpoint = ''
         self.call_param = ''
         self.filename = ''
         self.typescript_call = None
         self.worker_config = None
+        self.enable_auth_token_for_calling_api = enable_auth
 
         # TODO Implement
         #Improve this logic to handle multiple action event
@@ -57,7 +58,7 @@ class AngularService(TypescriptClassType):
                                      api_endpoint=self.api_endpoint, call_param=self.call_param,
                                      constructor_param=', '.join(constructor_param_list),
                                      import_statement_list='\n'.join(import_statement_list),
-                                     property_decl='\n'.join(property_decl_list))}
+                                     property_decl='\n'.join(property_decl_list), enable_auth=self.enable_auth_token_for_calling_api)}
 
 class ActionEventInterpretation(FunctionDeclType):
 

@@ -1,1 +1,1 @@
-{ path: '{$ path $}', component: {$ component $}{% if flag %},children: [{$ childrens|safe $}] {% endif %}}
+{ path: '{$ path $}', component: {$ component $}{% if enable_guard %}, canActivate: [AuthGuard]{% endif %}{% if flag %}, children: [{$ childrens|safe $}]{% endif %}}

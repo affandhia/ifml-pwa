@@ -94,10 +94,11 @@ class RootRoutingNode(BaseRoutingNode):
 class RouteToModule(RootRoutingNode):
     ROUTE_TO_MODULE_TEMPLATE = 'route_to_component.ts.template'
 
-    def __init__(self, component_typescript_class):
+    def __init__(self, component_typescript_class, enable_guard=False):
         super().__init__(component_typescript_class.selector_name)
         self.component = component_typescript_class.class_name + 'Component'
         self.flag = False
+        self.enable_guard = enable_guard
 
     def enable_children_routing(self):
         self.flag = True
@@ -112,7 +113,7 @@ class RouteToModule(RootRoutingNode):
         for _, route_node in self.angular_children_routes.items():
             children_routes.append(route_node.render())
         return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE, flag=self.flag, path=self.path,
-                                  component=self.component, childrens=',\n'.join(children_routes))
+                                  component=self.component, childrens=',\n'.join(children_routes), enable_guard=self.enable_guard)
 
 
 class RedirectToAnotherPath(BaseRoutingNode):
