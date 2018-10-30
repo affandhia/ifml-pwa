@@ -662,10 +662,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Interpreting Data Binding
         data_binding_function = DataBindingFunction(element_name, intended_model)
 
-        # Build all Conditional Expression
-        for _, conditional_expression in data_binding_element.get_conditional_expressions().items():
-            self.interpret_conditional_expression(conditional_expression, data_binding_function.func_decl)
-
         # Build (If any) Visualization Attribute or Simple Field
         for _, sub_view_component_part in data_binding_element.get_sub_view_component_parts().items():
             if isinstance(sub_view_component_part, VisualizationAttribute):

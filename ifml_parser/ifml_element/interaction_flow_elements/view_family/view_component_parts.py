@@ -198,8 +198,8 @@ class DataBinding(ContentBinding):
     def __init__(self, xmiSchema):
         super().__init__(xmiSchema)
         self._domain_concept = self._schema.getAttribute('domainConcept')
-        self._conditional_expressions = self.build_conditional_expressions()
         self._data_context_variable = self.build_data_context_variable()
+        self.build_conditional_expressions()
 
     def build_data_context_variable(self):
         from ifml_parser.ifml_element.context_family.base import DataContextVariable
@@ -216,15 +216,16 @@ class DataBinding(ContentBinding):
     def build_conditional_expressions(self):
         dict_conditional_expressions = {}
         list_conditional_expressions_node = self.getElementsByTagName(
-            ConditionalExpression.CONDITIONAL_EXPRESSION_TAGNAME)
+            ViewComponentPart.SUB_VIEW_COMPONENT_PARTS_TAGNAME)
 
-        for cond_exp in list_conditional_expressions_node:
-            cond_exp_element = ConditionalExpression(cond_exp)
-            dict_conditional_expressions.update({cond_exp_element.get_id(): cond_exp_element})
-        return dict_conditional_expressions
+        for view_comp_part in list_conditional_expressions_node:
+            view_comp_part_type = view_comp_part.getAttribute(self.XSI_TYPE)
 
-    def get_conditional_expressions(self):
-        return self._conditional_expressions
+            if view_comp_part_type == ConditionalExpression.CONDITIONAL_EXPRESSION_TYPE:
+                cond_exp_element = ConditionalExpression(view_comp_part)
+                dict_conditional_expressions.update({cond_exp_element.get_id(): cond_exp_element})
+
+        self._sub_view_component_parts.update(dict_conditional_expressions)
 
     def get_domain_concept(self):
         return self._domain_concept
