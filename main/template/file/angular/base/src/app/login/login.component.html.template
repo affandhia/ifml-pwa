@@ -1,6 +1,6 @@
 <div id='div-login' class='section'>
-    <h2 *ngIf="this.isLoggedIn == false id='login-title'>Please Login Here</h2>
-    <button *ngIf="this.isLoggedIn == false" id="google-sign-in" class="sign-in button" (click)="socialSignIn()">Sign In Google</button>
-    <h2 *ngIf="this.isLoggedIn == false id='login-title'>Please Logout Here</h2>
-    <button *ngIf="this.isLoggedIn == true" id="logout" class="logout button" (click)="logout()">Logout</button>
+    <h2 *ngIf='this.isLoggedIn == false' id='auth-title'>Please Login Here</h2>
+    <button *ngIf='this.isLoggedIn == false' id="google-sign-in" class="button" (click)="socialSignIn()">Sign In Google</button>
+    <h2 *ngIf='this.isLoggedIn == true' id='auth-title'>Please Logout Here</h2>
+    <button *ngIf='this.isLoggedIn == true' id="logout" class="button" (click)="logout()">Logout</button>
 </div>

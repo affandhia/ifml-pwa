@@ -1,5 +1,5 @@
 <nav id='menu-{$ menu_name|safe $}' class='navbar'>
-    <ul>
+    <ul id='list-menu-{$ menu_name|safe $}' class='list-menu'>
         {$ list_button|safe $}
     </ul>
 </nav>

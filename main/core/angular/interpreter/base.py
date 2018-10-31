@@ -342,7 +342,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             any_in_param = arbitary_param_inside_action.get_direction() == 'in'
 
         # Defining service typescript, and add the name into AngularService
-        service_typescript = AngularService()
+        service_typescript = AngularService(enable_auth=self.enable_authentication_guard)
         service_typescript.set_endpoint_class_name_and_worker(element_name)
 
         print(any_in_param)
