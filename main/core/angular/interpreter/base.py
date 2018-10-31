@@ -18,7 +18,7 @@ from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHa
 from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction, VisualizationWithSpan
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
-    AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
+    AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass, AngularFormHTMLCall
 from main.utils.ast.framework.angular.google_sign_in import LoginHTML, LoginTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass, OwnedOperation
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter, ParamGroup, \
@@ -373,8 +373,19 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # The HTML for Form
         html = AngularFormHTML(element_name)
 
+        #Preparing HTML Call template for form
+        form_call = AngularFormHTMLCall(typescript_class.selector_name)
+
         # Defining Routing Node
         routing_node = None
+
+        # TODO Implement
+        list_in_param = []
+        for _, parameter in form_element.get_parameters().items():
+            self.interpret_parameter(parameter, html, typescript_class, list_in_param)
+
+        # TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(form_call, typescript_calling, list_in_param)
 
         # Determine if there are any incoming interaction flow
         if self.check_if_there_is_an_interaction_flow(form_element) and routing_node is None:
@@ -410,8 +421,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
             with tag_selector('div', id='div-form-{name}'.format(name=html.form_dasherize),
                               klass='div-form view-component'):
-                with tag_selector(typescript_class.selector_name):
-                    text_selector('')
+                doc_selector.asis(form_call.render())
             html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container

@@ -181,6 +181,15 @@ class AngularDetailHTMLCall(Node):
         return angular_html_writer('detail_call.html.template', selector_name=self.selector_name,
                                    parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
+class AngularFormHTMLCall(AngularDetailHTMLCall):
+
+    def __init__(self, name):
+        super().__init__(name)
+
+    def render(self):
+        return angular_html_writer('form_call.html.template', selector_name=self.selector_name,
+                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
+
 
 class AngularListHTMLCall(Node):
 
