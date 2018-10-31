@@ -265,15 +265,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         if not (routing_node is None):
             routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
-        # TODO Implement, Delete below line after testing use
-        doc_test, tag_test, text_test = Doc().tagtext()
-
-        with tag_test('h2'):
-            text_test(typescript_class.selector_name + ' Works Fine')
-
-        html.append_html_into_body(doc_test.getvalue())
-        # End TODO
-
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in view_container.get_view_element_events().items():
