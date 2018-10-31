@@ -20,7 +20,7 @@ from main.utils.ast.framework.angular.components import AngularComponent, Angula
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal, AngularComponentWithInputTypescriptClass
 from main.utils.ast.framework.angular.google_sign_in import LoginHTML, LoginTypescriptClass
-from main.utils.ast.framework.angular.models import ModelFromUMLClass
+from main.utils.ast.framework.angular.models import ModelFromUMLClass, OwnedOperation
 from main.utils.ast.framework.angular.parameters import InParameter, OutParameter, ParamGroup, \
     ParameterBindingInterpretation
 from main.utils.ast.framework.angular.routers import RouteToModule, RedirectToAnotherPath, RootRoutingNode, \
@@ -345,7 +345,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         service_typescript = AngularService(enable_auth=self.enable_authentication_guard)
         service_typescript.set_endpoint_class_name_and_worker(element_name)
 
-        print(any_in_param)
         if any_in_param:
             service_typescript.param_exist()
 
@@ -1030,6 +1029,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # TODO Implement
         # Build the owned operation
+        for _, operation in class_xmi.get_operations().items():
+            self.interpret_owned_operation(operation, model_from_class)
 
         # Register to models container
         self.models[class_xmi.get_model_id()] = model_from_class
@@ -1043,6 +1044,28 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Interpret it
         model_element.add_owned_attribute_to_class(element_name, element_type)
+
+    def interpret_owned_operation(self, class_operation_xmi, model_element):
+        # Get attribute name, and type of the attribute
+        element_name = class_operation_xmi.get_model_name()
+
+        #Create Owned Operation Node
+        operation_node = OwnedOperation(element_name)
+
+        for _, owned_param in class_operation_xmi.get_parameters().items():
+            self.interpret_owned_param(owned_param, operation_node)
+
+        model_element.add_owned_operation_to_class(operation_node)
+
+    def interpret_owned_param(self, operation_param_xmi, operation_element):
+        # Get attribute name, and type of the attribute
+        element_name = operation_param_xmi.get_model_name()
+        id_of_type_symbol = operation_param_xmi.get_type()
+        uml_filename = self.root_class_diagram_xmi.get_filename()
+        element_type = self.uml_symbol_table.lookup(uml_filename, id_of_type_symbol)
+
+        is_class = isinstance(element_type, ClassSymbol)
+        operation_element.add_owned_param(element_name, element_type.name, is_class=is_class)
 
     def show_login_button_in_root(self):
         #If there are any navigation inside, then create a login page in the routing, else, call the button

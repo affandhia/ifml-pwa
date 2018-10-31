@@ -1,4 +1,4 @@
-from main.utils.ast.language.typescript import TypescriptClassType, VarDeclType
+from main.utils.ast.language.typescript import TypescriptClassType, VarDeclType, FunctionDeclType, ImportStatementType
 from main.utils.jinja.angular import model_file_writer
 from main.utils.naming_management import camel_classify, camel_function_style, dasherize
 
@@ -10,6 +10,11 @@ class ModelFromUMLClass(TypescriptClassType):
         super().__init__()
         self.class_name = camel_classify(class_name)
         self.filename = self.FILENAME_TEMPLATE.format(filename=dasherize(class_name))
+
+    def add_owned_operation_to_class(self, owned_operation):
+        self.body.append(owned_operation.render())
+        for import_statement in owned_operation.needed_import:
+            self.add_import_statement_using_import_node(import_statement)
 
     def add_owned_attribute_to_class(self, attribute_name, attribute_type):
         # Add Property Declaration for this attribute
@@ -35,9 +40,6 @@ class ModelFromUMLClass(TypescriptClassType):
         # Add statement to constructor body
         self.constructor_body.append(intended_constructor_statement)
 
-    def add_owned_operation_to_class(self, operation):
-        print(operation)
-
     def render(self):
         # Rendering all property decl statement
         property_decl_list = []
@@ -48,3 +50,23 @@ class ModelFromUMLClass(TypescriptClassType):
                                                  constructor_body=('\n'.join(self.constructor_body)),
                                                  body=('\n'.join(self.body)),
                                                  property_declaration='\n'.join(property_decl_list))}
+
+class OwnedOperation(FunctionDeclType):
+
+    def __init__(self, name):
+        super().__init__(name)
+
+    def add_owned_param(self, name, type, is_class=False):
+
+        param = VarDeclType(camel_function_style(name))
+        param.variable_datatype = type
+
+        if is_class:
+            model_import = ImportStatementType()
+            #Model location
+            model_location = './{filename}.model'.format(filename=dasherize(type))
+            model_import.add_imported_element(type)
+            model_import.set_main_module(model_location)
+            self.add_needed_import(model_import)
+
+        self.add_param(param)
