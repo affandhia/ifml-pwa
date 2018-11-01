@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_7uLp0E7QEeSt-rUToYoH4A" name="Bank Account">
+  <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Y0zEMMUkEei4DcEVNfBC7w" name="string"/>
+  <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_hoSTEMUkEei4DcEVNfBC7w" name="number"/>
+  <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_uJUxwMUkEei4DcEVNfBC7w" name="Array"/>
+  <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_0f4rMMUkEei4DcEVNfBC7w" name="any"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_IWfGoNzpEei9V6CDc8hNmw" name="Account">
+    <ownedAttribute xmi:id="_ESR04NzqEei9V6CDc8hNmw" name="id" type="_hoSTEMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_Fan9ANzqEei9V6CDc8hNmw" name="rekening" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_RMg2sNzqEei9V6CDc8hNmw" name="interest" type="_hoSTEMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_V-6OsNzqEei9V6CDc8hNmw" name="balance" type="_hoSTEMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_Ao7LwNzuEei9V6CDc8hNmw" name="customerId" type="_hoSTEMUkEei4DcEVNfBC7w"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_OV980NzpEei9V6CDc8hNmw" name="Customer">
+    <ownedAttribute xmi:id="_bHP28NzpEei9V6CDc8hNmw" name="address" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_q6klwNzpEei9V6CDc8hNmw" name="phone" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_w-HckNzpEei9V6CDc8hNmw" name="name" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_3F56MNzpEei9V6CDc8hNmw" name="id" type="_hoSTEMUkEei4DcEVNfBC7w"/>
+    <ownedAttribute xmi:id="_9-rv4NzpEei9V6CDc8hNmw" name="email" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
+  </packagedElement>
+</uml:Model>

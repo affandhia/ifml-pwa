@@ -70,21 +70,21 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.interpret_all_view_element_events()
 
         # Decide whether router-outlet is needed or not
-        self.append_router_outlet(self.angular_routing, self.root_html)
+        self.append_router_outlet(self.angular_routing, self.root_html, self.root_typescript_class)
 
         # Deciding How to show Login Button
         self.show_login_button_in_root()
 
-    def router_outlet_html(self):
+    def router_outlet_html(self, name):
         doc_outlet, tag_outlet, text_outlet = Doc().tagtext()
-
-        with tag_outlet('router-outlet'):
-            text_outlet('')
+        with tag_outlet('div', id=name, klass='div-content-router'):
+            with tag_outlet('router-outlet'):
+                text_outlet('')
         return doc_outlet.getvalue()
 
-    def append_router_outlet(self, angular_routing, html_call):
+    def append_router_outlet(self, angular_routing, html_call, typescipt_class):
         if len(angular_routing.angular_children_routes) > 0:
-            html_call.append_html_into_body(self.router_outlet_html())
+            html_call.append_html_into_body(self.router_outlet_html(typescipt_class.selector_name))
             angular_routing.enable_children_routing()
 
     def get_root_class(self):
@@ -309,7 +309,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         try:
             routing_parent.add_children_routing(routing_node)
             angular_component_node.set_routing_node(routing_node.path_from_root)
-            self.append_router_outlet(routing_node, html)
+            self.append_router_outlet(routing_node, html, typescript_class)
         # If this container must be called
         except Exception:
             # Calling ViewContainer selector
@@ -984,8 +984,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             param_binding_group_node = self.interpret_param_binding(param_binding_group)
             service_call_statement.add_param_binding_group(param_binding_group_node.render())
 
-        # Build the after effect of calling service
-        service_call_statement.after_statement = service_action_event.function_body
+        # Build the after effect of calling service, if None, then there are no after effect
+        try:
+            service_call_statement.after_statement = service_action_event.function_body
+        except AttributeError:
+            pass
 
         # Append to the event function handler. add import and constructor param
         function_node.add_needed_import(service_call_statement.import_statement)
