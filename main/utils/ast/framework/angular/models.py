@@ -24,7 +24,7 @@ class ModelFromUMLClass(TypescriptClassType):
         self.create_constructor_body_to_add_value_based_on_constructor(attribute_name)
 
     def create_var_decl_for_owned_attribute(self, attribute_name, attribute_type):
-        attribute_var_declaration = VarDeclType(camel_function_style(attribute_name), ';')
+        attribute_var_declaration = VarDeclType(attribute_name, ';')
         attribute_var_declaration.variable_datatype = attribute_type
         attribute_var_declaration.acc_modifiers = 'public'
         self.set_property_decl(attribute_var_declaration)
@@ -35,7 +35,7 @@ class ModelFromUMLClass(TypescriptClassType):
 
         # Write statement based on the template
         intended_constructor_statement = template_constructor_statement.format(
-            property_name=camel_function_style(attribute_name))
+            property_name=attribute_name)
 
         # Add statement to constructor body
         self.constructor_body.append(intended_constructor_statement)

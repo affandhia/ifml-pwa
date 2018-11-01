@@ -41,14 +41,15 @@ class InputField(Node):
 
     ANGULAR_TPYE_TO_HTML_CONVERSION = {'string': 'text', 'number': 'number', 'boolean': 'text'}
 
-    def __init__(self, name, type='text'):
+    def __init__(self, name, datatype='string'):
         self.dasherize_name = dasherize(name)
         self.title_name = creating_title_sentence_from_dasherize_word(name)
         self.var_camel_name = camel_function_style(name)
         self.placeholder = True
         self.value = ''
-        self.type = self.build_type(type)
+        self.type = self.build_type(datatype)
         self.ngmodel_property = VarDeclType(self.var_camel_name, semicolon=';')
+        self.ngmodel_property.variable_datatype = datatype
         self.ngmodel_property.acc_modifiers = 'public'
 
     def build_type(self, type):

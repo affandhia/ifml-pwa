@@ -85,6 +85,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
     def append_router_outlet(self, angular_routing, html_call):
         if len(angular_routing.angular_children_routes) > 0:
             html_call.append_html_into_body(self.router_outlet_html())
+            angular_routing.enable_children_routing()
 
     def get_root_class(self):
         # Angular Typescript Component for root component
@@ -239,6 +240,8 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node.enable_children_routing()
 
         if self.check_if_there_is_an_interaction_flow(view_container) and routing_node is None:
+            #Make sure to enable the parent child routing
+            routing_parent.enable_children_routing()
             routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
 
         if (view_container.get_is_landmark()):
@@ -249,6 +252,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                               ('[routerLink]', landmark_path_var_name)):
                 text_landmark(typescript_class.class_name)
 
+            routing_parent.enable_children_routing()
             routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
 
             absolute_path = routing_node.path
@@ -275,7 +279,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # TODO Implement
         # Build All Action inside the Container
         for _, action in view_container.get_action().items():
-            self.action_events.append(action)
+            self.interpret_action(action)
 
         # Build All Associated View Element
         for key, view_element in view_container.get_assoc_view_element().items():
@@ -721,7 +725,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         uml_model_name, id_of_type = simple_field_element.get_type().split('#')
 
         # Find the type in the UML Symbol Table
-        datatype_of_field = self.uml_symbol_table.lookup(uml_model_name, id_of_type)
+        datatype_of_field = self.uml_symbol_table.lookup(uml_model_name, id_of_type).name
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
@@ -1042,7 +1046,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         id_of_type_symbol = class_attribute_xmi.get_type()
         uml_filename = self.root_class_diagram_xmi.get_filename()
         element_type = self.uml_symbol_table.lookup(uml_filename, id_of_type_symbol).name
-
         # Interpret it
         model_element.add_owned_attribute_to_class(element_name, element_type)
 

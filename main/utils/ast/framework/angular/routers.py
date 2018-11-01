@@ -69,6 +69,7 @@ class RootRoutingNode(BaseRoutingNode):
         super().__init__(path)
         self.angular_children_routes = {}
         self.path_from_root = ''
+        self.flag = False
 
     def render(self):
         # Rendering Children route
@@ -90,6 +91,9 @@ class RootRoutingNode(BaseRoutingNode):
     def get_routing_hierarchy(self):
         return self.angular_children_routes
 
+    def enable_children_routing(self):
+        self.flag = True
+
 
 class RouteToModule(RootRoutingNode):
     ROUTE_TO_MODULE_TEMPLATE = 'route_to_component.ts.template'
@@ -97,11 +101,7 @@ class RouteToModule(RootRoutingNode):
     def __init__(self, component_typescript_class, enable_guard=False):
         super().__init__(component_typescript_class.selector_name)
         self.component = component_typescript_class.class_name + 'Component'
-        self.flag = False
         self.enable_guard = enable_guard
-
-    def enable_children_routing(self):
-        self.flag = True
 
     def add_component_to_route(self, component):
         self.component = component.component_typescript_class.class_name + 'Component'
