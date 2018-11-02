@@ -44,12 +44,27 @@ class AngularButtonWithFunctionHandler(Node):
 
     def render(self):
         # Rendering function first
-        function = self.function_node.render()
+        function_node = self.function_node.render()
 
         # Rendering Button HTML
         html = self.button_template()
 
-        return html, function
+        return html, function_node
+
+class AngularMenuButton(AngularButtonWithFunctionHandler):
+
+    def __init__(self, name, type=''):
+        super().__init__(name, type)
+
+    def button_template(self):
+        doc, tag, text = Doc().tagtext()
+        with tag('button', ('id', 'view-event-{name}'.format(name=self.button_id_name)),
+                 ('class', 'event view-element-event'), ('(click)', "{handler}({obj_param})".format(
+                    handler=self.function_node.function_name, obj_param=self.object_param))):
+            with tag('a', id='v-menu-{name}'.format(name=self.button_id_name), klass='menu-a'):
+                text(self.button_text)
+
+        return doc.getvalue()
 
 
 class AngularOnclickType(AngularButtonWithFunctionHandler):

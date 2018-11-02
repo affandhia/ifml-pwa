@@ -1,4 +1,4 @@
 <div id='div-{$ dasherize_name|safe $}' class='div-simple-field view-component-part'>
     <label id='label-{$ dasherize_name|safe $}' for='input-{$ dasherize_name|safe $}' class='label-simple-field'>{$ title_name|safe $}</label>
-    <input id='input-{$ dasherize_name|safe $}' name='{$ var_camel_name|safe $}' type='{$ type|safe $}' [(ngModel)]='{$ var_camel_name|safe $}'{% if value %} value='{$ value|safe $}'{% endif %}{% if placeholder %} placeholder='Fill the {$ title_name|safe $}'{% endif %}/>
+    <input id='input-{$ dasherize_name|safe $}' class='view-component-part simple-field' name='{$ var_camel_name|safe $}' type='{$ type|safe $}' [(ngModel)]='{$ var_camel_name|safe $}'{% if value %} value='{$ value|safe $}'{% endif %}{% if placeholder %} placeholder='Fill the {$ title_name|safe $}'{% endif %}/>
 </div>

@@ -12,9 +12,9 @@ from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_compone
     DataBinding, VisualizationAttribute, ConditionalExpression
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_components import Form, Details, List
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_containers import ViewContainer, Menu, Window
-from ifml_parser.ifmlsymboltable import ViewContainerSymbol, WindowSymbol, ActionSymbol
+from ifml_parser.ifmlsymboltable import ViewContainerSymbol, WindowSymbol, ActionSymbol, MenuSymbol
 from main.utils.ast.framework.angular.buttons import AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
-    AngularOnclickType, AngularModalButtonAndFunction
+    AngularOnclickType, AngularModalButtonAndFunction, AngularMenuButton
 from main.utils.ast.framework.angular.component_parts import InputField, DataBindingFunction, VisualizationWithSpan
 from main.utils.ast.framework.angular.components import AngularComponent, AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, AngularListHTMLCall, AngularListHTMLLayout, \
@@ -551,15 +551,19 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         self.components[list_element.get_id()] = angular_component_node
 
     # TODO Implement
-    def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling):
+    def interpret_view_element_event(self, view_element_event, html_calling, typescript_calling, parent_symbol):
         # Get the name
         element_name = view_element_event.get_name()
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} View Element Event".format(name=element_name))
 
-        # Interpret, Defining Typescript function and HTML button
+        #Defining variable for view element event interpreter
         func_and_html_event_node = AngularButtonWithFunctionHandler(element_name, type='async')
+
+        #Interpret if this is a special menu button
+        if isinstance(parent_symbol, MenuSymbol):
+            func_and_html_event_node = AngularMenuButton(element_name, type='async')
 
         # Build all child
         for _, interaction_flow in view_element_event.get_out_interaction_flow().items():
@@ -898,7 +902,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                                               component_node.component_typescript_class)
             elif isinstance(view_element_event, ViewElementEvent):
                 self.interpret_view_element_event(view_element_event, component_node.component_html,
-                                                  component_node.component_typescript_class)
+                                                  component_node.component_typescript_class, view_element_parent_symbol)
 
     def interpret_interaction_flow(self, interaction_flow_element, function_node, from_action=False):
 
