@@ -198,6 +198,7 @@ class DataBinding(ContentBinding):
     def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
         super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._domain_concept = self._schema.getAttribute('domainConcept')
+        self.check_ifml_reference(self._domain_concept)
         self._data_context_variable = self.build_data_context_variable()
         self.build_conditional_expressions()
 
