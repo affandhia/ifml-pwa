@@ -166,6 +166,7 @@ class VisualizationAttribute(ViewComponentPart):
         super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._name = self._schema.getAttribute('name')
         self._feature_concept = self._schema.getAttribute('featureConcept')
+        self.check_ifml_reference(self._feature_concept)
 
     def get_name(self):
         return self._name
