@@ -9,8 +9,8 @@ class Parameter(InteractionFlowModelElement, NamedElement):
     SOURCE_PARAMETER_ATTRIBUTE = 'sourceParameter'
     TARGET_PARAMETER_ATTRIBUTE = 'targetParameter'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._direction = 'in' if len(self.set_direction()) < 1 else self.set_direction()
         self._default_value = self.build_expression()
         self._name = self.set_name()
@@ -63,10 +63,12 @@ class ParameterBinding(Element):
 
     PARAMETER_BINDINGS_TAGNAME = 'parameterBindings'
 
-    def __init__(self, xmiSchema):
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
         super().__init__(xmiSchema)
         self._source_parameter = self._schema.getAttribute(Parameter.SOURCE_PARAMETER_ATTRIBUTE)
         self._target_parameter = self._schema.getAttribute(Parameter.TARGET_PARAMETER_ATTRIBUTE)
+        self.uml_symbol_table = uml_symbol_table
+        self.ifml_symbol_table = ifml_symbol_table
 
     def get_source_parameter(self):
         return self._source_parameter
@@ -79,8 +81,10 @@ class ParameterBindingGroup(Element):
 
     PARAMETER_BINDING_GROUP_TAGNAME = 'parameterBindingGroup'
 
-    def __init__(self, xmiSchema):
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
         super().__init__(xmiSchema)
+        self.uml_symbol_table = uml_symbol_table
+        self.ifml_symbol_table = ifml_symbol_table
         self._parameter_bindings = self.build_parameter_bindings()
 
 
@@ -88,7 +92,7 @@ class ParameterBindingGroup(Element):
         dict_param_binding = {}
         list_param_binding = self._schema.getElementsByTagName(ParameterBinding.PARAMETER_BINDINGS_TAGNAME)
         for param in list_param_binding:
-            param_binding = ParameterBinding(param)
+            param_binding = ParameterBinding(param, self.uml_symbol_table, self.ifml_symbol_table)
             dict_param_binding.update({param_binding.get_id() : param_binding})
         return dict_param_binding
 

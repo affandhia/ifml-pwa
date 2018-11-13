@@ -15,8 +15,8 @@ class ViewContainer(ViewElement):
     # Core Type
     VIEW_CONTAINER_TYPE = 'core:ViewContainer'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._is_landmark = self.set_landmark_att()
         self._is_xor = self.set_xor_att()
         self._is_default = self.set_default_att()
@@ -55,37 +55,37 @@ class ViewContainer(ViewElement):
             element_type = element.getAttribute(self.XSI_TYPE)
             # If element is View Container
             if element_type == ViewContainer.VIEW_CONTAINER_TYPE:
-                view_container_element = ViewContainer(element)
+                view_container_element = ViewContainer(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({view_container_element.get_id(): view_container_element})
 
             # If element is Menu (Ext)
             elif element_type == Menu.MENU_TYPE:
-                menu_element = Menu(element)
+                menu_element = Menu(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({menu_element.get_id(): menu_element})
 
             # If element is Windows (Ext)
             elif element_type == Window.WINDOWS_TYPE:
-                windows_element = Window(element)
+                windows_element = Window(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({windows_element.get_id(): windows_element})
 
             # If element is View Component
             elif element_type == ViewComponent.VIEW_COMPONENT_TYPE:
-                view_component_element = ViewComponent(element)
+                view_component_element = ViewComponent(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({view_component_element.get_id(): view_component_element})
 
             # If element is List (Ext)
             elif element_type == List.LIST_TYPE:
-                element_list = List(element)
+                element_list = List(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({element_list.get_id(): element_list})
 
             # If element is Form (Ext)
             elif element_type == Form.FORM_TYPE:
-                element_form = Form(element)
+                element_form = Form(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({element_form.get_id(): element_form})
 
             # If element is Detail (Ext)
             elif element_type == Details.DETAIL_TYPE:
-                details_element = Details(element)
+                details_element = Details(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_elements_associated.update({details_element.get_id(): details_element})
 
             else:
@@ -111,8 +111,8 @@ class ViewContainer(ViewElement):
 class Menu(ViewContainer):
     MENU_TYPE = 'ext:IFMLMenu'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 
 class Window(ViewContainer):
@@ -120,8 +120,8 @@ class Window(ViewContainer):
     MODAL_ATTRIBUTE = 'isModal'
     NEW_WINDOW_ATTRIBUTE = 'isNewWindow'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._is_modal = self.set_modal_att()
         self._is_new_window = self.set_new_window_att()
 

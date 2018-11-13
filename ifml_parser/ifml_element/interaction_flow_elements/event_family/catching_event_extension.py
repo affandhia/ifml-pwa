@@ -24,16 +24,16 @@ class ActionEvent(CatchingEvent):
 
     ACTION_EVENT_TAGNAME =  'actionEvents'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 class ViewElementEvent(CatchingEvent):
 
     VIEW_ELEMENT_EVENT_TAGNAME = 'viewElementEvents'
     PARENT_VIEW_ELEMENT_ATTRIBUTE = 'viewElement'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self.parent_view_element = xmiSchema.getAttribute(self.PARENT_VIEW_ELEMENT_ATTRIBUTE)
 
     def get_parent_view_element_reference(self):
@@ -41,5 +41,5 @@ class ViewElementEvent(CatchingEvent):
 
 class LandingEvent(CatchingEvent):
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)

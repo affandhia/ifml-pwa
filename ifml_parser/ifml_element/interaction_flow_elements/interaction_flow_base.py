@@ -5,8 +5,8 @@ from ifml_parser.ifml_element.parameter_family.parameters import Parameter
 
 class InteractionFlowElement(InteractionFlowModelElement):
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._in_interaction_flows = self.build_interaction_flow(
             self._schema.getAttribute(InteractionFlow.IN_INTERACTION_FLOWS_TAGNAME))
         self._out_interaction_flows = self.build_interaction_flow(
@@ -27,7 +27,7 @@ class InteractionFlowElement(InteractionFlowModelElement):
         dict_parameter = {}
         list_parameters = self.getElementsByTagName(Parameter.PARAMETER_TAGNAME)
         for param in list_parameters:
-            instance_param = Parameter(param)
+            instance_param = Parameter(param, self.uml_symbol_table, self.ifml_symbol_table)
             dict_parameter.update({instance_param.get_id() : instance_param})
         return dict_parameter
 

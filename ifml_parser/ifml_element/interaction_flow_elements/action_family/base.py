@@ -6,8 +6,8 @@ class Action(InteractionFlowElement):
     ACTION_TYPE = 'core:IFMLAction'
 
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._name = self.set_name()
         self._action_events = self.build_action_event()
 
@@ -21,7 +21,7 @@ class Action(InteractionFlowElement):
         dict_action_event = {}
         list_action_event = self.getElementsByTagName(ActionEvent.ACTION_EVENT_TAGNAME)
         for action_event_element in list_action_event:
-            action_event_instance = ActionEvent(action_event_element)
+            action_event_instance = ActionEvent(action_event_element, self.uml_symbol_table, self.ifml_symbol_table)
             dict_action_event[action_event_instance.get_id()] = action_event_instance
 
         return dict_action_event

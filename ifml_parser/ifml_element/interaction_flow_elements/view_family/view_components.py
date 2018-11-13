@@ -6,8 +6,8 @@ class ViewComponent(ViewElement):
     VIEW_COMPONENT_PARTS_TAGNAME = 'viewComponentParts'
     VIEW_COMPONENT_TYPE = 'core:ViewComponent'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._name = self.set_name()
         self._associated_view_component_part = self.build_assoc_view_component_parts()
 
@@ -19,33 +19,33 @@ class ViewComponent(ViewElement):
 
             # If element is View Component Part
             if element_type == ViewComponentPart.VIEW_COMPONENT_PARTS_TYPE:
-                view_component_part_element = ViewComponentPart(part)
+                view_component_part_element = ViewComponentPart(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update(
                     {view_component_part_element.get_id(): view_component_part_element})
 
             elif element_type == VisualizationAttribute.VISUALIZATION_ATTRIBUTE_TYPE:
-                simple_field_element = VisualizationAttribute(part)
+                simple_field_element = VisualizationAttribute(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update(
                     {simple_field_element.get_id(): simple_field_element})
 
                 # If element is SimpleField (Ext)
             elif element_type == SimpleField.SIMPLE_FIELD_TYPE:
-                simple_field_element = SimpleField(part)
+                simple_field_element = SimpleField(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update(
                     {simple_field_element.get_id(): simple_field_element})
 
             # If element is Slot (Ext)
             elif element_type == Slot.SLOT_TYPE:
-                slot_element = Slot(part)
+                slot_element = Slot(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update(
                     {slot_element.get_id(): slot_element})
 
             elif element_type == DataBinding.DATA_BINDING_TYPE:
-                data_binding_element = DataBinding(part)
+                data_binding_element = DataBinding(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update({data_binding_element.get_id(): data_binding_element})
 
             elif element_type == DynamicBehavior.DYNAMIC_BEHAVIOUR_TYPE:
-                dynamic_behaviour_element = DynamicBehavior(part)
+                dynamic_behaviour_element = DynamicBehavior(part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts_associated.update({dynamic_behaviour_element.get_id(): dynamic_behaviour_element})
 
             else:
@@ -65,17 +65,17 @@ class ViewComponent(ViewElement):
 
 class List(ViewComponent):
     LIST_TYPE = 'ext:List'
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 
 class Details(ViewComponent):
     DETAIL_TYPE = 'ext:Details'
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 
 class Form(ViewComponent):
     FORM_TYPE = 'ext:Form'
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)

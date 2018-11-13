@@ -6,8 +6,8 @@ from ifml_parser.ifml_element.interaction_flow_elements.interaction_flow_base im
 
 
 class ViewElement(InteractionFlowElement):
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._view_element_events = self.build_view_element_event()
         self._activation_expression = self.build_activation_expression()
 
@@ -20,17 +20,17 @@ class ViewElement(InteractionFlowElement):
 
             # If it's On Select Event
             if view_el_type == OnSelectEvent.ON_SELECT_EVENT_TYPE:
-                on_select_event_instance = OnSelectEvent(view_el_event_element)
+                on_select_event_instance = OnSelectEvent(view_el_event_element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_el_event.update({on_select_event_instance.get_id(): on_select_event_instance})
 
             # If it's On Submit Event
             elif view_el_type == OnSubmitEvent.ON_SUBMIT_EVENT_TYPE:
-                on_submit_event_instance = OnSubmitEvent(view_el_event_element)
+                on_submit_event_instance = OnSubmitEvent(view_el_event_element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_el_event.update({on_submit_event_instance.get_id(): on_submit_event_instance})
 
             # If it's View Element Event
             else:
-                view_el_event_instance = ViewElementEvent(view_el_event_element)
+                view_el_event_instance = ViewElementEvent(view_el_event_element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_el_event.update({view_el_event_instance.get_id(): view_el_event_instance})
         return dict_view_el_event
 

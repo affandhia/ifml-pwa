@@ -11,8 +11,8 @@ class ViewComponentPart(InteractionFlowElement):
     VIEW_COMPONENT_PARTS_TYPE = 'core:ViewComponentPart'
     SUB_VIEW_COMPONENT_PARTS_TAGNAME = 'subViewComponentParts'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._type = self.set_type()
         self._activation_expression = self.build_activation_expression()
         self._view_element_events = self.build_view_element_event()
@@ -27,27 +27,27 @@ class ViewComponentPart(InteractionFlowElement):
             view_comp_part_type = view_comp_part.getAttribute(self.XSI_TYPE)
 
             if view_comp_part_type == self.VIEW_COMPONENT_PARTS_TYPE:
-                view_comp_part_element = ViewComponentPart(view_comp_part)
+                view_comp_part_element = ViewComponentPart(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts.update({view_comp_part_element.get_id(): view_comp_part_element})
 
             elif view_comp_part_type == SimpleField.SIMPLE_FIELD_TYPE:
-                simple_field_element = SimpleField(view_comp_part)
+                simple_field_element = SimpleField(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table )
                 dict_view_component_parts.update({simple_field_element.get_id(): simple_field_element})
 
             elif view_comp_part_type == Slot.SLOT_TYPE:
-                slot_element = Slot(view_comp_part)
+                slot_element = Slot(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts.update({slot_element.get_id(): slot_element})
 
             elif view_comp_part_type == DataBinding.DATA_BINDING_TYPE:
-                data_binding_element = DataBinding(view_comp_part)
+                data_binding_element = DataBinding(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts.update({data_binding_element.get_id(): data_binding_element})
 
             elif view_comp_part_type == DynamicBehavior.DYNAMIC_BEHAVIOUR_TYPE:
-                dynamic_behaviour_element = DynamicBehavior(view_comp_part)
+                dynamic_behaviour_element = DynamicBehavior(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts.update({dynamic_behaviour_element.get_id(): dynamic_behaviour_element})
 
             elif view_comp_part_type == VisualizationAttribute.VISUALIZATION_ATTRIBUTE_TYPE:
-                visualization_attribute_element = VisualizationAttribute(view_comp_part)
+                visualization_attribute_element = VisualizationAttribute(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_view_component_parts.update(
                     {visualization_attribute_element.get_id(): visualization_attribute_element})
 
@@ -135,35 +135,35 @@ class Field(ViewComponentPart, Parameter):
 
     FIELD_TYPE = 'ext:Field'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 class SimpleField(Field):
     SIMPLE_FIELD_TYPE = 'ext:SimpleField'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 class SelectionField(Field):
     SIMPLE_FIELD_TYPE = 'ext:SimpleField'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._is_multi_selection = self._schema.getAttribute('isMultiSelection')
 
 class Slot(Field, Parameter):
     SLOT_TYPE = 'ext:Slot'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 
 class VisualizationAttribute(ViewComponentPart):
     VISUALIZATION_ATTRIBUTE_TAGNAME = 'visualizationAttribute'
     VISUALIZATION_ATTRIBUTE_TYPE = 'core:VisualizationAttribute'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._name = self._schema.getAttribute('name')
         self._feature_concept = self._schema.getAttribute('featureConcept')
 
@@ -182,8 +182,8 @@ class VisualizationAttribute(ViewComponentPart):
 
 class ContentBinding(ViewComponentPart):
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._uniform_resource_identifier = self.build_uri()
 
     def build_uri(self):
@@ -195,8 +195,8 @@ class DataBinding(ContentBinding):
 
     DATA_BINDING_TYPE = 'core:DataBinding'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._domain_concept = self._schema.getAttribute('domainConcept')
         self._data_context_variable = self.build_data_context_variable()
         self.build_conditional_expressions()
@@ -222,7 +222,7 @@ class DataBinding(ContentBinding):
             view_comp_part_type = view_comp_part.getAttribute(self.XSI_TYPE)
 
             if view_comp_part_type == ConditionalExpression.CONDITIONAL_EXPRESSION_TYPE:
-                cond_exp_element = ConditionalExpression(view_comp_part)
+                cond_exp_element = ConditionalExpression(view_comp_part, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_conditional_expressions.update({cond_exp_element.get_id(): cond_exp_element})
 
         self._sub_view_component_parts.update(dict_conditional_expressions)
@@ -235,8 +235,8 @@ class DynamicBehavior(ContentBinding):
 
     DYNAMIC_BEHAVIOUR_TYPE = 'core:DynamicBehavior'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._action = self._schema.getAttribute('action')
         self._behavioral_feature_concept = self._schema.getAttribute('behavioralFeatureConcept')
         self._behavior_concept = self._schema.getAttribute('behaviorConcept')
@@ -248,5 +248,5 @@ class ConditionalExpression(Expression, ViewComponentPart):
     CONDITIONAL_EXPRESSION_TYPE = 'core:ConditionalExpression'
     CONDITIONAL_EXPRESSION_TAGNAME = 'conditionalExpression'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)

@@ -40,9 +40,12 @@ class InteractionFlowModel(Element):
     INTERACTION_FLOW_ATTRIBUTE = 'interactionFlowModel'
 
 
-    def __init__(self, xmiSchema):
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
         super().__init__(xmiSchema)
+        self.uml_symbol_table = uml_symbol_table
+        self.ifml_symbol_table = ifml_symbol_table
         self._interaction_flow_model_elements = self.build_ifml_elements()
+
 
     def build_ifml_elements(self):
         dict_ifml_elements = {}
@@ -52,57 +55,22 @@ class InteractionFlowModel(Element):
 
             # If element is Menu (Ext)
             if element_type == Menu.MENU_TYPE:
-                menu_element = Menu(element)
+                menu_element = Menu(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_ifml_elements.update({menu_element.get_id(): menu_element})
 
             # If element is Windows (Ext)
             elif element_type == Window.WINDOWS_TYPE:
-                windows_element = Window(element)
+                windows_element = Window(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_ifml_elements.update({windows_element.get_id(): windows_element})
 
             #If element is View Container
             elif element_type == ViewContainer.VIEW_CONTAINER_TYPE:
-                view_container_element = ViewContainer(element)
+                view_container_element = ViewContainer(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_ifml_elements.update({view_container_element.get_id(): view_container_element})
-
-            #If element is List (Ext)
-            elif element_type == List.LIST_TYPE:
-                element_list = List(element)
-                dict_ifml_elements.update({element_list.get_id(): element_list})
-
-            #If element is Form (Ext)
-            elif element_type == Form.FORM_TYPE:
-                element_form = Form(element)
-                dict_ifml_elements.update({element_form.get_id(): element_form})
-
-            #If element is Detail (Ext)
-            elif element_type == Details.DETAIL_TYPE:
-                details_element = Details(element)
-                dict_ifml_elements.update({details_element.get_id(): details_element})
-
-            # If element is View Component
-            elif element_type == ViewComponent.VIEW_COMPONENT_TYPE:
-                view_component_element = ViewComponent(element)
-                dict_ifml_elements.update({view_component_element.get_id(): view_component_element})
-
-            #If element is View Component Part
-            elif element_type == ViewComponentPart.VIEW_COMPONENT_PARTS_TYPE:
-                view_component_part_element = ViewComponentPart(element)
-                dict_ifml_elements.update({view_component_part_element.get_id(): view_component_part_element})
-
-            #If element is SimpleField (Ext)
-            elif element_type == SimpleField.SIMPLE_FIELD_TYPE:
-                simple_field_element = SimpleField(element)
-                dict_ifml_elements.update({simple_field_element.get_id(): simple_field_element})
-
-            #If element is Slot (Ext)
-            elif element_type == Slot.SLOT_TYPE:
-                slot_element = Slot(element)
-                dict_ifml_elements.update({slot_element.get_id(): slot_element})
 
             # If element is Slot (Ext)
             elif element_type == Action.ACTION_TYPE:
-                action_element = Action(element)
+                action_element = Action(element, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_ifml_elements.update({action_element.get_id(): action_element})
 
             # If element is Interaction Flow
@@ -119,21 +87,6 @@ class InteractionFlowModel(Element):
             elif element_type == DataFlow.DATA_FLOW_TYPE:
                 data_flow_element = DataFlow(element)
                 dict_ifml_elements.update({data_flow_element.get_id(): data_flow_element})
-
-            # If element is Parameter
-            elif element_type == Parameter.PARAMETER_TYPE:
-                parameter_element = Parameter(element)
-                dict_ifml_elements.update({parameter_element.get_id(): parameter_element})
-
-            # If element is Parameter Binding
-            elif element_type == ParameterBinding.PARAMETER_BINDING_TYPE:
-                parameter_binding_element = ParameterBinding(element)
-                dict_ifml_elements.update({parameter_binding_element.get_id(): parameter_binding_element})
-
-            # If element is Parameter Binding Group
-            elif element_type == ParameterBindingGroup.PARAMETER_BINDING_GROUP_TYPE:
-                parameter_binding_group_element = ParameterBindingGroup(element)
-                dict_ifml_elements.update({parameter_binding_group_element.get_id(): parameter_binding_group_element})
 
             else:
                 pass
@@ -236,16 +189,16 @@ class IFMLModel(NamedElement):
         self.ext_version = str(self._schema.getAttribute(self.EXT_ATTRIBUTE)) if len(
             str(self._schema.getAttribute(self.EXT_ATTRIBUTE))) > 0 else "No Version Found"
         self._domain_model = self.build_domain_model(uml_symbol_table)
-        self._interaction_flow_model = self.build_interaction_flow_model()
+        self._interaction_flow_model = self.build_interaction_flow_model(uml_symbol_table, ifml_symbol_table)
 
 
-    def build_interaction_flow_model(self):
+    def build_interaction_flow_model(self, uml_symbol_table, ifml_symbol_table):
         interaction_flow_model = None
         list_schema_interaction_flow_model = self.getElementsByTagName(InteractionFlowModel.INTERACTION_FLOW_ATTRIBUTE)
         if len(list_schema_interaction_flow_model) > 1:
             raise ValueError('XMI FIle invalid, Cannot have More than 1 InteractionFlowModel')
         else:
-            if_model = InteractionFlowModel(list_schema_interaction_flow_model[0])
+            if_model = InteractionFlowModel(list_schema_interaction_flow_model[0], uml_symbol_table, ifml_symbol_table)
         return if_model
 
     def build_domain_model(self, uml_symbol_table):

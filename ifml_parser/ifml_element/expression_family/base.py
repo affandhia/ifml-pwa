@@ -8,8 +8,8 @@ class Expression(InteractionFlowModelElement):
     BODY_ATTRIBUTE = 'body'
     TRIGGERING_EXPRESSION_TAGNAME = 'triggeringExpressions'
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table ):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._language = self._schema.getAttribute(self.LANGUAGE_ATTRIBUTE)
         self._body = self._schema.getAttribute(self.BODY_ATTRIBUTE)
 
@@ -23,8 +23,8 @@ class InteractionFlowExpression(Expression):
     INTERACTION_FLOW_EXPRESSION_ATTRIBUTE = 'interactionFlowExpression'
     MULTIPLE_INT_FLOW_EXP_IN_EVENT = "Event can't have more than one Interaction Flow Expression"
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
         self._interaction_flow = self.build_interaction_flow()
 
     def build_interaction_flow(self):
@@ -35,24 +35,24 @@ class InteractionFlowExpression(Expression):
 
             #If it's navigation flow
             if int_flow_type == NavigationFlow.NAVIGATION_FLOW_TYPE:
-                nav_flow = NavigationFlow(int_flow_type)
+                nav_flow = NavigationFlow(int_flow_type, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_interaction_flows.update({nav_flow.get_id() : nav_flow})
 
             # If it's data flow
             elif int_flow_type == DataFlow.DATA_FLOW_TYPE:
-                data_flow = DataFlow(int_flow_type)
+                data_flow = DataFlow(int_flow_type, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_interaction_flows.update({data_flow.get_id() : data_flow})
 
             # If it's interaction flow
             elif int_flow_type == InteractionFlow.INTERACTION_FLOW_TYPE:
-                int_flow_instance = InteractionFlow(int_flow_type)
+                int_flow_instance = InteractionFlow(int_flow_type, self.uml_symbol_table, self.ifml_symbol_table)
                 dict_interaction_flows.update({int_flow_instance.get_id() : int_flow_instance})
 
         return dict_interaction_flows
 
 class BooleanExpression(Expression):
 
-    def __init__(self, xmiSchema):
-        super().__init__(xmiSchema)
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
+        super().__init__(xmiSchema, uml_symbol_table, ifml_symbol_table)
 
 
