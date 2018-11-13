@@ -48,9 +48,6 @@ class InputField(Node):
         self.placeholder = True
         self.value = ''
         self.type = self.build_type(datatype)
-        self.ngmodel_property = VarDeclType(self.var_camel_name, semicolon=';')
-        self.ngmodel_property.variable_datatype = datatype
-        self.ngmodel_property.acc_modifiers = 'public'
 
     def build_type(self, type):
         returned_type = None
@@ -59,9 +56,6 @@ class InputField(Node):
         except KeyError:
             returned_type = 'text'
         return returned_type
-
-    def get_ngmodel_property(self):
-        return self.ngmodel_property
 
     def disable_placeholder(self):
         self.placeholder = False

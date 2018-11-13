@@ -269,6 +269,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         if not (routing_node is None):
             routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
+        for _, parameter in view_container.get_parameters().items():
+            self.interpret_parameter(parameter, html, typescript_class, [])
+
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in view_container.get_view_element_events().items():
@@ -379,9 +382,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, parameter in form_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
 
-        # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(form_call, typescript_calling, list_in_param)
-
         # Determine if there are any incoming interaction flow
         if self.check_if_there_is_an_interaction_flow(form_element) and routing_node is None:
             routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
@@ -391,9 +391,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Build all View Component Part
         for _, view_component_part in form_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, SimpleField):
-                self.interpret_simple_field(view_component_part, html, typescript_class)
+                self.interpret_simple_field(view_component_part, html, typescript_class, list_in_param)
             elif isinstance(view_component_part, DataBinding):
-                self.interpret_data_binding(view_component_part, html, typescript_class)
+                self.interpret_data_binding(view_component_part, html, typescript_class, list_in_param)
+
+        # TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(form_call, typescript_calling, list_in_param)
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -450,8 +453,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, parameter in detail_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
 
-        # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(detail_call, typescript_calling, list_in_param)
+
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -462,7 +464,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Build all View Component Part
         for _, view_component_part in detail_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, DataBinding):
-                self.interpret_data_binding(view_component_part, html, typescript_class)
+                self.interpret_data_binding(view_component_part, html, typescript_class, list_in_param)
+
+        # TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(detail_call, typescript_calling, list_in_param)
 
         # Creating the component node
         # The Component Itself
@@ -515,9 +520,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         for _, parameter in list_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
 
-        # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(list_call, typescript_calling, list_in_param)
-
         # TODO Implement
         # Build All View Element Event Inside
         for _, event in list_element.get_view_element_events().items():
@@ -527,7 +529,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         # Build all View Component Part
         for _, view_component_part in list_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, DataBinding):
-                self.interpret_data_binding(view_component_part, html, typescript_class)
+                self.interpret_data_binding(view_component_part, html, typescript_class, list_in_param)
+
+        # TODO Implement Building all In Direction Parameter
+        self.build_in_parameter_for_parent(list_call, typescript_calling, list_in_param)
 
         # Creating the component node
         # The Component Itself
@@ -722,29 +727,28 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         html_calling.append_html_into_body(visualization_span.render())
 
     # TODO Implement
-    def interpret_simple_field(self, simple_field_element, html_calling, typescript_calling):
+    def interpret_simple_field(self, simple_field_element, html_calling, typescript_calling, list_in_param):
 
         # Get the name and type
         element_name = simple_field_element.get_name()
         uml_model_name, id_of_type = simple_field_element.get_type().split('#')
+        direction = simple_field_element.get_direction()
 
         # Find the type in the UML Symbol Table
         datatype_of_field = self.uml_symbol_table.lookup(uml_model_name, id_of_type).name
 
+        #Interpreting the parameter, because part of Simple Field is Parameter
+        self.interpret_parameter(simple_field_element, html_calling, typescript_calling, list_in_param)
+
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
-
-        # Check if this field is under the DataBinding
-        # TODO Implement
 
         # Create the Input Field
         input_html = InputField(element_name, datatype_of_field)
 
-        # Call Into the HTML
+        # Call Into the HTML, because the property already declared by interpreting the parameter
+        # The two way data binding angular ready to be implemented
         html_calling.append_html_into_body(input_html.render())
-
-        # Declare property in class, for ngModel two way biding
-        typescript_calling.set_property_decl(input_html.get_ngmodel_property())
 
     # TODO Implement
     def interpret_conditional_expression(self, conditional_expression_element, data_binding_function_declaration):
@@ -772,10 +776,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         elif direction == 'out':
             self.interpret_out_parameter(parameter_element, html_calling, typescript_calling)
         elif direction == 'inout':
-            parameter_element.name = 'in' + element_name
             self.interpret_in_parameter(parameter_element, typescript_calling, list_in_direction_parameter)
-            parameter_element.name = 'out' + element_name
-            self.interpret_out_parameter(parameter_element, html_calling, typescript_calling)
         else:
             raise TypeError(
                 'No Parameter will have {direction} direction, Please verify the validity of your IFML'.format(
