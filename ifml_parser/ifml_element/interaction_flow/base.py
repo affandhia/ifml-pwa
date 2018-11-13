@@ -17,6 +17,7 @@ class InteractionFlow(InteractionFlowModelElement):
         self._parameter_binding_group = None
         self.build_param_binding_group()
         self._target_interaction_flow_element = xmiSchema.getAttribute(self.TARGET_INTERACTION_FLOW_ELEMENT_ATTRIBUTE)
+        self.check_ifml_reference(self._target_interaction_flow_element)
 
     def build_param_binding_group(self):
         list_param_binding_groups = self.getElementsByTagName(ParameterBindingGroup.PARAMETER_BINDING_GROUP_TAGNAME)
