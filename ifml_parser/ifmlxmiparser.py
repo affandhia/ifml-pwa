@@ -13,6 +13,7 @@ import logging
 import os.path
 from xml.dom import minidom
 
+from ifml_parser.domain_element.base import UMLBehavior, UMLBehavioralFeatureConcept, UMLDomainConcept, UMLStructuralFeature
 from ifml_parser.domain_element.base import DomainElement
 from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_component_parts import ViewComponentPart, \
     SimpleField, Slot
@@ -188,16 +189,30 @@ class DomainModel(NamedElement):
     """
     DOMAIN_MODEL_ATTRIBUTE = 'domainModel'
 
-    def __init__(self, xmiSchema):
+    def __init__(self, xmiSchema, uml_symbol_table):
         super().__init__(xmiSchema)
         self._domain_concept = self.build_domain_concept()
+        self.uml_sym_tab = uml_symbol_table
 
     def build_domain_concept(self):
         dict_domain_concept = {}
         list_schema_domain_concept = self.getElementsByTagName('domainElements')
         for domain_element in list_schema_domain_concept:
-            domain_element_instance = DomainElement(domain_element)
-            dict_domain_concept[domain_element_instance.get_id()] = domain_element_instance
+
+            type_of_domain_element = domain_element.getAttribute('xsi:type')
+
+            if type_of_domain_element is UMLBehavior.UML_BEHAVIOR_TYPE:
+                domain_element_instance = UMLBehavior(domain_element, self.uml_sym_tab)
+                dict_domain_concept[domain_element_instance.get_id()] = domain_element_instance
+            elif type_of_domain_element is UMLBehavioralFeatureConcept.UML_BEHAVIORAL_FEATURE_TYPE:
+                domain_element_instance = UMLBehavioralFeatureConcept(domain_element, self.uml_sym_tab)
+                dict_domain_concept[domain_element_instance.get_id()] = domain_element_instance
+            elif type_of_domain_element is UMLDomainConcept.UML_DOMAIN_CONCEPT_TYPE:
+                domain_element_instance = UMLDomainConcept(domain_element, self.uml_sym_tab)
+                dict_domain_concept[domain_element_instance.get_id()] = domain_element_instance
+            elif type_of_domain_element is UMLStructuralFeature.UML_STRUCTURAL_FEATURE_TYPE:
+                domain_element_instance = UMLStructuralFeature(domain_element, self.uml_sym_tab)
+                dict_domain_concept[domain_element_instance.get_id()] = domain_element_instance
 
         return dict_domain_concept
 
@@ -214,14 +229,15 @@ class IFMLModel(NamedElement):
     EXT_ATTRIBUTE = 'xmlns:ext'
 
     #Add parameter of UML symbol table to be used in the process of parsing
-    def __init__(self, xmiSchema):
+    def __init__(self, xmiSchema, uml_symbol_table, ifml_symbol_table):
         super().__init__(xmiSchema)
         self.core_version = str(self._schema.getAttribute(self.CORE_ATTRIBUTE)) if len(
             str(self._schema.getAttribute(self.CORE_ATTRIBUTE))) > 0 else "No Version Found"
         self.ext_version = str(self._schema.getAttribute(self.EXT_ATTRIBUTE)) if len(
             str(self._schema.getAttribute(self.EXT_ATTRIBUTE))) > 0 else "No Version Found"
+        self._domain_model = self.build_domain_model(uml_symbol_table)
         self._interaction_flow_model = self.build_interaction_flow_model()
-        self._domain_model = self.build_domain_model()
+
 
     def build_interaction_flow_model(self):
         interaction_flow_model = None
@@ -232,13 +248,13 @@ class IFMLModel(NamedElement):
             if_model = InteractionFlowModel(list_schema_interaction_flow_model[0])
         return if_model
 
-    def build_domain_model(self):
+    def build_domain_model(self, uml_symbol_table):
         domain_model = None
         list_schema_domain_model = self.getElementsByTagName(DomainModel.DOMAIN_MODEL_ATTRIBUTE)
         if len(list_schema_domain_model) > 1:
             raise ValueError('XMI FIle invalid, Cannot have More than 1 DomainModel')
         else:
-            domain_model = DomainModel(list_schema_domain_model[0])
+            domain_model = DomainModel(list_schema_domain_model[0], uml_symbol_table)
         return domain_model
 
     def get_interaction_flow_model(self):
@@ -256,12 +272,12 @@ def build_ifml_model(doc=None, uml_sym=None):
     """
 
     #Build the Symbol Table
-    symbol_table = IFMLSymbolTableBuilder(doc, uml_sym).build()
+    ifml_symbol_table = IFMLSymbolTableBuilder(doc, uml_sym).build()
 
     #Parse the UML Model here and become input for IFML Model
-    model = IFMLModel(doc.getElementsByTagName('core:IFMLModel')[0])
+    model = IFMLModel(doc.getElementsByTagName('core:IFMLModel')[0], uml_sym, ifml_symbol_table)
 
-    return model, symbol_table
+    return model, ifml_symbol_table
 
 
 def parse(xmiFileName=None, umlSymbolTable=None, xmiSchema=None, **kw):
