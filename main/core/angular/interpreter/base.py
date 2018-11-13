@@ -670,7 +670,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         action_event_container.add_action_event(action_event_node)
 
     # TODO Implement
-    def interpret_data_binding(self, data_binding_element, html_calling, typescript_calling):
+    def interpret_data_binding(self, data_binding_element, html_calling, typescript_calling, list_in_param):
         # Get the name
         element_name = data_binding_element.get_name()
 
@@ -691,7 +691,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                 self.interpret_visualization_attribute(sub_view_component_part, html_calling, typescript_calling,
                                                        data_binding_function.property_declaration)
             elif isinstance(sub_view_component_part, SimpleField):
-                self.interpret_simple_field(sub_view_component_part, html_calling, typescript_calling)
+                self.interpret_simple_field(sub_view_component_part, html_calling, typescript_calling, list_in_param)
             elif isinstance(sub_view_component_part, ConditionalExpression):
                 self.interpret_conditional_expression(sub_view_component_part, data_binding_function.func_decl)
 
