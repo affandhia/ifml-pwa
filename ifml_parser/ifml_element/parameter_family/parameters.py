@@ -43,6 +43,7 @@ class Parameter(InteractionFlowModelElement, NamedElement):
             #uml_type = type_node.getAttribute(self.XSI_TYPE)
             #href = type_node.getAttribute('href')
             type_returned = type_node.getAttribute('href')
+            self.check_uml_reference(type_returned)
         except IndexError:
             pass
         return type_returned
