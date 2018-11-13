@@ -1,1 +1,1 @@
-<ul id='list-{$ selector_name|safe $}'><{$ selector_name|safe $}{% for pair in parameter_and_property_pair_list %} *ngFor='let row of {$ pair[1]|safe $}' [{$ pair[0]|safe $}]='row'{% endfor %}></{$ selector_name|safe $}></ul>
+<ul id='list-{$ selector_name|safe $}' class='list-component view-component'><{$ selector_name|safe $}{% for pair in parameter_and_property_pair_list %} *ngFor='let row of {$ pair[1]|safe $}' [{$ pair[0]|safe $}]='row'{% endfor %}></{$ selector_name|safe $}></ul>

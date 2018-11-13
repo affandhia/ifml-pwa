@@ -51,6 +51,7 @@ class AngularButtonWithFunctionHandler(Node):
 
         return html, function_node
 
+
 class AngularMenuButton(AngularButtonWithFunctionHandler):
 
     def __init__(self, name, type=''):
@@ -141,4 +142,13 @@ class AngularModalButtonAndFunction(AngularButtonWithFunctionHandler):
     def set_target_modal(self, modal_identifier):
         self.add_statement_into_function_body(
             'this.{servicevar}.getModal(\'{modal_name}\').open();'.format(servicevar=self.service_var_name,
-                                                                         modal_name=modal_identifier))
+                                                                          modal_name=modal_identifier))
+
+    def button_template(self):
+        doc_landmark, tag_landmark, text_landmark = Doc().tagtext()
+        with tag_landmark('button', ('class', 'landmark-event'),
+                          ('id', 'view-event-{name}'.format(name=self.button_id_name)),
+                          ('(click)', "{handler}({obj_param})".format(
+                              handler=self.function_node.function_name, obj_param=self.object_param))
+                          ):
+            text_landmark(self.button_text)
