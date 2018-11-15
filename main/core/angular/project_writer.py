@@ -12,6 +12,8 @@ class AngularProject(object):
     GUARD_KEY = 'guard'
     LOGIN_KEY = 'login'
 
+    BUILD_SCRIPT_KEY = 'build'
+    RUN_SCRIPT_KEY = 'run'
     EDITOR_CONFIG_KEY = '.editorconfig'
     GITIGNORE_KEY = '.gitignore'
     ANGULAR_KEY = 'angular.json'
@@ -78,6 +80,7 @@ class AngularProject(object):
         self.write_e2e_protractor_definition()
         self.write_e2e_spec_definition()
         self.enable_authentication_service()
+        self.write_build_and_run_script()
 
     def write_editor_config(self):
         self.project_structure[self.EDITOR_CONFIG_KEY] = base_file_writer(self.EDITOR_CONFIG_KEY + '.template')
@@ -198,6 +201,17 @@ class AngularProject(object):
         content_of_auth_guard = base_file_writer(
             self.SRC_FOLDER_KEY + '/' + self.APP_KEY + '/' + self.GUARD_KEY + '/' + self.AUTH_GUARD_KEY + '.template')
         self.app_folder.update({self.GUARD_KEY: {self.AUTH_GUARD_KEY: content_of_auth_guard}})
+
+    def write_build_and_run_script(self):
+
+        #Build Script
+        self.project_structure[self.BUILD_SCRIPT_KEY+'.bat'] = base_file_writer(self.BUILD_SCRIPT_KEY+'.bat.template')
+        self.project_structure[self.BUILD_SCRIPT_KEY+'.sh'] = base_file_writer(self.BUILD_SCRIPT_KEY + '.sh.template')
+
+        #Run Script
+        self.project_structure[self.RUN_SCRIPT_KEY + '.bat'] = base_file_writer(
+            self.RUN_SCRIPT_KEY + '.bat.template')
+        self.project_structure[self.RUN_SCRIPT_KEY + '.sh'] = base_file_writer(self.RUN_SCRIPT_KEY + '.sh.template')
 
     def return_project_structure(self):
         return {self.app_name: self.project_structure}
