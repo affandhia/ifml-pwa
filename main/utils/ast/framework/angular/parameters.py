@@ -3,7 +3,7 @@ from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import VarDeclType, ImportStatementType
 from main.utils.jinja.angular import router_file_writer
 from main.utils.naming_management import camel_function_style, dasherize
-
+from .base import ANGULAR_CORE_MODULE
 
 class Parameter(Node):
 
@@ -63,8 +63,14 @@ class InParameter(Parameter):
         # Creating typescript code for defining proprty in child and parent
         self.parent_property = None
         self.child_property = None
-
+        self.input_import_statement = None
+        self.build_import_statement_input()
         self.build_parent_and_child_param()
+
+    def build_import_statement_input(self):
+        self.input_import_statement = ImportStatementType()
+        self.input_import_statement.set_main_module(ANGULAR_CORE_MODULE)
+        self.input_import_statement.add_imported_element('Input')
 
     def build_parent_and_child_param(self):
         self.build_parent_param()

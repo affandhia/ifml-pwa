@@ -799,8 +799,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Declare it in the child typescript, and if the type is class, import the class
         typescript_calling.set_property_decl(input_node.child_property)
+
         if input_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(input_node.needed_import)
+
+        #Adding Input decorator import statement
+        typescript_calling.add_import_statement_using_import_node(input_node.input_import_statement)
 
         # Add it into InDirectionInput List at Child Component
         list_in_direction_parameter.append(input_node)

@@ -126,11 +126,6 @@ class AngularComponentTypescriptClass(TypescriptClassType):
 class AngularComponentWithInputTypescriptClass(AngularComponentTypescriptClass):
     def __init__(self):
         super().__init__()
-        self.import_input_decorator_from_angular_core()
-
-    def import_input_decorator_from_angular_core(self):
-        # Adding import statement for Basic Component
-        self.add_import_statement(ANGULAR_CORE_MODULE, 'Input')
 
 class AngularComponentHTML(Node):
     def __init__(self):
