@@ -265,6 +265,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             typescript_calling.set_property_decl(landmark_path_var_decl)
             html_calling.append_html_into_body(doc_landmark.getvalue())
 
+        # Decide if this container is default in its XOR
+        if view_container.get_is_default():
+            routing_parent.add_children_routing(RedirectToAnotherPath('', typescript_class.selector_name))
+
         # Adding Path from root
         if not (routing_node is None):
             routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
@@ -299,10 +303,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
                 self.interpret_menu(view_element, html)
             elif isinstance(view_element, ViewContainer):
                 self.interpret_view_container(view_element, html, typescript_class, routing_node)
-
-        # Decide if this container is default in its XOR
-        if view_container.get_is_default():
-            routing_parent.add_children_routing(RedirectToAnotherPath('', typescript_class.selector_name))
 
         # The Component Itself
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,

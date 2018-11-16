@@ -9,7 +9,7 @@
         <outInteractionFlows xsi:type="core:NavigationFlow" id="_3KeCV92zEeir1be2FXIiQQ" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.3"/>
       </viewElementEvents>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:ViewContainer" id="_IpJCDd2bEeir1be2FXIiQQ" name="Customer Page" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:ViewContainer" id="_IpJCDd2bEeir1be2FXIiQQ" name="Customer Page" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.0/@viewElementEvents.0/@outInteractionFlows.0" isDefault="true">
       <viewElements xsi:type="ext:IFMLMenu" id="_mjcSot2bEeir1be2FXIiQQ" name="Customer Menu">
         <viewElementEvents id="_xQx_CN2bEeir1be2FXIiQQ" name="List Customer" viewElement="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.0">
           <outInteractionFlows xsi:type="core:NavigationFlow" id="_i62dd92qEeir1be2FXIiQQ" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.2"/>
@@ -19,7 +19,7 @@
         </viewElementEvents>
       </viewElements>
       <viewElements xsi:type="core:ViewContainer" id="_pRZtrN2bEeir1be2FXIiQQ" name="Customer Content" isXOR="true">
-        <viewElements xsi:type="core:ViewContainer" id="_9WzVrN2bEeir1be2FXIiQQ" name="Add Customer Page" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.0/@viewElementEvents.1/@outInteractionFlows.0">
+        <viewElements xsi:type="core:ViewContainer" id="_9WzVrN2bEeir1be2FXIiQQ" name="Add Customer Page" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.0/@viewElementEvents.1/@outInteractionFlows.0" isDefault="true">
           <viewElements xsi:type="ext:Form" id="_Fgojj92cEeir1be2FXIiQQ" name="Form Add Customer">
             <viewElementEvents xsi:type="ext:OnSubmitEvent" id="_uxmA-d21Eeir1be2FXIiQQ" name="Save" viewElement="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.0/@viewElements.0">
               <outInteractionFlows xsi:type="core:NavigationFlow" id="_0OUmB93OEeiovuDo4ZCbSA" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.6">
@@ -164,7 +164,7 @@
         </viewElements>
       </viewElements>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_-8sMEt20Eeir1be2FXIiQQ" name="account/list.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.3/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_-8sMEt20Eeir1be2FXIiQQ" name="api/account/list.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.3/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
       <parameters id="_OXa0ot21Eeir1be2FXIiQQ" name="data" direction="out">
         <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_0f4rMMUkEei4DcEVNfBC7w"/>
       </parameters>
@@ -176,7 +176,7 @@
         </outInteractionFlows>
       </actionEvents>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_PHq7At23Eeir1be2FXIiQQ" name="customer/retrieve.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.1/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_PHq7At23Eeir1be2FXIiQQ" name="api/customer/retrieve.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.1/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
       <parameters id="_j3EAgt3KEeiovuDo4ZCbSA" name="id">
         <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_Y0zEMMUkEei4DcEVNfBC7w"/>
       </parameters>
@@ -191,7 +191,7 @@
         </outInteractionFlows>
       </actionEvents>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_q8nmot3NEeiovuDo4ZCbSA" name="customer/create.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.0/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_q8nmot3NEeiovuDo4ZCbSA" name="api/customer/create.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.0/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
       <parameters id="__n47wt3NEeiovuDo4ZCbSA" name="data" direction="out">
         <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_0f4rMMUkEei4DcEVNfBC7w"/>
       </parameters>
@@ -215,12 +215,12 @@
         </outInteractionFlows>
       </actionEvents>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_wrlUkt3NEeiovuDo4ZCbSA" name="customer/delete.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.1/@viewElements.0/@viewElementEvents.1/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_wrlUkt3NEeiovuDo4ZCbSA" name="api/customer/delete.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.1/@viewElements.0/@viewElementEvents.1/@outInteractionFlows.0">
       <parameters id="_5hXCYt3NEeiovuDo4ZCbSA" name="id">
         <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_Y0zEMMUkEei4DcEVNfBC7w"/>
       </parameters>
     </interactionFlowModelElements>
-    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_-IGN8t3WEeiovuDo4ZCbSA" name="account/create.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.3/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+    <interactionFlowModelElements xsi:type="core:IFMLAction" id="_-IGN8t3WEeiovuDo4ZCbSA" name="api/account/create.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.3/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
       <parameters id="_BUi7wt3XEeiovuDo4ZCbSA" name="balance">
         <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_Y0zEMMUkEei4DcEVNfBC7w"/>
       </parameters>
