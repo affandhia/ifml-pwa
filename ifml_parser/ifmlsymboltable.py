@@ -376,6 +376,14 @@ class IFMLSymbolTableBuilder(object):
             symbol.build_datatype(self.uml_symbol_table)
             current_scope_symbol_table.insert(symbol)
 
+        # Get all actions
+        for child in getElementsByTagName(element, 'actions'):
+            next_scope_symbol_table = IFMLElementSymbolTable()
+            symbol = ActionSymbol(child)
+            self.build_action(child, next_scope_symbol_table)
+            symbol.set_next_scope(next_scope_symbol_table)
+            current_scope_symbol_table.insert(symbol)
+
         #Get child element beside text node and parameter
         for child in getElementsExceptTextNode(element):
             symbol_type = child.getAttribute(self.TYPE_ATTRIBUTE)
@@ -394,11 +402,6 @@ class IFMLSymbolTableBuilder(object):
             elif symbol_type == self.MENU_TYPE:
                 symbol = MenuSymbol(child)
                 self.build_view_container(child, next_scope_symbol_table)
-                symbol.set_next_scope(next_scope_symbol_table)
-                current_scope_symbol_table.insert(symbol)
-            elif symbol_type == self.ACTION_TYPE:
-                symbol = ActionSymbol(child)
-                self.build_action(child, next_scope_symbol_table)
                 symbol.set_next_scope(next_scope_symbol_table)
                 current_scope_symbol_table.insert(symbol)
             elif symbol_type == self.LIST_TYPE:

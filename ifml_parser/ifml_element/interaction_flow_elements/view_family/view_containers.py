@@ -100,7 +100,7 @@ class ViewContainer(ViewElement):
         dict_actions = {}
         list_action_associated = self.getElementsByTagName(self.ACTION_TAGNAME)
         for action in list_action_associated:
-            action_instance = Action(action)
+            action_instance = Action(action, self.uml_symbol_table, self.ifml_symbol_table)
             dict_actions.update({action_instance.get_id(): action_instance})
         return dict_actions
 

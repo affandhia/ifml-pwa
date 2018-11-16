@@ -205,13 +205,13 @@ class AngularProject(object):
     def write_build_and_run_script(self):
 
         #Build Script
-        self.project_structure[self.BUILD_SCRIPT_KEY+'.bat'] = base_file_writer(self.BUILD_SCRIPT_KEY+'.bat.template')
-        self.project_structure[self.BUILD_SCRIPT_KEY+'.sh'] = base_file_writer(self.BUILD_SCRIPT_KEY + '.sh.template')
+        self.project_structure[self.BUILD_SCRIPT_KEY+'.bat'] = base_file_writer(self.BUILD_SCRIPT_KEY+'.bat.template', app_name=self.app_name)
+        self.project_structure[self.BUILD_SCRIPT_KEY+'.sh'] = base_file_writer(self.BUILD_SCRIPT_KEY + '.sh.template', app_name=self.app_name)
 
         #Run Script
         self.project_structure[self.RUN_SCRIPT_KEY + '.bat'] = base_file_writer(
-            self.RUN_SCRIPT_KEY + '.bat.template')
-        self.project_structure[self.RUN_SCRIPT_KEY + '.sh'] = base_file_writer(self.RUN_SCRIPT_KEY + '.sh.template')
+            self.RUN_SCRIPT_KEY + '.bat.template', app_name=self.app_name)
+        self.project_structure[self.RUN_SCRIPT_KEY + '.sh'] = base_file_writer(self.RUN_SCRIPT_KEY + '.sh.template', app_name=self.app_name)
 
     def return_project_structure(self):
         return {self.app_name: self.project_structure}

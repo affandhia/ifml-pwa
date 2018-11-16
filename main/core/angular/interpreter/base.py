@@ -239,11 +239,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
             routing_node.enable_children_routing()
 
-        if self.check_if_there_is_an_interaction_flow(view_container) and routing_node is None:
-            #Make sure to enable the parent child routing
-            routing_parent.enable_children_routing()
-            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
-
         if (view_container.get_is_landmark()):
             landmark_path_var_name = camel_function_style(typescript_class.class_name) + 'path'
 
@@ -265,16 +260,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             typescript_calling.set_property_decl(landmark_path_var_decl)
             html_calling.append_html_into_body(doc_landmark.getvalue())
 
+        if self.check_if_there_is_an_interaction_flow(view_container) and routing_node is None:
+            #Make sure to enable the parent child routing
+            routing_parent.enable_children_routing()
+            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
+
         # Decide if this container is default in its XOR
         if view_container.get_is_default():
             routing_parent.add_children_routing(RedirectToAnotherPath('', typescript_class.selector_name))
-
-        # Adding Path from root
-        if not (routing_node is None):
-            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
-
-        for _, parameter in view_container.get_parameters().items():
-            self.interpret_parameter(parameter, html, typescript_class, [])
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -282,6 +275,9 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             if isinstance(event, ViewElementEvent):
                 # self.interpret_view_element_event(event, html, typescript_class)
                 self.view_element_events.append(event)
+
+        for _, parameter in view_container.get_parameters().items():
+            self.interpret_parameter(parameter, html, typescript_class, [])
 
         # TODO Implement
         # Build All Action inside the Container
@@ -310,6 +306,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Add Routing Node and (If exist) any children route
         try:
+            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
             routing_parent.add_children_routing(routing_node)
             angular_component_node.set_routing_node(routing_node.path_from_root)
             self.append_router_outlet(routing_node, html, typescript_class)
@@ -365,7 +362,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} Form".format(name=element_name))
 
         # Only need the routing node and typescript_class
-        _, typescript_class, routing_node = self.view_component_definition()
+        _, typescript_class, _ = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         # The HTML for Form
@@ -374,18 +371,10 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         #Preparing HTML Call template for form
         form_call = AngularFormHTMLCall(typescript_class.selector_name)
 
-        # Defining Routing Node
-        routing_node = None
-
         # TODO Implement
         list_in_param = []
         for _, parameter in form_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
-
-        # Determine if there are any incoming interaction flow
-        if self.check_if_there_is_an_interaction_flow(form_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
-            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
 
         # TODO Implement
         # Build all View Component Part
@@ -408,19 +397,14 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
                                                   component_html=html)
 
-        # Add Routing Node and (If exist) any children route
-        try:
-            routing_parent.add_children_routing(routing_node)
-            angular_component_node.set_routing_node(routing_node.path_from_root)
-        # If this container must be called
-        except Exception:
-            # Calling Form selector
-            doc_selector, tag_selector, text_selector = Doc().tagtext()
 
-            with tag_selector('div', id='div-form-{name}'.format(name=html.form_dasherize),
-                              klass='div-form view-component'):
-                doc_selector.asis(form_call.render())
-            html_calling.append_html_into_body(doc_selector.getvalue())
+        # Calling Form selector
+        doc_selector, tag_selector, text_selector = Doc().tagtext()
+
+        with tag_selector('div', id='div-form-{name}'.format(name=html.form_dasherize),
+                          klass='div-form view-component'):
+            doc_selector.asis(form_call.render())
+        html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
         self.components[form_element.get_id()] = angular_component_node
@@ -433,27 +417,17 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} Detail".format(name=element_name))
 
         # HTML, Typescript Class, and Routing Node
-        html, typescript_class, routing_node = self.view_component_definition()
+        html, typescript_class, _ = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         # HTML Call for Detail
         # Preparation to Call Detail
         detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
 
-        # Defining Routing Node
-        routing_node = None
-
-        # Determine if there are any incoming interaction flow
-        if self.check_if_there_is_an_interaction_flow(detail_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
-            routing_node.path_from_root = detail_element.path_from_root + '/' + routing_node.path
-
         # TODO Implement
         list_in_param = []
         for _, parameter in detail_element.get_parameters().items():
             self.interpret_parameter(parameter, html, typescript_class, list_in_param)
-
-
 
         # TODO Implement
         # Build All View Element Event Inside
@@ -474,18 +448,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
                                                   component_html=html)
 
-        # Add Routing Node and (If exist) any children route
-        try:
-            routing_parent.add_children_routing(routing_node)
-            angular_component_node.set_routing_node(routing_node.path_from_root)
-        # If this container must be called
-        except Exception:
-            # Calling Detail selector
-            doc_selector, tag_selector, text_selector = Doc().tagtext()
-            with tag_selector('div', id='div-detail-{name}'.format(name=typescript_class.selector_name),
-                              klass='div-detail view-component'):
-                doc_selector.asis(detail_call.render())
-            html_calling.append_html_into_body(doc_selector.getvalue())
+        # Calling Detail selector
+        doc_selector, tag_selector, text_selector = Doc().tagtext()
+        with tag_selector('div', id='div-detail-{name}'.format(name=typescript_class.selector_name),
+                          klass='div-detail view-component'):
+            doc_selector.asis(detail_call.render())
+        html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
         self.components[detail_element.get_id()] = angular_component_node
@@ -498,7 +466,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} List".format(name=element_name))
 
         # Typescript Class, and Routing Node
-        _, typescript_class, routing_node = self.view_component_definition()
+        _, typescript_class, _ = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
 
         # List HTML Layout
@@ -506,14 +474,6 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
 
         # Preparation to Call List selector in parent
         list_call = AngularListHTMLCall(typescript_class.selector_name)
-
-        # Defining Routing Node
-        routing_node = None
-
-        # Determine if there are any incoming interaction flow
-        if self.check_if_there_is_an_interaction_flow(list_element) and routing_node is None:
-            routing_node = RouteToModule(typescript_class, enable_guard=self.enable_authentication_guard)
-            routing_node.path_from_root = list_element.path_from_root + '/' + routing_node.path
 
         # TODO Implement
         list_in_param = []
@@ -539,18 +499,12 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         angular_component_node = AngularComponent(component_typescript_class=typescript_class,
                                                   component_html=html)
 
-        # Add Routing Node and (If exist) any children route
-        try:
-            routing_parent.add_children_routing(routing_node)
-            angular_component_node.set_routing_node(routing_node.path_from_root)
-        # If this container must be called
-        except Exception:
-            # Calling Detail selector
-            doc_selector, tag_selector, text_selector = Doc().tagtext()
-            with tag_selector('div', id='div-list-{name}'.format(name=typescript_class.selector_name),
-                              klass='div-list view-component'):
-                doc_selector.asis(list_call.render())
-            html_calling.append_html_into_body(doc_selector.getvalue())
+        # Calling Detail selector
+        doc_selector, tag_selector, text_selector = Doc().tagtext()
+        with tag_selector('div', id='div-list-{name}'.format(name=typescript_class.selector_name),
+                          klass='div-list view-component'):
+            doc_selector.asis(list_call.render())
+        html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
         self.components[list_element.get_id()] = angular_component_node
@@ -564,11 +518,11 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} View Element Event".format(name=element_name))
 
         #Defining variable for view element event interpreter
-        func_and_html_event_node = AngularButtonWithFunctionHandler(element_name, type='async')
+        func_and_html_event_node = AngularButtonWithFunctionHandler(element_name)
 
         #Interpret if this is a special menu button
         if isinstance(parent_symbol, MenuSymbol):
-            func_and_html_event_node = AngularMenuButton(element_name, type='async')
+            func_and_html_event_node = AngularMenuButton(element_name)
 
         # Build all child
         for _, interaction_flow in view_element_event.get_out_interaction_flow().items():
@@ -597,7 +551,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} OnSubmit Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
-        func_and_html_event_node = AngularSubmitButtonType(element_name, type='async')
+        func_and_html_event_node = AngularSubmitButtonType(element_name)
 
         # Build all child
         for _, interaction_flow in onsubmit_event.get_out_interaction_flow().items():
@@ -627,7 +581,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
             "Interpreting a {name} OnSelect Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
-        func_and_html_event_node = AngularOnclickType(element_name, type='async')
+        func_and_html_event_node = AngularOnclickType(element_name)
 
         # Build all child
         for _, interaction_flow in onselect_event.get_out_interaction_flow().items():
@@ -963,7 +917,7 @@ class IFMLtoAngularInterpreter(BaseInterpreter):
         modal_identifier = component_modal_node.modal_identifier
 
         # Add Open Modal Statement and import ngxmodal service
-        modal_handler_template = AngularModalButtonAndFunction(modal_identifier, 'async')
+        modal_handler_template = AngularModalButtonAndFunction(modal_identifier)
         modal_handler_template.set_target_modal(modal_identifier)
 
         # Build the param binding group
