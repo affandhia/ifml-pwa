@@ -63,7 +63,6 @@ class InParameter(Parameter):
         # Creating typescript code for defining proprty in child and parent
         self.parent_property = None
         self.child_property = None
-        self.input_import_statement = None
         self.build_import_statement_input()
         self.build_parent_and_child_param()
 

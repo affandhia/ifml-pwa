@@ -18,4 +18,8 @@
     <ownedAttribute xmi:id="_3F56MNzpEei9V6CDc8hNmw" name="id" type="_hoSTEMUkEei4DcEVNfBC7w"/>
     <ownedAttribute xmi:id="_9-rv4NzpEei9V6CDc8hNmw" name="email" type="_Y0zEMMUkEei4DcEVNfBC7w"/>
   </packagedElement>
+  <packagedElement xmi:type="uml:Association" xmi:id="_qTMUgOvCEeik6a1rBXeJEQ" memberEnd="_uCreAOvCEeik6a1rBXeJEQ _IsbuYOvEEeik6a1rBXeJEQ" navigableOwnedEnd="_uCreAOvCEeik6a1rBXeJEQ">
+    <ownedEnd xmi:id="_uCreAOvCEeik6a1rBXeJEQ" name="customerId" type="_hoSTEMUkEei4DcEVNfBC7w" association="_qTMUgOvCEeik6a1rBXeJEQ"/>
+    <ownedEnd xmi:id="_IsbuYOvEEeik6a1rBXeJEQ" name="accountId" type="_hoSTEMUkEei4DcEVNfBC7w" association="_qTMUgOvCEeik6a1rBXeJEQ"/>
+  </packagedElement>
 </uml:Model>

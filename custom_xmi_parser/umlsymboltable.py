@@ -150,7 +150,8 @@ class UMLSymbolTableBuilder(object):
             elif type_of_symbol == self.PRIMITIVE_TYPE or type_of_symbol == self.DATA_TYPE:
                 self.uml_symbol_table.insert(TypeSymbol(child))
             else:
-                raise Exception('{name} Not Yet Implemented, please Fix'.format(name=type_of_symbol))
+                pass
+                #raise Exception('{name} Not Yet Implemented, please Fix'.format(name=type_of_symbol))
 
         return self.uml_symbol_table
 
