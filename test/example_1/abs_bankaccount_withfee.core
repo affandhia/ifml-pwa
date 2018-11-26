@@ -207,12 +207,39 @@
           <parameters id="_QoAMot20Eeir1be2FXIiQQ" name="Json All Account">
             <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_0f4rMMUkEei4DcEVNfBC7w"/>
           </parameters>
-          <viewElementEvents xsi:type="ext:OnSelectEvent" id="_ZDANmt21Eeir1be2FXIiQQ" name="See Detail" viewElement="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.1/@viewElements.0"/>
+          <parameters id="_1Md9gu1qEeiC1MBoocpsjA" name="Customer Id" direction="out">
+            <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_hoSTEMUkEei4DcEVNfBC7w"/>
+          </parameters>
+          <viewElementEvents id="_5YbnqO1qEeiC1MBoocpsjA" name="Details" viewElement="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.1/@viewElements.0">
+            <outInteractionFlows xsi:type="core:NavigationFlow" id="_BMyp5-1tEeiC1MBoocpsjA" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.2/@actions.1">
+              <parameterBindingGroup id="_DnHXQu1tEeiC1MBoocpsjA">
+                <parameterBindings id="_EaLL4u1tEeiC1MBoocpsjA" sourceParameter="//@interactionFlowModel/@interactionFlowModelElements.1/@actions.3/@parameters.2" targetParameter="//@interactionFlowModel/@interactionFlowModelElements.1/@actions.0/@parameters.0"/>
+              </parameterBindingGroup>
+            </outInteractionFlows>
+          </viewElementEvents>
+          <viewElementEvents id="_-MQjCO1qEeiC1MBoocpsjA" name="Delete" viewElement="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.1/@viewElements.0">
+            <outInteractionFlows xsi:type="core:NavigationFlow" id="_wWXUx-1rEeiC1MBoocpsjA" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.2/@actions.2">
+              <parameterBindingGroup id="_yY7pcu1rEeiC1MBoocpsjA">
+                <parameterBindings id="_zDgQcu1rEeiC1MBoocpsjA" sourceParameter="//@interactionFlowModel/@interactionFlowModelElements.1/@actions.3/@parameters.2" targetParameter="//@interactionFlowModel/@interactionFlowModelElements.1/@actions.2/@parameters.0"/>
+              </parameterBindingGroup>
+            </outInteractionFlows>
+          </viewElementEvents>
           <viewComponentParts xsi:type="core:DataBinding" id="_8iQmbd2zEeir1be2FXIiQQ" name="All Account Data" domainConcept="//@domainModel/@domainElements.0">
-            <subViewComponentParts xsi:type="core:ConditionalExpression" id="_J2tfDt20Eeir1be2FXIiQQ" language="Typescript" body="this.allAccountData = new Account(this.jsonAllAccount);" name="setData"/>
-            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_ofJA7920Eeir1be2FXIiQQ" name="Account Id" featureConcept="//@domainModel/@domainElements.3"/>
+            <subViewComponentParts xsi:type="core:ConditionalExpression" id="_J2tfDt20Eeir1be2FXIiQQ" language="Typescript" body="this.allAccountData = new Account(this.jsonAllAccount);this.customerId = this.allAccountData.customerId" name="setData"/>
             <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_vHX5L920Eeir1be2FXIiQQ" name="Account Rekening" featureConcept="//@domainModel/@domainElements.11"/>
-            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_UHrNb-vqEei3u4A3X0mt-A" name="Account Balance" featureConcept="//@domainModel/@domainElements.9"/>
+          </viewComponentParts>
+        </viewElements>
+      </viewElements>
+      <viewElements xsi:type="core:ViewContainer" id="_BC3HTO1sEeiC1MBoocpsjA" name="Detail Account Page" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.2/@actions.1/@actionEvents.0/@outInteractionFlows.0">
+        <viewElements xsi:type="ext:Details" id="_DSV2oO1sEeiC1MBoocpsjA" name="Detail Account">
+          <parameters id="_F9hDYu1sEeiC1MBoocpsjA" name="Account Detail Param">
+            <type xsi:type="uml:Class" href="abs_bankaccount.uml#_IWfGoNzpEei9V6CDc8hNmw"/>
+          </parameters>
+          <viewComponentParts xsi:type="core:DataBinding" id="_LW7_Le1sEeiC1MBoocpsjA" name="Detail Account Data" domainConcept="//@domainModel/@domainElements.14">
+            <subViewComponentParts xsi:type="core:ConditionalExpression" id="_N6CODu1sEeiC1MBoocpsjA" body="this.detailAccountData = new Account(this.accountDetailParam);" name="setData"/>
+            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_QnkLT-1sEeiC1MBoocpsjA" name="Account Id" featureConcept="//@domainModel/@domainElements.3"/>
+            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_UvC-D-1sEeiC1MBoocpsjA" name="Account Rekening" featureConcept="//@domainModel/@domainElements.11"/>
+            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_Yg3Cz-1sEeiC1MBoocpsjA" name="Account Balance" featureConcept="//@domainModel/@domainElements.9"/>
           </viewComponentParts>
         </viewElements>
       </viewElements>
@@ -227,6 +254,26 @@
             </parameterBindingGroup>
           </outInteractionFlows>
         </actionEvents>
+      </actions>
+      <actions id="_kke3ku1qEeiC1MBoocpsjA" name="api/account/retrieve.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.1/@viewElements.0/@viewElementEvents.0/@outInteractionFlows.0">
+        <parameters id="_2l_fwu1rEeiC1MBoocpsjA" name="id">
+          <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_hoSTEMUkEei4DcEVNfBC7w"/>
+        </parameters>
+        <parameters id="_4BHZ8u1rEeiC1MBoocpsjA" name="data" direction="out">
+          <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_0f4rMMUkEei4DcEVNfBC7w"/>
+        </parameters>
+        <actionEvents id="_6EV1-O1rEeiC1MBoocpsjA" name="then">
+          <outInteractionFlows xsi:type="core:NavigationFlow" id="_7OMZ9-1rEeiC1MBoocpsjA" targetInteractionFlowElement="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.2">
+            <parameterBindingGroup id="_c1h88u1sEeiC1MBoocpsjA">
+              <parameterBindings id="_deASMu1sEeiC1MBoocpsjA" sourceParameter="//@interactionFlowModel/@interactionFlowModelElements.1/@actions.0/@parameters.1" targetParameter="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.2/@viewElements.0/@parameters.0"/>
+            </parameterBindingGroup>
+          </outInteractionFlows>
+        </actionEvents>
+      </actions>
+      <actions id="_Am71w-1rEeiC1MBoocpsjA" name="api/account/delete.abs" inInteractionFlows="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.1/@viewElements.0/@viewElementEvents.1/@outInteractionFlows.0">
+        <parameters id="_0aqQou1rEeiC1MBoocpsjA" name="id">
+          <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_hoSTEMUkEei4DcEVNfBC7w"/>
+        </parameters>
       </actions>
     </interactionFlowModelElements>
   </interactionFlowModel>
@@ -271,6 +318,9 @@
       <classifier xsi:type="uml:Class" href="abs_bankaccount.uml#_OV980NzpEei9V6CDc8hNmw"/>
     </domainElements>
     <domainElements xsi:type="core:UMLDomainConcept" id="_a_hXGd3VEeiovuDo4ZCbSA" name="Account For Form" dataBinding="//@interactionFlowModel/@interactionFlowModelElements.1/@viewElements.1/@viewElements.3/@viewElements.0/@viewComponentParts.0">
+      <classifier xsi:type="uml:Class" href="abs_bankaccount.uml#_IWfGoNzpEei9V6CDc8hNmw"/>
+    </domainElements>
+    <domainElements xsi:type="core:UMLDomainConcept" id="_ZAfvou1tEeiC1MBoocpsjA" name="Account For Details" dataBinding="//@interactionFlowModel/@interactionFlowModelElements.2/@viewElements.2/@viewElements.0/@viewComponentParts.0">
       <classifier xsi:type="uml:Class" href="abs_bankaccount.uml#_IWfGoNzpEei9V6CDc8hNmw"/>
     </domainElements>
   </domainModel>
