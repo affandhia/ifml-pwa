@@ -940,8 +940,8 @@ def buildHierarchy(doc, filename):
 def parse(xschemaFileName):
     """ """
     global XMI
+    doc = None
     try:
-        doc = None
         if xschemaFileName:
             suff = os.path.splitext(xschemaFileName)[1].lower()
             if suff in ('.xmi', '.xml', '.uml'):

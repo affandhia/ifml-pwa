@@ -68,7 +68,6 @@ class IFMLSymbolTable(object):
     def lookup(self, reference_in_list):
 
         symbol_found = None
-
         # Remove the first 3 character, and convert into array
         recursive_reference_array = reference_in_list[3:].split('/@')
         model_name = recursive_reference_array[0]
@@ -79,7 +78,6 @@ class IFMLSymbolTable(object):
             symbol_found = self.table[model_name].lookup(scope_in_model)
         except KeyError:
             raise Exception('No {name} model in IFML, please fix the XMI file'.format(name=model_name))
-
         return symbol_found
 
 

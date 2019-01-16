@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<core:IFMLModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://www.omg.org/spec/20130218/core" xmlns:ext="http://www.omg.org/spec/20130218/ext" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" id="_NEwuMN2aEeir1be2FXIiQQ" name="abs-bankaccount-ver2">
+<core:IFMLModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://www.omg.org/spec/20130218/core" xmlns:ext="http://www.omg.org/spec/20130218/ext" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" id="_NEwuMN2aEeir1be2FXIiQQ" name="abs-bankaccount">
   <interactionFlowModel id="_QEtRIt2aEeir1be2FXIiQQ" name="application">
     <interactionFlowModelElements xsi:type="ext:IFMLMenu" id="_gS-2u92aEeir1be2FXIiQQ" name="Main Menu">
       <viewElementEvents id="_pGlaON2aEeir1be2FXIiQQ" name="Customer" viewElement="//@interactionFlowModel/@interactionFlowModelElements.0">
@@ -116,7 +116,7 @@
             <viewComponentParts xsi:type="ext:SimpleField" id="_GXFeEt3WEeiovuDo4ZCbSA" name="Id Of The Account Owner" direction="inout">
               <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_hoSTEMUkEei4DcEVNfBC7w"/>
             </viewComponentParts>
-            <viewComponentParts xsi:type="ext:SimpleField" id="_ZD1REt3WEeiovuDo4ZCbSA" name="Rekening" direction="out">
+            <viewComponentParts xsi:type="ext:SimpleField" id="_ZD1REt3WEeiovuDo4ZCbSA" name="The Account" direction="out">
               <type xsi:type="uml:PrimitiveType" href="abs_bankaccount.uml#_Y0zEMMUkEei4DcEVNfBC7w"/>
             </viewComponentParts>
             <viewComponentParts xsi:type="ext:SimpleField" id="_kNGEgt3WEeiovuDo4ZCbSA" name="Balance" direction="out">
@@ -211,7 +211,7 @@
           <viewComponentParts xsi:type="core:DataBinding" id="_8iQmbd2zEeir1be2FXIiQQ" name="All Account Data" domainConcept="//@domainModel/@domainElements.0">
             <subViewComponentParts xsi:type="core:ConditionalExpression" id="_J2tfDt20Eeir1be2FXIiQQ" language="Typescript" body="this.allAccountData = new Account(this.jsonAllAccount);" name="setData"/>
             <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_ofJA7920Eeir1be2FXIiQQ" name="Account Id" featureConcept="//@domainModel/@domainElements.3"/>
-            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_vHX5L920Eeir1be2FXIiQQ" name="Account Rekening" featureConcept="//@domainModel/@domainElements.11"/>
+            <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_vHX5L920Eeir1be2FXIiQQ" name="The Account" featureConcept="//@domainModel/@domainElements.11"/>
             <subViewComponentParts xsi:type="core:VisualizationAttribute" id="_UHrNb-vqEei3u4A3X0mt-A" name="Account Balance" featureConcept="//@domainModel/@domainElements.9"/>
           </viewComponentParts>
         </viewElements>
