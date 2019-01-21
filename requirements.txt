@@ -1,0 +1,9 @@
+beautifulsoup4==4.6.3
+click==6.7
+EditorConfig==0.12.2
+Jinja2==2.10
+jsbeautifier==1.8.7
+MarkupSafe==1.0
+pytz==2018.5
+six==1.11.0
+yattag==1.10.0
