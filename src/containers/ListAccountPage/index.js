@@ -1,14 +1,15 @@
-import React from "react";
-import axios, { CancelToken } from "axios";
-import _debounce from "lodash/debounce";
+import React from 'react';
+import axios, { CancelToken } from 'axios';
 
-import Token from "../../utils/token";
+import { withAuth } from '../Authentication';
+
+import Token from '../../utils/token';
 
 class ListAccountPage extends React.Component {
   state = {
     accounts: [],
     loading: null,
-    source: CancelToken.source()
+    source: CancelToken.source(),
   };
   _isMounted = false;
 
@@ -22,7 +23,7 @@ class ListAccountPage extends React.Component {
     this._isMounted = false;
 
     this.state.source.cancel(
-      "Operation canceled because of the component will be unmounted"
+      'Operation canceled because of the component will be unmounted'
     );
   }
 
@@ -34,24 +35,18 @@ class ListAccountPage extends React.Component {
         `http://localhost:8089/api/account/list.abs?token=${token}`,
         undefined,
         {
-          cancelToken: this.state.source
+          cancelToken: this.state.source,
         }
       );
 
       if (this._isMounted) {
         this.setState({
-          accounts: response.data.data
+          accounts: response.data.data,
         });
       }
     } catch (e) {
       console.log(e);
     }
-  };
-
-  getAccountListDebounced = _debounce(this.getAccountList, 1000);
-
-  handleTokenChange = e => {
-    this.getAccountListDebounced(e.target.value);
   };
 
   renderAccountList = () => {
@@ -60,15 +55,15 @@ class ListAccountPage extends React.Component {
     return (
       <React.Fragment>
         {accounts.map(account => {
-          const { rekening, balance, id, accountId, interest } = account;
+          const { rekening, balance, id, customerId, interest } = account;
 
           return (
             <li key={id}>
               <div>Account ID: {id}</div>
-              <div>Customer ID: {accountId}</div>
-              <div>{rekening}</div>
-              <div>{interest}</div>
-              <div>{balance}</div>
+              <div>Customer ID: {customerId}</div>
+              <div>Bank Account: {rekening}</div>
+              <div>Interest: {interest}</div>
+              <div>Balance: {balance}</div>
             </li>
           );
         })}
@@ -79,10 +74,6 @@ class ListAccountPage extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <div>Input the Token here</div>
-        <div>
-          <textarea onChange={this.handleTokenChange} />
-        </div>
         {this.state.loading ? <div>{this.state.loading}</div> : null}
         <ul>{this.renderAccountList()}</ul>
       </React.Fragment>
@@ -90,4 +81,4 @@ class ListAccountPage extends React.Component {
   }
 }
 
-export default ListAccountPage;
+export default withAuth(ListAccountPage);
