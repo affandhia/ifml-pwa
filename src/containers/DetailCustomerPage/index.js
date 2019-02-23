@@ -10,7 +10,8 @@ class DetailCustomerPage extends React.Component {
   state = {
     source: CancelToken.source(),
     data: {},
-    loading: false
+    loading: false,
+    error: null,
   };
   _isMounted = false;
 
@@ -51,6 +52,7 @@ class DetailCustomerPage extends React.Component {
       if (this._isMounted) {
         this.setState({
           loading: false,
+          error: null,
           data: response.data.data
         });
       }
@@ -58,6 +60,7 @@ class DetailCustomerPage extends React.Component {
       console.log(e);
       this.setState({
         loading: false,
+        error: 'The customer ID can not be found',
         data: {}
       });
     }
@@ -78,7 +81,7 @@ class DetailCustomerPage extends React.Component {
           </Link>
         </div>
 
-        <Form
+        {this.state.error ? <div>{this.state.error}</div> : <Form
           name={name}
           email={email}
           phone={phone}
@@ -86,7 +89,7 @@ class DetailCustomerPage extends React.Component {
           formTitle={`Detail Customer #${id}`}
           hideSubmitButton
           onSubmit={() => {}}
-        />
+        />}
 
         
       </div>
