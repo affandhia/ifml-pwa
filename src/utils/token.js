@@ -1,14 +1,21 @@
+import { Cookies } from 'react-cookie';
 
 class Token {
-    get() {
-        const token = localStorage.getItem("token");
+  cookies = new Cookies();
 
-        return token;
-    }
+  get() {
+    const token = this.cookies.get('token');
 
-    set(token) {
-        localStorage.setItem("token", token);
-    }
+    return token;
+  }
+
+  set(token) {
+    this.cookies.set('token', token, { path: '/' });
+  }
+
+  clear() {
+    this.cookies.remove('token');
+  }
 }
 
 export default Token;
