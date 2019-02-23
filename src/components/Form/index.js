@@ -20,10 +20,18 @@ class Form extends React.Component {
   };
 
   render() {
+    const {
+      name,
+      phone,
+      email,
+      address,
+      buttonText,
+    } = this.props;
+
     return (
       <form>
         <fieldset>
-          <legend>Add Customer</legend>
+          <legend>{this.props.formTitle}</legend>
           <div>
             <label htmlFor="input-name">Customer Name</label>
             <div>
@@ -32,6 +40,7 @@ class Form extends React.Component {
                 name="name"
                 type="text"
                 placeholder="type your Name"
+                defaultValue={name}
                 ref={e => { this.nameInput = e }}
               />
             </div>
@@ -44,6 +53,7 @@ class Form extends React.Component {
                 name="phone"
                 type="text"
                 placeholder="type your Phone"
+                defaultValue={phone}
                 ref={e => { this.phoneInput = e }}
               />
             </div>
@@ -56,6 +66,7 @@ class Form extends React.Component {
                 name="email"
                 type="text"
                 placeholder="type your Email"
+                defaultValue={email}
                 ref={e => { this.emailInput = e }}
               />
             </div>
@@ -68,6 +79,7 @@ class Form extends React.Component {
                 name="address"
                 type="text"
                 placeholder="type your Address"
+                defaultValue={address}
                 ref={e => { this.addressInput = e }}
               />
             </div>
@@ -79,7 +91,7 @@ class Form extends React.Component {
                 id="button-save"
                 name="save"
               >
-                Save Customer
+                {buttonText}
               </button>
             </div>
           </div>
@@ -87,6 +99,11 @@ class Form extends React.Component {
       </form>
     );
   }
+}
+
+Form.defaultProps = {
+  formTitle: 'Form',
+  buttonText: 'Submit',
 }
 
 export default Form;
