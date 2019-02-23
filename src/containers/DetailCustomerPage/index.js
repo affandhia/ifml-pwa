@@ -84,7 +84,7 @@ class DetailCustomerPage extends React.Component {
           phone={phone}
           address={address}
           formTitle={`Detail Customer #${id}`}
-          buttonText="Save Changes"
+          hideSubmitButton
           onSubmit={() => {}}
         />
 

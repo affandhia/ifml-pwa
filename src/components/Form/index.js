@@ -26,6 +26,7 @@ class Form extends React.Component {
       email,
       address,
       buttonText,
+      hideSubmitButton,
     } = this.props;
 
     return (
@@ -84,7 +85,7 @@ class Form extends React.Component {
               />
             </div>
           </div>
-          <div>
+          {hideSubmitButton ? null : <div>
             <div>
               <button
                 onClick={this.handleOnSaveBtnClick}
@@ -94,7 +95,7 @@ class Form extends React.Component {
                 {buttonText}
               </button>
             </div>
-          </div>
+          </div>}
         </fieldset>
       </form>
     );
@@ -104,6 +105,7 @@ class Form extends React.Component {
 Form.defaultProps = {
   formTitle: 'Form',
   buttonText: 'Submit',
+  hideSubmitButton: false,
 }
 
 export default Form;
