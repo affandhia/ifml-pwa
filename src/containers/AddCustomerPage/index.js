@@ -2,7 +2,7 @@ import React from "react";
 import axios, { CancelToken } from "axios";
 import _debounce from "lodash/debounce";
 
-import Form from "./components/Form";
+import Form from "../../components/Form";
 
 class CustomerPage extends React.Component {
   state = {
@@ -60,7 +60,7 @@ class CustomerPage extends React.Component {
       return <div>Saving the data to database...</div>;
     }
 
-    return <Form onSubmit={this.addCustomer} />;
+    return <Form formTitle="Add Customer" buttonText="Save Customer" onSubmit={this.addCustomer} />;
   }
 }
 

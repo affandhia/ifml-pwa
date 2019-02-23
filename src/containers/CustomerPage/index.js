@@ -3,6 +3,7 @@ import { Switch, Route, Redirect } from "react-router-dom";
 
 import AddCustomerPage from "../AddCustomerPage";
 import ListCustomerPage from "../ListCustomerPage";
+import DetailCustomerPage from "../DetailCustomerPage";
 
 import Navbar from "./components/Navbar";
 
@@ -16,6 +17,7 @@ class CustomerPage extends React.Component {
         <hr />
         <Switch>
           <Route exact path={`${match.url}/add`} component={AddCustomerPage} />
+        <Route exact path={`${match.url}/:id`} component={DetailCustomerPage} />
           <Route exact path={`${match.url}/`} component={ListCustomerPage} />
           <Redirect
             from={`${match.url}/`}
