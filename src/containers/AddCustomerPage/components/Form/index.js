@@ -1,6 +1,24 @@
 import React from "react";
 
 class Form extends React.Component {
+  state = {
+    name: "",
+    email: "",
+    phone: "",
+    address: ""
+  };
+
+  handleOnSaveBtnClick = e => {
+    e.preventDefault();
+
+    const name = this.nameInput.value;
+    const phone = this.phoneInput.value;
+    const email = this.emailInput.value;
+    const address = this.addressInput.value;
+
+    this.props.onSubmit(name, email, phone, address);
+  };
+
   render() {
     return (
       <form>
@@ -14,6 +32,7 @@ class Form extends React.Component {
                 name="name"
                 type="text"
                 placeholder="type your Name"
+                ref={e => { this.nameInput = e }}
               />
             </div>
           </div>
@@ -25,6 +44,7 @@ class Form extends React.Component {
                 name="phone"
                 type="text"
                 placeholder="type your Phone"
+                ref={e => { this.phoneInput = e }}
               />
             </div>
           </div>
@@ -36,6 +56,7 @@ class Form extends React.Component {
                 name="email"
                 type="text"
                 placeholder="type your Email"
+                ref={e => { this.emailInput = e }}
               />
             </div>
           </div>
@@ -47,12 +68,17 @@ class Form extends React.Component {
                 name="address"
                 type="text"
                 placeholder="type your Address"
+                ref={e => { this.addressInput = e }}
               />
             </div>
           </div>
           <div>
             <div>
-              <button id="button-save" name="save">
+              <button
+                onClick={this.handleOnSaveBtnClick}
+                id="button-save"
+                name="save"
+              >
                 Save Customer
               </button>
             </div>
