@@ -1,15 +1,15 @@
-import React from "react";
-import axios, { CancelToken } from "axios";
-import { Link } from "react-router-dom";
-import _debounce from "lodash/debounce";
+import React from 'react';
+import axios, { CancelToken } from 'axios';
+import { Link } from 'react-router-dom';
+import _debounce from 'lodash/debounce';
 
-import Token from "../../utils/token";
+import Token from '../../utils/token';
 
 class ListCustomerPage extends React.Component {
   state = {
     customers: [],
     loading: null,
-    source: CancelToken.source()
+    source: CancelToken.source(),
   };
   _isMounted = false;
 
@@ -23,7 +23,7 @@ class ListCustomerPage extends React.Component {
     this._isMounted = false;
 
     this.state.source.cancel(
-      "Operation canceled because of the component will be unmounted"
+      'Operation canceled because of the component will be unmounted'
     );
   }
 
@@ -35,13 +35,13 @@ class ListCustomerPage extends React.Component {
         `http://localhost:8089/api/customer/list.abs?token=${token}`,
         undefined,
         {
-          cancelToken: this.state.source
+          cancelToken: this.state.source,
         }
       );
 
       if (this._isMounted) {
         this.setState({
-          customers: response.data.data
+          customers: response.data.data,
         });
       }
     } catch (e) {
@@ -49,13 +49,11 @@ class ListCustomerPage extends React.Component {
     }
   };
 
-  getCustomerListDebounced = _debounce(this.getCustomerList, 1000);
-
   deleteCustomerList = _debounce(async id => {
     const token = new Token().get();
 
     this.setState({
-      loading: `Deleting customer ${id}`
+      loading: `Deleting customer ${id}`,
     });
 
     try {
@@ -63,13 +61,13 @@ class ListCustomerPage extends React.Component {
         `http://localhost:8089/api/customer/delete.abs?token=${token}&id=${id}`,
         undefined,
         {
-          cancelToken: this.state.source
+          cancelToken: this.state.source,
         }
       );
 
       if (this._isMounted) {
         this.setState({
-          loading: null
+          loading: null,
         });
 
         this.getCustomerList();
@@ -77,14 +75,10 @@ class ListCustomerPage extends React.Component {
     } catch (e) {
       console.log(e);
       this.setState({
-        loading: null
+        loading: null,
       });
     }
   }, 1000);
-
-  handleTokenChange = e => {
-    this.getCustomerListDebounced(e.target.value);
-  };
 
   handleDeleteCustomer = id => () => {
     this.deleteCustomerList(id);
@@ -100,7 +94,7 @@ class ListCustomerPage extends React.Component {
 
           return (
             <li key={id}>
-              <div>Customer ID: {id}</div>
+              <div>Customer ID: {id.toString()}</div>
               <div>{name}</div>
               <div>{email}</div>
               <div>
@@ -119,10 +113,6 @@ class ListCustomerPage extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <div>Input the Token here</div>
-        <div>
-          <textarea onChange={this.handleTokenChange} />
-        </div>
         {this.state.loading ? <div>{this.state.loading}</div> : null}
         <ul>{this.renderCustomerList()}</ul>
       </React.Fragment>
