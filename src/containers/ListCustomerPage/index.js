@@ -27,8 +27,8 @@ class ListCustomerPage extends React.Component {
     );
   }
 
-  getCustomerList = async () => {
-    const token = new Token().get();
+  getCustomerList = async (token = '') => {
+    token = token ? token : new Token().get();
 
     try {
       const response = await axios.get(
