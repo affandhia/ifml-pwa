@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 
 import CustomerPage from './containers/CustomerPage';
+import ListAccountPage from './containers/ListAccountPage';
 
 import Navbar from './components/Navbar';
 
@@ -65,7 +66,7 @@ const App = () => (
 
       <Route exact path="/" component={Home}/>
       <Route path="/customer" component={CustomerPage}/>
-      <Route path="/account" component={Home}/>
+      <Route path="/account" component={ListAccountPage}/>
       <Route path="/about" component={About}/>
       <Route path="/topics" component={Topics}/>
     </div>
