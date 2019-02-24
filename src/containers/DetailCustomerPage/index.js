@@ -1,10 +1,10 @@
-import React from "react";
-import axios, { CancelToken } from "axios";
-import { Link } from "react-router-dom";
+import React from 'react';
+import axios, { CancelToken } from 'axios';
+import { Link } from 'react-router-dom';
 
-import Form from "../../components/Form";
+import Form from '../../components/Form';
 
-import Token from "../../utils/token";
+import Token from '../../utils/token';
 
 class DetailCustomerPage extends React.Component {
   state = {
@@ -26,7 +26,7 @@ class DetailCustomerPage extends React.Component {
     this._isMounted = false;
 
     this.state.source.cancel(
-      "Operation canceled because of the component will be unmounted"
+      'Operation canceled because of the component will be unmounted'
     );
   };
 
@@ -37,15 +37,15 @@ class DetailCustomerPage extends React.Component {
 
     this.setState({
       loading: true,
-      data: {}
+      data: {},
     });
 
     try {
       const response = await axios.get(
-        `http://localhost:8089/api/customer/retrieve.abs?token=${token}&${encodedData}`,
+        `/api/customer/retrieve.abs?token=${token}&${encodedData}`,
         undefined,
         {
-          cancelToken: this.state.source
+          cancelToken: this.state.source,
         }
       );
 
@@ -53,7 +53,7 @@ class DetailCustomerPage extends React.Component {
         this.setState({
           loading: false,
           error: null,
-          data: response.data.data
+          data: response.data.data,
         });
       }
     } catch (e) {
@@ -61,7 +61,7 @@ class DetailCustomerPage extends React.Component {
       this.setState({
         loading: false,
         error: 'The customer ID can not be found',
-        data: {}
+        data: {},
       });
     }
   };
@@ -75,23 +75,25 @@ class DetailCustomerPage extends React.Component {
 
     return (
       <div>
-          <div>
+        <div>
           <Link to="/customer">
             <button>Back to List</button>
           </Link>
         </div>
 
-        {this.state.error ? <div>{this.state.error}</div> : <Form
-          name={name}
-          email={email}
-          phone={phone}
-          address={address}
-          formTitle={`Detail Customer #${id}`}
-          hideSubmitButton
-          onSubmit={() => {}}
-        />}
-
-        
+        {this.state.error ? (
+          <div>{this.state.error}</div>
+        ) : (
+          <Form
+            name={name}
+            email={email}
+            phone={phone}
+            address={address}
+            formTitle={`Detail Customer #${id}`}
+            hideSubmitButton
+            onSubmit={() => {}}
+          />
+        )}
       </div>
     );
   }

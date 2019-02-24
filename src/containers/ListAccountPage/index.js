@@ -32,7 +32,7 @@ class ListAccountPage extends React.Component {
 
     try {
       const response = await axios.get(
-        `http://localhost:8089/api/account/list.abs?token=${token}`,
+        `/api/account/list.abs?token=${token}`,
         undefined,
         {
           cancelToken: this.state.source,
