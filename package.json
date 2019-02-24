@@ -2,8 +2,10 @@
   "name": "ifml-react-pwa",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:7776",
   "dependencies": {
     "axios": "^0.18.0",
+    "http-proxy-middleware": "^0.19.1",
     "lodash": "^4.17.11",
     "react": "^16.8.2",
     "react-cookie": "^3.0.8",
