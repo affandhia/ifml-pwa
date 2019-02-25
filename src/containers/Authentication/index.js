@@ -16,33 +16,29 @@ export class AuthProvider extends React.Component {
   tokenManager = new Token();
 
   componentDidMount = () => {
+    const token = this.tokenManager.get();
+    if (!token) {
+      this.logout();
+      return;
+    }
+
     const googleLoadTimer = setInterval(() => {
       this.setAuthLoadingStatus(LOADING_STATUS.INITIAL);
       if (window.gapi) {
         this.setAuthLoadingStatus(LOADING_STATUS.LOADING);
-        this.initGoogle(() => {
+        this.initGoogle(googleAuth => {
           clearInterval(googleLoadTimer);
-          this.setAuthLoadingStatus(LOADING_STATUS.LOADED);
+          this.checkGoogle(googleAuth);
         });
       }
     }, 90);
   };
 
-  login = token => {
-    this.tokenManager.set(token);
-
-    this.setState({
-      isAuth: true,
-    });
+  componentWillUpdate = () => {
+    console.log(this.state.isAuth);
   };
 
-  logout = () => {
-    this.tokenManager.clear();
-
-    window.gapi.auth2.getAuthInstance().signOut();
-
-    this.setState({ isAuth: false });
-  };
+  // GOOGLE Method
 
   initGoogle = func => {
     window.gapi.load('auth2', function() {
@@ -52,6 +48,82 @@ export class AuthProvider extends React.Component {
         })
         .then(func);
     });
+  };
+
+  getGoogleAuth = () => {};
+
+  checkGoogle = googleAuth => {
+    if (googleAuth.isSignedIn.get()) {
+      const googleUser = googleAuth.currentUser.get();
+      const tokenId = googleUser.getAuthResponse().id_token;
+      this.login(tokenId, () => {
+        this.setState({ googleAuth }, () =>
+          this.setAuthLoadingStatus(LOADING_STATUS.LOADED)
+        );
+      });
+      return;
+    }
+
+    this.setState({ googleAuth }, () =>
+      this.setAuthLoadingStatus(LOADING_STATUS.LOADED)
+    );
+  };
+
+  loginGoogle = () => {
+    const googleAuth = this.state.googleAuth;
+    if (!googleAuth) {
+      this.initGoogle(this.loginGoogleHelper);
+      return;
+    }
+
+    this.loginGoogleHelper(googleAuth);
+  };
+
+  loginGoogleHelper = googleAuth => {
+    googleAuth
+      .signIn({
+        scope: 'profile email',
+      })
+      .then(googleUser => {
+        const tokenId = googleUser.getAuthResponse().id_token;
+
+        this.login(tokenId);
+      });
+  };
+
+  logoutGoogle = () => {
+    const googleAuth = this.state.googleAuth;
+    if (!googleAuth) {
+      this.initGoogle(auth => {
+        this.setAuthLoadingStatus(LOADING_STATUS.LOADED);
+        auth.signOut();
+      });
+    } else {
+      googleAuth.signOut();
+    }
+  };
+
+  // [END] GOOGLE Method
+
+  login = (token, callback) => {
+    this.tokenManager.set(token);
+
+    this.setState(
+      {
+        isAuth: true,
+      },
+      callback
+    );
+  };
+
+  logout = () => {
+    this.tokenManager.clear();
+
+    // logout vendor
+    this.logoutGoogle();
+    // end
+
+    this.setState({ isAuth: false });
   };
 
   setAuthLoadingStatus = status => {
@@ -68,7 +140,9 @@ export class AuthProvider extends React.Component {
         value={{
           isAuth: this.state.isAuth,
           login: this.login,
+          loginGoogle: this.loginGoogle,
           logout: this.logout,
+          gapi: window.gapi,
         }}
       >
         {this.props.children}

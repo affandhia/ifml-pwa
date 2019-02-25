@@ -3,23 +3,7 @@ import { Redirect } from 'react-router-dom';
 import _debounce from 'lodash/debounce';
 import { AuthConsumer } from '../Authentication';
 
-const GOOGLE_BUTTON_ID = 'google-sign-in-button';
-
 class LoginPage extends React.Component {
-  componentDidMount = () => {
-    window.gapi.signin2.render(GOOGLE_BUTTON_ID, {
-      width: 200,
-      height: 50,
-      onsuccess: this.onSuccess,
-    });
-  };
-
-  onSuccess = googleUser => {
-    // const profile = googleUser.getBasicProfile();
-    const id_token = googleUser.getAuthResponse().id_token;
-    this.props.login(id_token);
-  };
-
   saveToken = token => {
     this.props.login(token);
   };
@@ -29,6 +13,10 @@ class LoginPage extends React.Component {
   handleTokenChange = e => {
     const token = e.target.value;
     this.saveTokenDebounced(token);
+  };
+
+  handleLoginWithGoogle = () => {
+    this.props.loginGoogle();
   };
 
   render() {
@@ -44,8 +32,12 @@ class LoginPage extends React.Component {
         </div>
         <div>- OR -</div>
         <div>
-          <button>Login with Google</button>
-          <div id={GOOGLE_BUTTON_ID} />
+          <input
+            onClick={this.handleLoginWithGoogle}
+            value="Login with Google"
+            type="button"
+          />
+          {/* <div id={GOOGLE_BUTTON_ID} /> */}
         </div>
       </div>
     );
