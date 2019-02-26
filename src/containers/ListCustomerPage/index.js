@@ -58,7 +58,7 @@ class ListCustomerPage extends React.Component {
 
     try {
       await axios.get(
-        `http://localhost:8089/api/customer/delete.abs?token=${token}&id=${id}`,
+        `/api/customer/delete.abs?token=${token}&id=${id}`,
         undefined,
         {
           cancelToken: this.state.source,
