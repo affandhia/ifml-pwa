@@ -12,6 +12,7 @@ from main.utils.project_generator import create_structure
 logger_angular = logging.getLogger("main.core.angular.main")
 
 
+# receive two required params: ifml file & uml, others two: generated web, enable login
 def generate_project(path_to_ifml_file, path_to_class_diagram, target_directory='', enable_login=False):
     target_project_directory = sys.path[0] if target_directory == '' else target_directory
     uml_structure, uml_symbol_table = uml_parse(path_to_class_diagram)

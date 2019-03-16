@@ -1,0 +1,21 @@
+<div id='div-vis-name' class='view-component-part visualization-attribute'>
+    <p id='label-vis-name' class='label-visualization'>Name</p>
+    <p id='vs-name' class='class-attribute'>{{ customerData.name }}</p>
+</div>
+<div id='div-vis-email' class='view-component-part visualization-attribute'>
+    <p id='label-vis-email' class='label-visualization'>Email</p>
+    <p id='vs-email' class='class-attribute'>{{ customerData.email }}</p>
+</div>
+<div id='div-vis-phone-number' class='view-component-part visualization-attribute'>
+    <p id='label-vis-phone-number' class='label-visualization'>Phone Number</p>
+    <p id='vs-phone-number' class='class-attribute'>{{ customerData.phone }}</p>
+</div>
+<div id='div-vis-address' class='view-component-part visualization-attribute'>
+    <p id='label-vis-address' class='label-visualization'>Address</p>
+    <p id='vs-address' class='class-attribute'>{{ customerData.address }}</p>
+</div>
+<div id='div-id-cust' class='div-simple-field view-component-part'>
+    <label id='label-id-cust' for='input-id-cust' class='label-simple-field'>Id Cust</label>
+    <input id='input-id-cust' class='view-component-part simple-field' name='idCust' type='number' [(ngModel)]='idCust' placeholder='Fill the Id Cust'/>
+</div>
+<button id="view-event-create-new-account" class="event view-element-event" (click)="createnewaccount()">Create New Account</button>

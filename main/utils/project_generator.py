@@ -48,6 +48,7 @@ def linter(filename, content):
         linting_result = content
     return linting_result
 
+# this funciton to generate file and folder using file_and_folder_management.py and naming_management.py
 def create_structure(struct, directory=None):
     """
     Manifests a directory structure in the filesystem

@@ -1,0 +1,1 @@
+ng build --base-href /abs-bankaccount/ --aot --prod --build-optimizer

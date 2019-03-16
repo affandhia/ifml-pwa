@@ -1,0 +1,20 @@
+<form id='form-add-customer' #formAddCustomer='ngForm' (ngSubmit)='save()' class='form view-component'>
+    <h2 id='form-add-customer-title' class='form-title'>Form Add Customer</h2>
+    <div id='div-customer-name' class='div-simple-field view-component-part'>
+    <label id='label-customer-name' for='input-customer-name' class='label-simple-field'>Customer Name</label>
+    <input id='input-customer-name' class='view-component-part simple-field' name='customerName' type='text' [(ngModel)]='customerName' placeholder='Fill the Customer Name'/>
+</div>
+<div id='div-customer-phone' class='div-simple-field view-component-part'>
+    <label id='label-customer-phone' for='input-customer-phone' class='label-simple-field'>Customer Phone</label>
+    <input id='input-customer-phone' class='view-component-part simple-field' name='customerPhone' type='text' [(ngModel)]='customerPhone' placeholder='Fill the Customer Phone'/>
+</div>
+<div id='div-customer-email' class='div-simple-field view-component-part'>
+    <label id='label-customer-email' for='input-customer-email' class='label-simple-field'>Customer Email</label>
+    <input id='input-customer-email' class='view-component-part simple-field' name='customerEmail' type='text' [(ngModel)]='customerEmail' placeholder='Fill the Customer Email'/>
+</div>
+<div id='div-customer-address' class='div-simple-field view-component-part'>
+    <label id='label-customer-address' for='input-customer-address' class='label-simple-field'>Customer Address</label>
+    <input id='input-customer-address' class='view-component-part simple-field' name='customerAddress' type='text' [(ngModel)]='customerAddress' placeholder='Fill the Customer Address'/>
+</div>
+<button type="submit" id="onsubmit-event-save" class="event onsubmit-event">Save</button>
+</form>
