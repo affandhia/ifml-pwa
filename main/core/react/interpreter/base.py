@@ -61,8 +61,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
     def __init__(self, ifml_xmi, ifml_symbol_table, class_diagram_xmi,
                  class_diagram_symbol_table,
                  enable_authentication_guard=False):
+
         self.root_ifml, self.ifml_symbol_table = ifml_xmi, ifml_symbol_table
         self.root_class_diagram_xmi, self.uml_symbol_table = class_diagram_xmi, class_diagram_symbol_table
+
         self.project_name = dasherize(self.root_ifml.name)
         self.enable_authentication_guard = enable_authentication_guard
         self.components = {}
@@ -72,7 +74,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.view_element_events = []
         self.list_service_worker_config = []
         self.angular_routing = RootRoutingNode('')
-        # self.root_html = self.get_root_html()
         self.root_typescript_class = self.get_root_class()
 
         logger_react.info(

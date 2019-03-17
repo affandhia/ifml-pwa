@@ -10,6 +10,15 @@ from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
 
 
 class ReactComponentClass():
+    def __init__(self):
+        super().__init__()
+        self.selector_name = ''
+        self.component_name = ''
+        self.set_import_and_constructor()
+
+    def set_import_and_constructor(self):
+        pass
+
     def render(self):
         pass
 

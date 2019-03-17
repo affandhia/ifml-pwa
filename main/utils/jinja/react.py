@@ -1,4 +1,5 @@
 from jinja2 import Environment, PackageLoader
+from main.utils.file_and_folder_management import path_joiner
 
 base_env = Environment(
     loader=PackageLoader('main.template', 'file/react/base'),
@@ -24,23 +25,9 @@ react_html_env = Environment(
     autoescape=[''],
     variable_start_string='{$', variable_end_string='$}')
 
-DELIMITER = '/'
-
-
-def __path_joiner(path):
-    final_path = ''
-    if isinstance(path, list):
-        for section in path:
-            final_path = final_path + DELIMITER + section
-
-        final_path = final_path[1:]
-    elif isinstance(path, str):
-        final_path = path
-    return final_path
-
 
 def base_file_writer(template_name, *args, **kwargs):
-    template = base_env.get_template(__path_joiner(template_name))
+    template = base_env.get_template(path_joiner(template_name))
     return template.render(*args, **kwargs)
 
 

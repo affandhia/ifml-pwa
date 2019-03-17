@@ -1,0 +1,13 @@
+{$ import_statement_list|safe $}
+
+class {$ class_name|safe $} extends React.Component {
+
+    {$ property_decl|safe $}
+
+    render() {
+
+        return ();
+    }
+}
+
+export default {$ class_name|safe $};

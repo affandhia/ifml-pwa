@@ -1,0 +1,9 @@
+{$ import_list|safe $}
+
+export class {$ class_name|safe $}{
+
+    {$ constructor|safe $}
+
+    {$ body|safe $}
+
+}
