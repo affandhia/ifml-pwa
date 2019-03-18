@@ -1,4 +1,4 @@
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader
 from main.utils.file_and_folder_management import path_joiner
 
 typescript_env = Environment(
