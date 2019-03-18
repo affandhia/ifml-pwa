@@ -16,10 +16,14 @@ class ImportStatementType(Node):
 
     def __init__(self):
         self.main_module = ''
+        self.default_element = None
         self.imported_elements = []
 
     def set_main_module(self, main_module):
         self.main_module = main_module
+
+    def set_default_element(self, default_element):
+        self.default_element = default_element
 
     def add_imported_elements(self, elements_that_want_to_be_imported):
         self.imported_elements += elements_that_want_to_be_imported
@@ -29,9 +33,10 @@ class ImportStatementType(Node):
 
     def render(self):
         import_statement = eseight_writer(IMPORT_ESEIGHT_TEMPLATE,
-                                             imported_element=', '.join(
-                                                 self.imported_elements),
-                                             main_module=self.main_module)
+                                          default_element=self.default_element,
+                                          imported_element=', '.join(
+                                              self.imported_elements),
+                                          main_module=self.main_module)
         return import_statement
 
     def __str__(self):

@@ -1,1 +1,11 @@
-import { {$ imported_element|safe $} } from '{$ main_module|safe $}';
+import {% if default_element %}
+    {$- default_element|safe $}
+{%- endif %}
+
+{%- if (default_element is defined and default_element is not none) and (imported_element is defined and imported_element is not none)  %}
+{$- ', ' $}
+{%- endif %}
+
+{%- if imported_element -%}
+{ {$ imported_element|safe $} }
+{%- endif %} from '{$- main_module|safe $}';
