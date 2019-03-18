@@ -13,13 +13,15 @@ HTTP_MODULE_LOCATION = '@angular/common/http'
 NGX_SMART_MODAL_LOCATION = 'ngx-smart-modal'
 ANGULAR_6_SOCIAL_LOGIN = 'angular-6-social-login-v2'
 
+REACT_MODULE = 'react'
+
 IMPORTED_NG_MODULE = 'NgModule'
 IMPORTED_ROUTES = 'Routes'
 IMPORTED_ROUTER_MODULE = 'RouterModule'
 IMPORTED_GOOGLE_LOGIN_PROVIDER = 'GoogleLoginProvider'
 
 
-class AngularMainModule(TypescriptClassType):
+class ReactMainModule(TypescriptClassType):
     IMPORTED_BROWSER_MODULE = 'BrowserModule'
     IMPORTED_APP_ROUTING_MODULE = 'AppRoutingModule'
     IMPORTED_APP_COMPONENT = 'AppComponent'

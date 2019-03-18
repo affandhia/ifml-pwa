@@ -6,24 +6,21 @@ from main.utils.naming_management import camel_classify, dasherize, \
     camel_function_style, \
     creating_title_sentence_from_dasherize_word
 
-from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
+from .base import ANGULAR_ROUTER_MODULE, REACT_MODULE
 
 
 class ReactComponentEseightClass(EseightClassType):
     def __init__(self):
         super().__init__()
-        self.selector_name = ''
         self.component_name = ''
         self.set_import_and_constructor()
 
     def set_import_and_constructor(self):
         # Adding import statement for Basic Component
         import_component_from_react_core = ImportStatementType()
-        import_component_from_react_core.set_main_module(ANGULAR_CORE_MODULE)
-        import_component_from_react_core.add_imported_element('Component')
-        import_component_from_react_core.add_imported_element('OnInit')
+        import_component_from_react_core.set_main_module(REACT_MODULE)
         self.import_dict[
-            ANGULAR_CORE_MODULE] = import_component_from_react_core
+            REACT_MODULE] = import_component_from_react_core
 
         # Importing Routing Purpose
         import_component_from_angular_router = ImportStatementType()
@@ -48,12 +45,8 @@ class ReactComponentEseightClass(EseightClassType):
         self.set_constructor_param(router_var)
 
     def set_component_selector_class_name(self, name):
-        self.selector_name = dasherize(name)
         self.class_name = camel_classify(name)
         self.component_name = dasherize(name)
-
-    def set_selector_name(self, selector_name):
-        self.selector_name = selector_name
 
     def set_component_name(self, component_name):
         self.component_name = component_name
@@ -121,11 +114,11 @@ class AngularComponentTypescriptClass(EseightClassType):
     def set_import_and_constructor(self):
         # Adding import statement for Basic Component
         import_component_from_react_core = ImportStatementType()
-        import_component_from_react_core.set_main_module(ANGULAR_CORE_MODULE)
+        import_component_from_react_core.set_main_module(REACT_MODULE)
         import_component_from_react_core.add_imported_element('Component')
         import_component_from_react_core.add_imported_element('OnInit')
         self.import_dict[
-            ANGULAR_CORE_MODULE] = import_component_from_react_core
+            REACT_MODULE] = import_component_from_react_core
 
         # Importing Routing Purpose
         import_component_from_angular_router = ImportStatementType()

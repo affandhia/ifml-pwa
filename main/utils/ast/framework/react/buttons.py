@@ -5,7 +5,7 @@ from yattag import Doc
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import FunctionDeclType, ImportStatementType, VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style, creating_title_sentence_from_dasherize_word
-from .base import NGX_SMART_MODAL_LOCATION, AngularMainModule
+from .base import NGX_SMART_MODAL_LOCATION, ReactMainModule
 
 logger_ifml_angular_interpreter = logging.getLogger("main.utils.ast.framework.angular.buttons")
 
@@ -132,12 +132,12 @@ class AngularModalButtonAndFunction(AngularButtonWithFunctionHandler):
     def declare_ngx_service_param_constructor(self):
         self.ngx_service_constructor = VarDeclType(self.service_var_name)
         self.ngx_service_constructor.acc_modifiers = 'public'
-        self.ngx_service_constructor.variable_datatype = AngularMainModule.IMPORTED_SMART_MODAL_SERVICE
+        self.ngx_service_constructor.variable_datatype = ReactMainModule.IMPORTED_SMART_MODAL_SERVICE
 
     def importing_ngx_modal_service_node(self):
         self.import_ngx_modal_service_node = ImportStatementType()
         self.import_ngx_modal_service_node.set_main_module(NGX_SMART_MODAL_LOCATION)
-        self.import_ngx_modal_service_node.add_imported_element(AngularMainModule.IMPORTED_SMART_MODAL_SERVICE)
+        self.import_ngx_modal_service_node.add_imported_element(ReactMainModule.IMPORTED_SMART_MODAL_SERVICE)
 
     def set_target_modal(self, modal_identifier):
         self.add_statement_into_function_body(
