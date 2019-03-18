@@ -20,9 +20,6 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
     target_project_directory = sys.path[
         0] if target_directory == '' else target_directory
 
-    print(
-        "================================= {} {}".format(remove_folder_content,
-                                                         enable_login))
     if remove_folder_content:
         shutil.rmtree(target_project_directory,
                       ignore_errors=True)
