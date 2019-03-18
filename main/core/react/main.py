@@ -1,5 +1,7 @@
 import logging
 import sys
+import shutil
+import os
 
 from custom_xmi_parser.xmiparser_2 import parse as uml_parse
 from ifml_parser.ifmlxmiparser import parse as ifml_parse
@@ -7,15 +9,24 @@ from main.core.react.interpreter.base import IFMLtoReactInterpreter
 from main.core.react.project_writer import ReactProject
 from main.utils.project_generator import create_structure
 
-logger_angular = logging.getLogger("main.core.angular.main")
+logger_react = logging.getLogger("main.core.react.main")
 
 
 # receive two required params: ifml file & uml, others two: generated web, enable login
 def generate_project(path_to_ifml_file, path_to_class_diagram,
-                     target_directory='', enable_login=False):
+                     target_directory='', enable_login=False,
+                     remove_folder_content=False):
     # handle output folder
     target_project_directory = sys.path[
         0] if target_directory == '' else target_directory
+
+    print(
+        "================================= {} {}".format(remove_folder_content,
+                                                         enable_login))
+    if remove_folder_content:
+        shutil.rmtree(target_project_directory,
+                      ignore_errors=True)
+        os.mkdir(target_project_directory)
 
     # parse uml, the data is supposed to be related with UI, because of ifml has no relation of each UI so we use the UML
     # the output will be used to generate the IFML [SKIP]
@@ -90,7 +101,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
     # print(basic_template.return_project_structure())
     create_structure(basic_template.return_project_structure(),
                      target_directory)
-    logger_angular.info(
+    logger_react.info(
         'React PWA Project successfully generated at ' + target_directory)
     return
     ###################################
