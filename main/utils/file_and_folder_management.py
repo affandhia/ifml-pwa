@@ -71,10 +71,7 @@ def directory_is_empty(path):
 def path_joiner(path):
     final_path = ''
     if isinstance(path, list):
-        for section in path:
-            final_path = final_path + DELIMITER + section
-
-        final_path = final_path[1:]
+        final_path = DELIMITER.join(path)
     elif isinstance(path, str):
         final_path = path
     return final_path
