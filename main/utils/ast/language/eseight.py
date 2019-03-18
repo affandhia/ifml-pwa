@@ -52,12 +52,12 @@ class VarDeclType(Node):
 
     def render(self):
         return eseight_writer(VARIABLE_DECLARATION_TEMPLATE,
-                                 acc_modifiers=self.acc_modifiers,
-                                 decorator=self.decorator,
-                                 variable_type=self.variable_type,
-                                 variable_name=self.variable_name,
-                                 variable_datatype=self.variable_datatype,
-                                 value=self.value, end=self.semicolon)
+                              acc_modifiers=self.acc_modifiers,
+                              decorator=self.decorator,
+                              variable_type=self.variable_type,
+                              variable_name=self.variable_name,
+                              variable_datatype=self.variable_datatype,
+                              value=self.value, end=self.semicolon)
 
 
 class ArrowFunctionType(Node):
@@ -93,9 +93,9 @@ class ArrowFunctionType(Node):
             parameter_list.append(param.render())
 
         return eseight_writer(ARROW_FUNCTION_DECLARATION_TEMPLATE,
-                                 function_name=self.function_name,
-                                 function_body='\n'.join(self.function_body),
-                                 parameter_list=', '.join(parameter_list))
+                              function_name=self.function_name,
+                              function_body='\n'.join(self.function_body),
+                              parameter_list=', '.join(parameter_list))
 
 
 class FunctionDeclType(ArrowFunctionType):
@@ -115,11 +115,11 @@ class FunctionDeclType(ArrowFunctionType):
             parameter_list.append(param.render())
 
         return eseight_writer(FUNCTION_DECLARATION_TEMPLATE,
-                                 function_name=self.function_name,
-                                 function_type=self.function_type,
-                                 function_body='\n'.join(self.function_body),
-                                 parameter_list=', '.join(parameter_list),
-                                 function_return_type=self.function_return_type)
+                              function_name=self.function_name,
+                              function_type=self.function_type,
+                              function_body='\n'.join(self.function_body),
+                              parameter_list=', '.join(parameter_list),
+                              function_return_type=self.function_return_type)
 
 
 class EseightClassType(Node):
@@ -195,9 +195,9 @@ class EseightClassType(Node):
             property_decl_list.append(prop.render())
 
         return eseight_writer(CLASS_ESEIGHT_TEMPLATE,
-                                 class_name=self.class_name,
-                                 constructor_param=','.join(
-                                     constructor_param_list),
-                                 body='\n'.join(self.body),
-                                 import_statement_list='\n'.join(
-                                     import_statement_list))
+                              class_name=self.class_name,
+                              constructor_param=','.join(
+                                  constructor_param_list),
+                              body='\n'.join(self.body),
+                              import_statement_list='\n'.join(
+                                  import_statement_list))

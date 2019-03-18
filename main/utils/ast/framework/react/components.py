@@ -1,6 +1,6 @@
 from main.utils.ast.base import Node
-from main.utils.ast.language.typescript import ImportStatementType, \
-    TypescriptClassType, VarDeclType
+from main.utils.ast.language.eseight import ImportStatementType, \
+    EseightClassType, VarDeclType
 from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.naming_management import camel_classify, dasherize, \
     camel_function_style, \
@@ -9,7 +9,7 @@ from main.utils.naming_management import camel_classify, dasherize, \
 from .base import ANGULAR_CORE_MODULE, ANGULAR_ROUTER_MODULE
 
 
-class ReactComponentClass():
+class ReactComponentEseightClass(EseightClassType):
     def __init__(self):
         super().__init__()
         self.selector_name = ''
@@ -17,7 +17,46 @@ class ReactComponentClass():
         self.set_import_and_constructor()
 
     def set_import_and_constructor(self):
-        pass
+        # Adding import statement for Basic Component
+        import_component_from_react_core = ImportStatementType()
+        import_component_from_react_core.set_main_module(ANGULAR_CORE_MODULE)
+        import_component_from_react_core.add_imported_element('Component')
+        import_component_from_react_core.add_imported_element('OnInit')
+        self.import_dict[
+            ANGULAR_CORE_MODULE] = import_component_from_react_core
+
+        # Importing Routing Purpose
+        import_component_from_angular_router = ImportStatementType()
+        import_component_from_angular_router.set_main_module(
+            ANGULAR_ROUTER_MODULE)
+        import_component_from_angular_router.add_imported_element(
+            'ActivatedRoute')
+        import_component_from_angular_router.add_imported_element('Router')
+        self.import_dict[
+            ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
+
+        # Adding ActivatedRoute and Router in constructor
+        activated_route_var = VarDeclType('route')
+        activated_route_var.variable_datatype = 'ActivatedRoute'
+        activated_route_var.acc_modifiers = 'private'
+
+        router_var = VarDeclType('router')
+        router_var.variable_datatype = 'Router'
+        router_var.acc_modifiers = 'private'
+
+        self.set_constructor_param(activated_route_var)
+        self.set_constructor_param(router_var)
+
+    def set_component_selector_class_name(self, name):
+        self.selector_name = dasherize(name)
+        self.class_name = camel_classify(name)
+        self.component_name = dasherize(name)
+
+    def set_selector_name(self, selector_name):
+        self.selector_name = selector_name
+
+    def set_component_name(self, component_name):
+        self.component_name = component_name
 
     def render(self):
         pass
@@ -72,7 +111,7 @@ class AngularComponentForModal(AngularComponent):
         self.modal_identifier = self.component_html.var_camel_name
 
 
-class AngularComponentTypescriptClass(TypescriptClassType):
+class AngularComponentTypescriptClass(EseightClassType):
     def __init__(self):
         super().__init__()
         self.selector_name = ''
@@ -81,12 +120,12 @@ class AngularComponentTypescriptClass(TypescriptClassType):
 
     def set_import_and_constructor(self):
         # Adding import statement for Basic Component
-        import_component_from_angular_core = ImportStatementType()
-        import_component_from_angular_core.set_main_module(ANGULAR_CORE_MODULE)
-        import_component_from_angular_core.add_imported_element('Component')
-        import_component_from_angular_core.add_imported_element('OnInit')
+        import_component_from_react_core = ImportStatementType()
+        import_component_from_react_core.set_main_module(ANGULAR_CORE_MODULE)
+        import_component_from_react_core.add_imported_element('Component')
+        import_component_from_react_core.add_imported_element('OnInit')
         self.import_dict[
-            ANGULAR_CORE_MODULE] = import_component_from_angular_core
+            ANGULAR_CORE_MODULE] = import_component_from_react_core
 
         # Importing Routing Purpose
         import_component_from_angular_router = ImportStatementType()

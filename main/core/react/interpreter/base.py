@@ -49,7 +49,7 @@ from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style
 from . import BaseInterpreter
 
-from main.utils.ast.framework.react.components import ReactComponentClass
+from main.utils.ast.framework.react.components import ReactComponentEseightClass
 
 logger_ifml_angular_interpreter = logging.getLogger(
     "main.core.angular.interpreter")
@@ -74,7 +74,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.view_element_events = []
         self.list_service_worker_config = []
         self.angular_routing = RootRoutingNode('')
-        self.root_typescript_class = self.get_root_class()
+        self.root_eseight_class = self.get_root_class()
 
         logger_react.info(
             "Interpreting {name} IFML Project".format(name=self.project_name))
@@ -122,7 +122,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
     #         angular_routing.enable_children_routing()
     #
     def get_root_class(self):
-        root_react_class = ReactComponentClass()
+        root_react_class = ReactComponentEseightClass()
         return root_react_class
 
     #

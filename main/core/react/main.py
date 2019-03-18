@@ -51,7 +51,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
 
     # Angular Typescript Component for root component
     basic_template.add_default_app_component(
-        interpreting_result.root_typescript_class.render())
+        interpreting_result.root_eseight_class.render())
     # basic_template.add_app_html_template(
     #     interpreting_result.root_html.render())
 
