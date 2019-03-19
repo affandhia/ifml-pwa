@@ -2,7 +2,7 @@ import {% if default_element %}
     {$- default_element|safe $}
 {%- endif %}
 
-{%- if (default_element is defined and default_element is not none) and (imported_element is defined and imported_element is not none)  %}
+{%- if default_element and imported_element %}
 {$- ', ' $}
 {%- endif %}
 
