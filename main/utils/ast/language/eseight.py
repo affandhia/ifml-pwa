@@ -44,7 +44,7 @@ class ImportStatementType(Node):
             self.imported_elements) + ']'
 
 
-class VarDeclType(Node):
+class VarDecl(Node):
 
     def __init__(self, name, semicolon=''):
         self.acc_modifiers = ''
