@@ -49,7 +49,8 @@ from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style
 from . import BaseInterpreter
 
-from main.utils.ast.framework.react.components import ReactComponentEseightClass
+from main.utils.ast.framework.react.components import \
+    ReactComponentEseightClass
 
 logger_ifml_angular_interpreter = logging.getLogger(
     "main.core.angular.interpreter")
