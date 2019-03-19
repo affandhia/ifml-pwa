@@ -1,6 +1,7 @@
 {$ import_list|safe $}
 
-export class {$ class_name|safe $}{
+export class {$ class_name|safe $}{% if parent_class %} extends {$ parent_class $}{% end if %} {
+    {$ instance_variables|safe $}
 
     {$ constructor|safe $}
 

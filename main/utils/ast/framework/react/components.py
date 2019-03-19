@@ -22,18 +22,6 @@ class ReactComponentEseightClass(EseightClassType):
         self.import_dict[
             REACT_MODULE] = import_component_from_react_core
 
-        # Adding ActivatedRoute and Router in constructor
-        activated_route_var = VarDecl('route')
-        activated_route_var.variable_datatype = 'ActivatedRoute'
-        activated_route_var.acc_modifiers = 'private'
-
-        router_var = VarDecl('router')
-        router_var.variable_datatype = 'Router'
-        router_var.acc_modifiers = 'private'
-
-        self.set_constructor_param(activated_route_var)
-        self.set_constructor_param(router_var)
-
     def set_component_selector_class_name(self, name):
         self.class_name = camel_classify(name)
         self.component_name = dasherize(name)
@@ -159,19 +147,21 @@ class AngularComponentTypescriptClass(EseightClassType):
         for _, prop in self.property_decl.items():
             property_decl_list.append(prop.render())
 
-        return component_file_writer('basic.component.ts.template',
-                                     selector_name=self.selector_name,
-                                     class_name=self.class_name,
-                                     component_name=self.component_name,
-                                     constructor_param=', '.join(
-                                         constructor_param_list),
-                                     body='\n'.join(self.body),
-                                     import_statement_list='\n'.join(
-                                         import_statement_list),
-                                     property_decl='\n'.join(
-                                         property_decl_list),
-                                     constructor_body='\n'.join(
-                                         self.constructor_body))
+        return component_file_writer(
+            'basic.component.ts.template',
+            selector_name=self.selector_name,
+            class_name=self.class_name,
+            component_name=self.component_name,
+            constructor_param=', '.join(
+                constructor_param_list),
+            body='\n'.join(self.body),
+            import_statement_list='\n'.join(
+                import_statement_list),
+            property_decl='\n'.join(
+                property_decl_list),
+            constructor_body='\n'.join(
+                self.constructor_body)
+        )
 
 
 class AngularComponentWithInputTypescriptClass(
@@ -210,12 +200,13 @@ class AngularFormHTML(AngularComponentHTML):
         self.on_submit_call = on_submit
 
     def render(self):
-        return angular_html_writer('angular_form.html.template',
-                                   form_title=self.form_title,
-                                   form_dasherize=self.form_dasherize,
-                                   on_submit_call=self.on_submit_call,
-                                   form_varcamel=self.form_varcamel,
-                                   input_list='\n'.join(self.input_list))
+        return angular_html_writer(
+            'angular_form.html.template',
+            form_title=self.form_title,
+            form_dasherize=self.form_dasherize,
+            on_submit_call=self.on_submit_call,
+            form_varcamel=self.form_varcamel,
+            input_list='\n'.join(self.input_list))
 
 
 class AngularDetailHTMLCall(Node):
@@ -232,9 +223,10 @@ class AngularDetailHTMLCall(Node):
             (parameter_name, property_name))
 
     def render(self):
-        return angular_html_writer('detail_call.html.template',
-                                   selector_name=self.selector_name,
-                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
+        return angular_html_writer(
+            'detail_call.html.template',
+            selector_name=self.selector_name,
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularFormHTMLCall(AngularDetailHTMLCall):
@@ -243,9 +235,10 @@ class AngularFormHTMLCall(AngularDetailHTMLCall):
         super().__init__(name)
 
     def render(self):
-        return angular_html_writer('form_call.html.template',
-                                   selector_name=self.selector_name,
-                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
+        return angular_html_writer(
+            'form_call.html.template',
+            selector_name=self.selector_name,
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularListHTMLCall(Node):
@@ -261,9 +254,10 @@ class AngularListHTMLCall(Node):
         self.parameter_and_property_pair_list.append(tuple_param_prop_pair)
 
     def render(self):
-        return angular_html_writer('list_call.html.template',
-                                   selector_name=self.selector_name,
-                                   parameter_and_property_pair_list=self.parameter_and_property_pair_list)
+        return angular_html_writer(
+            'list_call.html.template',
+            selector_name=self.selector_name,
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularListHTMLLayout(AngularComponentHTML):
@@ -276,9 +270,10 @@ class AngularListHTMLLayout(AngularComponentHTML):
         self.onclick = onclick
 
     def render(self):
-        return angular_html_writer('unordered_list_element.html.template',
-                                   onclick=self.onclick,
-                                   body='\n'.join(self.body))
+        return angular_html_writer(
+            'unordered_list_element.html.template',
+            onclick=self.onclick,
+            body='\n'.join(self.body))
 
 
 class AngularModalHTMLLayout(AngularComponentHTML):
@@ -290,8 +285,9 @@ class AngularModalHTMLLayout(AngularComponentHTML):
         self.title_name = creating_title_sentence_from_dasherize_word(name)
 
     def render(self):
-        return angular_html_writer('modal_layout.html.template',
-                                   var_camel_name=self.var_camel_name,
-                                   dasherize_name=self.title_name,
-                                   title_name=self.title_name,
-                                   body='\n'.join(self.body))
+        return angular_html_writer(
+            'modal_layout.html.template',
+            var_camel_name=self.var_camel_name,
+            dasherize_name=self.title_name,
+            title_name=self.title_name,
+            body='\n'.join(self.body))
