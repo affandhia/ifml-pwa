@@ -22,16 +22,6 @@ class ReactComponentEseightClass(EseightClassType):
         self.import_dict[
             REACT_MODULE] = import_component_from_react_core
 
-        # Importing Routing Purpose
-        import_component_from_angular_router = ImportStatementType()
-        import_component_from_angular_router.set_main_module(
-            ANGULAR_ROUTER_MODULE)
-        import_component_from_angular_router.add_imported_element(
-            'ActivatedRoute')
-        import_component_from_angular_router.add_imported_element('Router')
-        self.import_dict[
-            ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
-
         # Adding ActivatedRoute and Router in constructor
         activated_route_var = VarDeclType('route')
         activated_route_var.variable_datatype = 'ActivatedRoute'
