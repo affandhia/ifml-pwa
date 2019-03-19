@@ -1,6 +1,6 @@
 from main.utils.ast.base import Node
 from main.utils.ast.language.eseight import ImportStatementType, \
-    EseightClassType, VarDecl
+    EseightClassType, ParamVarDecl
 from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.naming_management import camel_classify, dasherize, \
     camel_function_style, \
@@ -109,11 +109,11 @@ class AngularComponentTypescriptClass(EseightClassType):
             ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
 
         # Adding ActivatedRoute and Router in constructor
-        activated_route_var = VarDecl('route')
+        activated_route_var = ParamVarDecl('route')
         activated_route_var.variable_datatype = 'ActivatedRoute'
         activated_route_var.acc_modifiers = 'private'
 
-        router_var = VarDecl('router')
+        router_var = ParamVarDecl('router')
         router_var.variable_datatype = 'Router'
         router_var.acc_modifiers = 'private'
 
