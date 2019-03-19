@@ -48,10 +48,7 @@ class VarDecl(Node):
 
     def __init__(self, name, semicolon=''):
         self.acc_modifiers = ''
-        self.decorator = ''
-        self.variable_type = ''
         self.variable_name = name
-        self.variable_datatype = ''
         self.value = ''
         self.semicolon = semicolon
 
