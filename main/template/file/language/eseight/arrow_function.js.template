@@ -1,1 +1,1 @@
-({{ parameter_list|safe }}) => { {{ function_body|safe }} }
+({$ parameter_list|safe $}) => { {$ function_body|safe $} }

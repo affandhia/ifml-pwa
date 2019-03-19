@@ -1,6 +1,3 @@
-from enum import Enum
-import logging
-
 from main.utils.ast.base import Node
 from main.utils.jinja.language_template_writer import eseight_writer
 from main.utils.naming_management import camel_function_style
@@ -84,16 +81,8 @@ class ArrowFunctionType(Node):
         self.function_name = camel_function_style(name)
         self.parameter_dict = {}
         self.function_body = []
-        self.needed_constructor_param = []
-        self.needed_import = []
 
-    def add_needed_import(self, import_node):
-        self.needed_import.append(import_node)
-
-    def add_needed_constructor_param(self, constructor_param):
-        self.needed_constructor_param.append(constructor_param)
-
-    def add_param(self, var_decl):
+    def add_param(self, var_decl: ParamVarDecl):
         self.parameter_dict[var_decl.variable_name] = var_decl
 
     def add_statements_to_body(self, list_of_statements):
@@ -121,6 +110,7 @@ class FunctionDeclType(ArrowFunctionType):
         super().__init__(name)
         self.function_type = ''
         self.function_return_type = ''
+        self.is_method = False
 
     def add_param(self, var_decl):
         self.parameter_dict[var_decl.variable_name] = var_decl
@@ -131,12 +121,20 @@ class FunctionDeclType(ArrowFunctionType):
         for _, param in self.parameter_dict.items():
             parameter_list.append(param.render())
 
-        return eseight_writer(FUNCTION_DECLARATION_TEMPLATE,
-                              function_name=self.function_name,
-                              function_type=self.function_type,
-                              function_body='\n'.join(self.function_body),
-                              parameter_list=', '.join(parameter_list),
-                              function_return_type=self.function_return_type)
+        return eseight_writer(
+            FUNCTION_DECLARATION_TEMPLATE,
+            is_method=self.is_method,
+            function_name=self.function_name,
+            parameter_list=', '.join(parameter_list),
+            function_body='\n'.join(self.function_body)
+        )
+
+
+class MethodDeclType(FunctionDeclType):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.is_method = True
 
 
 class EseightClassType(Node):
@@ -149,7 +147,6 @@ class EseightClassType(Node):
         self.body = []
         self.import_dict = {}
         self.parent_class = None
-        self.instance_variables = {}
 
     def set_class_name(self, class_name):
         self.class_name = class_name
@@ -194,13 +191,10 @@ class EseightClassType(Node):
             new_import_statement_node.add_imported_element(element_imported)
             self.import_dict[main_module] = new_import_statement_node
 
-    def set_instance_variable(self, var_decl: InstanceVarDecl):
-        self.instance_variables[var_decl.variable_name] = var_decl
-
     def set_constructor_param(self, var_decl: ParamVarDecl):
         self.constructor_param[var_decl.variable_name] = var_decl
 
-    def set_property_decl(self, var_decl):
+    def set_property_decl(self, var_decl: InstanceVarDecl):
         self.property_decl[var_decl.variable_name] = var_decl
 
     def set_parent_class(self, parent_class: str):
@@ -219,13 +213,8 @@ class EseightClassType(Node):
 
         # Rendering all instance variables
         instance_variables_list = []
-        for _, param in self.instance_variables.items():
+        for _, param in self.property_decl.items():
             instance_variables_list.append(param.render())
-
-        # Rendering all property decl statement
-        property_decl_list = []
-        for _, prop in self.property_decl.items():
-            property_decl_list.append(prop.render())
 
         return eseight_writer(
             CLASS_ESEIGHT_TEMPLATE,
