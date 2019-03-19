@@ -1,4 +1,5 @@
 {% if acc_modifiers %}{$ acc_modifiers|safe $} {% endif -%}
-let {$ variable_name|safe $}
+{% if not is_instance %}let {% end if%}
+{$- variable_name|safe $}
 {%- if value %} = {$ value|safe $}{% endif %}
 {$- end|safe $}

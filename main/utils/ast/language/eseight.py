@@ -46,20 +46,35 @@ class ImportStatementType(Node):
 
 class VarDecl(Node):
 
-    def __init__(self, name, semicolon=''):
+    def __init__(self, name, semicolon=';'):
         self.acc_modifiers = ''
         self.variable_name = name
         self.value = ''
+        self.is_instance = False
         self.semicolon = semicolon
 
     def render(self):
         return eseight_writer(
             VARIABLE_DECLARATION_TEMPLATE,
             acc_modifiers=self.acc_modifiers,
+            is_instance=self.is_instance,
             variable_name=self.variable_name,
             value=self.value,
             end=self.semicolon
         )
+
+
+class ParamVarDecl(VarDecl):
+    def __init__(self, name, semicolon=''):
+        super().__init__(name, semicolon)
+        self.is_instance = True
+
+
+class InstanceVarDecl(VarDecl):
+    def __init__(self, name, modifier='', semicolon=';'):
+        super().__init__(name, semicolon)
+        self.is_instance = True
+        self.acc_modifiers = modifier
 
 
 class ArrowFunctionType(Node):
@@ -133,6 +148,8 @@ class EseightClassType(Node):
         self.constructor_body = []
         self.body = []
         self.import_dict = {}
+        self.parent_class = None
+        self.instance_variables = {}
 
     def set_class_name(self, class_name):
         self.class_name = class_name
@@ -142,11 +159,13 @@ class EseightClassType(Node):
 
     def add_import_statement_using_import_node(self, import_node):
         try:
-            # Check if the imported element already exist, if not then insert it
+            # Check if the imported element already exist, if not then
+            # insert it
             for element in import_node.imported_elements:
                 self.add_import_statement(import_node.main_module, element)
         except KeyError:
-            # In case the import from the main module is never been declared before, then do the full import statement
+            # In case the import from the main module is never been declared
+            # before, then do the full import statement
             self.import_dict[import_node.main_module] = import_node
 
     def add_import_statement_for_multiple_element(self, main_module,
@@ -162,7 +181,8 @@ class EseightClassType(Node):
 
     def add_import_statement(self, main_module, element_imported):
         try:
-            # Check if the imported element already exist, if not then insert it
+            # Check if the imported element already exist, if not then
+            # insert it
             existing_import_node = self.import_dict[main_module]
             if not (
                     element_imported in existing_import_node.imported_elements):
@@ -174,11 +194,17 @@ class EseightClassType(Node):
             new_import_statement_node.add_imported_element(element_imported)
             self.import_dict[main_module] = new_import_statement_node
 
-    def set_constructor_param(self, var_decl):
+    def set_instance_variable(self, var_decl: InstanceVarDecl):
+        self.instance_variables[var_decl.variable_name] = var_decl
+
+    def set_constructor_param(self, var_decl: ParamVarDecl):
         self.constructor_param[var_decl.variable_name] = var_decl
 
     def set_property_decl(self, var_decl):
         self.property_decl[var_decl.variable_name] = var_decl
+
+    def set_parent_class(self, parent_class: str):
+        self.parent_class = parent_class
 
     def render(self):
         # Rendering all import statement
@@ -191,15 +217,24 @@ class EseightClassType(Node):
         for _, param in self.constructor_param.items():
             constructor_param_list.append(param.render())
 
+        # Rendering all instance variables
+        instance_variables_list = []
+        for _, param in self.instance_variables.items():
+            instance_variables_list.append(param.render())
+
         # Rendering all property decl statement
         property_decl_list = []
         for _, prop in self.property_decl.items():
             property_decl_list.append(prop.render())
 
-        return eseight_writer(CLASS_ESEIGHT_TEMPLATE,
-                              class_name=self.class_name,
-                              constructor_param=','.join(
-                                  constructor_param_list),
-                              body='\n'.join(self.body),
-                              import_statement_list='\n'.join(
-                                  import_statement_list))
+        return eseight_writer(
+            CLASS_ESEIGHT_TEMPLATE,
+            class_name=self.class_name,
+            instance_variables='\n'.join(instance_variables_list),
+            constructor_param=','.join(
+                constructor_param_list),
+            body='\n'.join(self.body),
+            import_statement_list='\n'.join(
+                import_statement_list),
+            parent_class=self.parent_class
+        )
