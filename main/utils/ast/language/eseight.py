@@ -56,13 +56,13 @@ class VarDeclType(Node):
         self.semicolon = semicolon
 
     def render(self):
-        return eseight_writer(VARIABLE_DECLARATION_TEMPLATE,
-                              acc_modifiers=self.acc_modifiers,
-                              decorator=self.decorator,
-                              variable_type=self.variable_type,
-                              variable_name=self.variable_name,
-                              variable_datatype=self.variable_datatype,
-                              value=self.value, end=self.semicolon)
+        return eseight_writer(
+            VARIABLE_DECLARATION_TEMPLATE,
+            acc_modifiers=self.acc_modifiers,
+            variable_name=self.variable_name,
+            value=self.value,
+            end=self.semicolon
+        )
 
 
 class ArrowFunctionType(Node):
