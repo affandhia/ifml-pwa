@@ -10,7 +10,6 @@ FUNCTION_DECLARATION_TEMPLATE = 'function.js.template'
 
 
 class ImportStatementType(Node):
-
     def __init__(self):
         self.main_module = ''
         self.default_element = None
@@ -42,7 +41,6 @@ class ImportStatementType(Node):
 
 
 class VarDecl(Node):
-
     def __init__(self, name, semicolon=';'):
         self.acc_modifiers = ''
         self.variable_name = name
@@ -75,7 +73,6 @@ class InstanceVarDecl(VarDecl):
 
 
 class ArrowFunctionType(Node):
-
     def __init__(self, name):
         super().__init__()
         self.function_name = camel_function_style(name)
@@ -105,11 +102,8 @@ class ArrowFunctionType(Node):
 
 
 class FunctionDeclType(ArrowFunctionType):
-
     def __init__(self, name):
         super().__init__(name)
-        self.function_type = ''
-        self.function_return_type = ''
         self.is_method = False
 
     def add_param(self, var_decl):
@@ -131,14 +125,12 @@ class FunctionDeclType(ArrowFunctionType):
 
 
 class MethodDeclType(FunctionDeclType):
-
     def __init__(self, name):
         super().__init__(name)
         self.is_method = True
 
 
 class EseightClassType(Node):
-
     def __init__(self):
         self.class_name = ''
         self.constructor_param = {}
@@ -212,14 +204,14 @@ class EseightClassType(Node):
             constructor_param_list.append(param.render())
 
         # Rendering all instance variables
-        instance_variables_list = []
+        property_decl_list = []
         for _, param in self.property_decl.items():
-            instance_variables_list.append(param.render())
+            property_decl_list.append(param.render())
 
         return eseight_writer(
             CLASS_ESEIGHT_TEMPLATE,
             class_name=self.class_name,
-            instance_variables='\n'.join(instance_variables_list),
+            instance_variables='\n'.join(property_decl_list),
             constructor_param=','.join(
                 constructor_param_list),
             body='\n'.join(self.body),

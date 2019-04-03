@@ -29,9 +29,6 @@ class ReactComponentEseightClass(EseightClassType):
     def set_component_name(self, component_name):
         self.component_name = component_name
 
-    def render(self):
-        pass
-
 
 class AngularComponent(Node):
     SUFFIX_TYPESCRIPT_COMPONENT_FILENAME = '.component.ts'
