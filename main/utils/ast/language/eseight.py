@@ -146,7 +146,7 @@ class EseightClassType(Node):
     def get_class_name(self):
         return self.class_name
 
-    def add_import_statement_using_import_node(self, import_node):
+    def add_import_statement_using_import_node(self, import_node: ImportStatementType):
         try:
             # Check if the imported element already exist, if not then
             # insert it

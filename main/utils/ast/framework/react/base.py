@@ -14,6 +14,8 @@ NGX_SMART_MODAL_LOCATION = 'ngx-smart-modal'
 ANGULAR_6_SOCIAL_LOGIN = 'angular-6-social-login-v2'
 
 REACT_MODULE = 'react'
+REACT_ROUTER_DOM_MODULE = 'react-router-dom'
+REACT_COOKIES_MODULE = 'react-cookie'
 
 IMPORTED_NG_MODULE = 'NgModule'
 IMPORTED_ROUTES = 'Routes'

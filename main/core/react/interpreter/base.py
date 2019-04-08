@@ -44,6 +44,9 @@ from main.utils.ast.framework.angular.routers import RouteToModule, \
     RouteToComponentPage, RouteToAction, GettingQueryParam
 from main.utils.ast.framework.angular.services import AngularService, \
     ActionEventInterpretation
+from main.utils.ast.framework.react.base import REACT_ROUTER_DOM_MODULE, \
+    REACT_COOKIES_MODULE
+from main.utils.ast.language.eseight import ImportStatementType
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style
@@ -124,6 +127,25 @@ class IFMLtoReactInterpreter(BaseInterpreter):
     #
     def get_root_class(self):
         root_react_class = ReactComponentEseightClass()
+        root_react_class.class_name = 'App'
+        root_react_class.component_name = 'App'
+
+        react_router_dom_import = ImportStatementType()
+        react_router_dom_import.set_main_module(REACT_ROUTER_DOM_MODULE)
+        react_router_dom_import.add_imported_elements([
+            'BrowserRouter',
+            'Route'
+        ])
+
+        react_cookie_import = ImportStatementType()
+        react_cookie_import.set_main_module(REACT_COOKIES_MODULE)
+        react_cookie_import.add_imported_element('CookiesProvider')
+
+        root_react_class.add_import_statement_using_import_node(
+            react_router_dom_import)
+        root_react_class.add_import_statement_using_import_node(
+            react_cookie_import)
+
         return root_react_class
 
     #

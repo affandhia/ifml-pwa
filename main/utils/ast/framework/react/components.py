@@ -14,11 +14,16 @@ class ReactComponentEseightClass(EseightClassType):
         super().__init__()
         self.component_name = ''
         self.set_import_and_constructor()
+        self.set_extend_component()
+
+    def set_extend_component(self):
+        self.parent_class = 'React.Component'
 
     def set_import_and_constructor(self):
         # Adding import statement for Basic Component
         import_component_from_react_core = ImportStatementType()
         import_component_from_react_core.set_main_module(REACT_MODULE)
+        import_component_from_react_core.set_default_element('React')
         self.import_dict[
             REACT_MODULE] = import_component_from_react_core
 
