@@ -43,7 +43,7 @@ def create_new_directory(foldername, path):
 def copy_file_to_target_folder(source_path, target_path):
     try:
         shutil.copyfile(source_path, target_path)
-        logging.debug('SUCCESS copy into ' + target_path)
+        logging.debug('SUCCESS copy into ' + str(target_path))
     except Exception as e:
         logging.error(str(e))
 
