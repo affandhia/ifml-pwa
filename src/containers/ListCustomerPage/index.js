@@ -7,7 +7,7 @@ import Token from '../../utils/token';
 
 class ListCustomerPage extends React.Component {
   state = {
-    customers: [],
+    list: [],
     loading: null,
     source: CancelToken.source(),
   };
@@ -16,7 +16,7 @@ class ListCustomerPage extends React.Component {
   componentDidMount() {
     this._isMounted = true;
 
-    this.getCustomerList();
+    this.getList();
   }
 
   componentWillUnmount() {
@@ -27,7 +27,7 @@ class ListCustomerPage extends React.Component {
     );
   }
 
-  getCustomerList = async (token = '') => {
+  getList = async (token = '') => {
     token = token ? token : new Token().get();
 
     try {
@@ -41,7 +41,7 @@ class ListCustomerPage extends React.Component {
 
       if (this._isMounted) {
         this.setState({
-          customers: response.data.data,
+          list: response.data.data,
         });
       }
     } catch (e) {
@@ -70,7 +70,7 @@ class ListCustomerPage extends React.Component {
           loading: null,
         });
 
-        this.getCustomerList();
+        this.getList();
       }
     } catch (e) {
       console.log(e);
@@ -84,13 +84,13 @@ class ListCustomerPage extends React.Component {
     this.deleteCustomerList(id);
   };
 
-  renderCustomerList = () => {
-    const { customers } = this.state;
+  renderList = () => {
+    const { list } = this.state;
 
     return (
       <React.Fragment>
-        {customers.map(customer => {
-          const { email, id, name } = customer;
+        {list.map(data => {
+          const { email, id, name } = data;
 
           return (
             <li key={id}>
@@ -114,7 +114,7 @@ class ListCustomerPage extends React.Component {
     return (
       <React.Fragment>
         {this.state.loading ? <div>{this.state.loading}</div> : null}
-        <ul>{this.renderCustomerList()}</ul>
+        <ul>{this.renderList()}</ul>
       </React.Fragment>
     );
   }

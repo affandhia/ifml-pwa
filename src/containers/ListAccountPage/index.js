@@ -7,7 +7,7 @@ import Token from '../../utils/token';
 
 class ListAccountPage extends React.Component {
   state = {
-    accounts: [],
+    list: [],
     loading: null,
     source: CancelToken.source(),
   };
@@ -16,7 +16,7 @@ class ListAccountPage extends React.Component {
   componentDidMount() {
     this._isMounted = true;
 
-    this.getAccountList();
+    this.getList();
   }
 
   componentWillUnmount() {
@@ -27,7 +27,7 @@ class ListAccountPage extends React.Component {
     );
   }
 
-  getAccountList = async (token = '') => {
+  getList = async (token = '') => {
     token = token ? token : new Token().get();
 
     try {
@@ -41,7 +41,7 @@ class ListAccountPage extends React.Component {
 
       if (this._isMounted) {
         this.setState({
-          accounts: response.data.data,
+          list: response.data.data,
         });
       }
     } catch (e) {
@@ -49,13 +49,13 @@ class ListAccountPage extends React.Component {
     }
   };
 
-  renderAccountList = () => {
-    const { accounts } = this.state;
+  renderList = () => {
+    const { list } = this.state;
 
     return (
       <React.Fragment>
-        {accounts.map(account => {
-          const { rekening, balance, id, customerId, interest } = account;
+        {list.map(data => {
+          const { rekening, balance, id, customerId, interest } = data;
 
           return (
             <li key={id}>
@@ -75,7 +75,7 @@ class ListAccountPage extends React.Component {
     return (
       <React.Fragment>
         {this.state.loading ? <div>{this.state.loading}</div> : null}
-        <ul>{this.renderAccountList()}</ul>
+        <ul>{this.renderList()}</ul>
       </React.Fragment>
     );
   }
