@@ -1,10 +1,11 @@
-{$ import_list|safe $}
+{$ import_statement_list|safe $}
 
-export class {$ class_name|safe $}{% if parent_class %} extends {$ parent_class $}{% endif %} {
+class {$ class_name|safe $}{% if parent_class %} extends {$ parent_class $}{% endif %} {
     {$ instance_variables|safe $}
 
     {$ constructor|safe $}
 
     {$ body|safe $}
-
 }
+
+export default {$ class_name|safe $};
