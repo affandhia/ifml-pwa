@@ -56,7 +56,7 @@ default_structure = {
         "serviceWorker.js": "main/template/file/react/assets/src",
         "setupProxy.js.example": "main/template/file/react/assets/src",
         "utils": {
-            "token.js": ""
+            "token.js": "main/template/file/react/assets/src/utils"
         }
     },
     "yarn.lock": "main/template/file/react/assets"
