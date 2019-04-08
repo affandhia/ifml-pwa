@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import Form from '../../components/Form';
 
 import Token from '../../utils/token';
+import { withAuth } from '../Authentication'
 
 class DetailCustomerPage extends React.Component {
   state = {
@@ -99,4 +100,4 @@ class DetailCustomerPage extends React.Component {
   }
 }
 
-export default DetailCustomerPage;
+export default withAuth(DetailCustomerPage);

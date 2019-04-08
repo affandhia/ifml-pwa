@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import _debounce from 'lodash/debounce';
 
 import Token from '../../utils/token';
+import { withAuth } from '../Authentication'
 
 class ListCustomerPage extends React.Component {
   state = {
@@ -87,7 +88,7 @@ class ListCustomerPage extends React.Component {
   renderData = (data) => {
     const keys = Object.keys(data);
     return (<React.Fragment>
-      {keys.map(key => <div>{key}: {data[key]}</div>)}
+      {keys.map(key => <div key={key}>{key}: {data[key]}</div>)}
     </React.Fragment>);
   }
 
@@ -124,4 +125,4 @@ class ListCustomerPage extends React.Component {
   }
 }
 
-export default ListCustomerPage;
+export default withAuth(ListCustomerPage);

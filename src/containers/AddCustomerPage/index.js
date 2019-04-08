@@ -3,10 +3,11 @@ import axios, { CancelToken } from 'axios';
 import _debounce from 'lodash/debounce';
 
 import Token from '../../utils/token';
+import { withAuth } from '../Authentication'
 
 import Form from '../../components/Form';
 
-class CustomerPage extends React.Component {
+class AddCustomerPage extends React.Component {
   state = {
     source: CancelToken.source(),
     loading: false,
@@ -37,7 +38,7 @@ class CustomerPage extends React.Component {
     });
 
     try {
-      const response = await axios.get(
+      await axios.get(
         `/api/customer/create.abs?token=${token}&${encodedData}`,
         undefined,
         {
@@ -73,4 +74,4 @@ class CustomerPage extends React.Component {
   }
 }
 
-export default CustomerPage;
+export default withAuth(AddCustomerPage);

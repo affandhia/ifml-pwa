@@ -52,7 +52,7 @@ class ListAccountPage extends React.Component {
   renderData = (data) => {
     const keys = Object.keys(data);
     return (<React.Fragment>
-      {keys.map(key => <div>{key}: {data[key]}</div>)}
+      {keys.map(key => <div key={key}>{key}: {data[key]}</div>)}
     </React.Fragment>);
   }
 
