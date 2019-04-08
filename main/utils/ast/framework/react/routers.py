@@ -2,15 +2,16 @@ import logging
 
 from main.utils.ast.base import Node
 from main.utils.ast.language.typescript import TypescriptClassType, VarDeclType, ImportStatementType
-from main.utils.jinja.angular import base_file_writer, router_file_writer
+from main.utils.ast.language.eseight import EseightClassType
+from main.utils.jinja.react import base_file_writer, router_file_writer
 from main.utils.naming_management import camel_function_style
 from .base import ANGULAR_CORE_MODULE, IMPORTED_ROUTER_MODULE, IMPORTED_ROUTES, IMPORTED_NG_MODULE, \
     ANGULAR_ROUTER_MODULE
 
-logger_routers = logging.getLogger("main.utils.ast.framework.angular.routers")
+logger_routers = logging.getLogger("main.utils.ast.framework.react.routers")
 
 
-class AngularDefaultRouterDefinition(TypescriptClassType):
+class ReactDefaultRouterDefinition(EseightClassType):
 
     def __init__(self):
         super().__init__()
