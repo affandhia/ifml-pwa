@@ -2,6 +2,7 @@ import logging
 import sys
 import shutil
 import os
+import json
 
 from custom_xmi_parser.xmiparser_2 import parse as uml_parse
 from ifml_parser.ifmlxmiparser import parse as ifml_parse
@@ -57,7 +58,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
 
     # # Defining Angular Main Module
     # basic_app_module = AngularMainModule(app_name=interpreting_result.get_project_name())
-    #
+
     # # Adding basic Routing Module
     # basic_routing = AngularDefaultRouterDefinition()
     # basic_routing.add_routing_hierarchy(interpreting_result.angular_routing)
@@ -95,7 +96,11 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
     # basic_template.add_app_module_file(basic_app_module.render())
     #
     # basic_template.add_app_module_routing(basic_routing.render())
-    # print(basic_template.return_project_structure())
+
+    logger_react.debug(
+        json.dumps(basic_template.return_project_structure(), sort_keys=True,
+                   indent=4))
+
     create_structure(basic_template.return_project_structure(),
                      target_directory)
     logger_react.info(
