@@ -84,24 +84,28 @@ class ListCustomerPage extends React.Component {
     this.deleteCustomerList(id);
   };
 
+  renderData = (data) => {
+    const keys = Object.keys(data);
+    return (<React.Fragment>
+      {keys.map(key => <div>{key}: {data[key]}</div>)}
+    </React.Fragment>);
+  }
+
   renderList = () => {
     const { list } = this.state;
 
     return (
       <React.Fragment>
         {list.map(data => {
-          const { email, id, name } = data;
 
           return (
-            <li key={id}>
-              <div>Customer ID: {id.toString()}</div>
-              <div>{name}</div>
-              <div>{email}</div>
+            <li key={data.id}>
+              {this.renderData(data)}
               <div>
-                <Link to={`/customer/${id}`}>
+                <Link to={`/customer/${data.id}`}>
                   <button>Details</button>
                 </Link>
-                <button onClick={this.handleDeleteCustomer(id)}>Delete</button>
+                <button onClick={this.handleDeleteCustomer(data.id)}>Delete</button>
               </div>
             </li>
           );
