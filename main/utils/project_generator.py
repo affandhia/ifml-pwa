@@ -49,7 +49,6 @@ def write_or_copy(filename, target_directory, content):
         copy_file_to_target_folder(project_base / content / filename,
                                    target_directory / filename)
     elif content.startswith('main/template/file'):
-        logger.debug("")
         copy_file_to_target_folder(project_base/ content / filename,
                                    target_directory / filename)
     else:
