@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
 
 import { AuthProvider, AuthConsumer } from './containers/Authentication';
@@ -19,7 +19,7 @@ const Home = () => (
 
 const App = () => (
   <CookiesProvider>
-    <Router>
+    <BrowserRouter>
       <AuthProvider>
         <div>
           <AuthConsumer>{values => <Navbar {...values} />}</AuthConsumer>
@@ -32,7 +32,7 @@ const App = () => (
           <Route path="/account" component={ListAccountPage} />
         </div>
       </AuthProvider>
-    </Router>
+    </BrowserRouter>
   </CookiesProvider>
 );
 
