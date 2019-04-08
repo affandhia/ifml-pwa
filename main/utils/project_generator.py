@@ -14,17 +14,44 @@
 
 from .file_and_folder_management import create_new_file, create_new_directory, copy_file_to_target_folder
 from pathlib import Path
+import main as MainModule
 import os
 import logging
 import jsbeautifier
 
-ASSETS_EXTENSION = ['.jpg', '.jpeg', '.png', '.ico']
+logger = logging.getLogger("main.utils.project_generator")
+
+ASSETS_EXTENSION = []
+
+project_base = Path(os.sys.path[0])
+main_module_base = Path(os.path.dirname(MainModule.__file__))
+
+if project_base / "main" != main_module_base:
+    logger.info("SYNCHRONIZED project base")
+    logger.debug(
+        f"project base {str(project_base)} is not synchronized with the main "
+        f"module base {str(main_module_base.parent)}")
+    logger.debug("syncing project base...")
+    cur_project_base = Path(str(project_base))
+    while main_module_base.parent != cur_project_base and \
+            cur_project_base.parent != cur_project_base.root:
+        cur_project_base = cur_project_base.parent
+
+    if main_module_base.parent == cur_project_base:
+        project_base = cur_project_base
+        logger.debug(f"syncing project base...SUCCESS. {str(cur_project_base)}")
+    else:
+        logger.error("syncing project base...FAILED. Base is not found")
 
 
 def write_or_copy(filename, target_directory, content):
-    project_base = Path(os.sys.path[0])
-    if (os.path.splitext(filename)[1] in ASSETS_EXTENSION):
-        copy_file_to_target_folder(project_base / content / filename, target_directory / filename)
+    if os.path.splitext(filename)[1] in ASSETS_EXTENSION:
+        copy_file_to_target_folder(project_base / content / filename,
+                                   target_directory / filename)
+    elif content.startswith('main/template/file'):
+        logger.debug("")
+        copy_file_to_target_folder(project_base/ content / filename,
+                                   target_directory / filename)
     else:
         create_new_file(filename, target_directory, content)
 
