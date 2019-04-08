@@ -48,7 +48,6 @@ class CustomerPage extends React.Component {
       if (this._isMounted) {
         this.setState({
           loading: false,
-          customers: response.data.data,
         });
       }
     } catch (e) {
