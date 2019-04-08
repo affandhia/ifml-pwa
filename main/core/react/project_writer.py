@@ -49,14 +49,15 @@ class ReactProject(object):
     #
 
     def write_index(self):
-        self.project_structure[self.INDEX_KEY] = base_file_writer(
+        self.project_structure[self.SRC_FOLDER_KEY][self.INDEX_KEY] = \
+            base_file_writer(
             [
                 self.SRC_FOLDER_KEY,
                 self.INDEX_KEY + '.template'
             ])
 
     def write_package_dependencies(self):
-        self.project_structure[self.README_KEY] = base_file_writer(
+        self.project_structure[self.PACKAGE_KEY] = base_file_writer(
             self.PACKAGE_KEY + '.template')
 
     def write_readme(self):
