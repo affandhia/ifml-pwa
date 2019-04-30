@@ -28,8 +28,17 @@ class ReactComponentEseightClass(EseightClassType):
             REACT_MODULE] = import_component_from_react_core
 
     def set_component_selector_class_name(self, name):
-        self.class_name = camel_classify(name)
-        self.component_name = dasherize(name)
+        """
+        Set the component name and the class name as well. Note that the
+        component name here is programmatically same with the class name in
+        React.
+
+        :param name: the component name in start case. e.g. "My Component"
+        :return: None
+        """
+
+        # format the string from start case into camel case
+        self.class_name = self.component_name = camel_classify(name)
 
     def set_component_name(self, component_name):
         self.component_name = component_name
