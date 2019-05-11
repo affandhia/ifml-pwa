@@ -1,7 +1,10 @@
+from yattag import Doc
+
 from main.utils.ast.base import Node
 from main.utils.ast.language.eseight import ImportStatementType, \
-    EseightClassType, ParamVarDecl
+    EseightClassType, ParamVarDecl, InstanceVarDecl, ArrowFunctionType
 from main.utils.jinja.angular import component_file_writer, angular_html_writer
+from main.utils.jinja.react import react_jsx_writer
 from main.utils.naming_management import camel_classify, dasherize, \
     camel_function_style, \
     creating_title_sentence_from_dasherize_word
@@ -12,14 +15,21 @@ from .base import ANGULAR_ROUTER_MODULE, REACT_MODULE
 class ReactComponentEseightClass(EseightClassType):
     def __init__(self):
         super().__init__()
+        self.selector_name = ''
         self.component_name = ''
         self.set_import_and_constructor()
-        self.set_extend_component()
+        self.set_react_component_as_parent()
 
-    def set_extend_component(self):
+    def set_react_component_as_parent(self):
         self.parent_class = 'React.Component'
 
     def set_import_and_constructor(self):
+        """
+        Set default modules and libraries which is gonna be use for default
+        React component.
+
+        :return: None
+        """
         # Adding import statement for Basic Component
         import_component_from_react_core = ImportStatementType()
         import_component_from_react_core.set_main_module(REACT_MODULE)
@@ -39,9 +49,67 @@ class ReactComponentEseightClass(EseightClassType):
 
         # format the string from start case into camel case
         self.class_name = self.component_name = camel_classify(name)
+        # set selector_name for Route path purposes
+        self.selector_name = dasherize(name)
 
     def set_component_name(self, component_name):
         self.component_name = component_name
+
+
+class ReactComponent(Node):
+    def __init__(self, component_class: ReactComponentEseightClass,
+                 component_markup_language: Node):
+        self.component_class = component_class
+        self.component_html = component_markup_language
+        self.component_name = f'{self.component_class.selector_name}.js'
+        self.routing_path = ''
+
+    def set_routing_node(self, routing_path):
+        self.routing_path = routing_path
+
+    def get_routing_path(self):
+        return self.routing_path
+
+    def get_component_name(self):
+        return self.component_name
+
+    def get_typescript_component_filename(self):
+        return self.component_name
+
+    def get_typescript_class_node(self):
+        return self.component_class
+
+    def get_component_html(self):
+        return self.component_html
+
+    def build(self):
+        self.react_render()
+
+        return {self.component_class.component_name: {
+            self.component_name: self.component_class.render()
+        }}
+
+    def react_render(self):
+        """
+        Insert the markup language result into the component class.
+
+        :return:
+        """
+        function_name = 'render'
+
+        # create an instance variable for the function
+        render_function = InstanceVarDecl(function_name)
+
+        # create the function body
+        render_function_body = ArrowFunctionType(function_name)
+        render_function_body.add_statement_to_body(
+            f'return ({self.component_html.render()});')
+
+        # set instance variable value with function body
+        render_function.value = render_function_body.render()
+
+        # insert the render function as a property of the class
+        self.component_class.set_property_decl(render_function)
 
 
 class AngularComponent(Node):
@@ -179,6 +247,37 @@ class AngularComponentWithInputTypescriptClass(
     AngularComponentTypescriptClass):
     def __init__(self):
         super().__init__()
+
+
+class ReactJSX(Node):
+    def __init__(self):
+        self.body = []
+
+    def append_html_into_body(self, html_element):
+        self.body.append(html_element)
+
+    def render(self):
+        return react_jsx_writer('basic.component.jsx.template',
+                                body='\n'.join(self.body))
+
+
+class MenuJSX(ReactJSX):
+    def __init__(self, name, auth_enabled=False):
+        super().__init__()
+        self.auth_enabled = auth_enabled
+        self.menu_name = name
+
+    def append_html_into_body(self, button):
+        doc, tag, text = Doc().tagtext()
+        with tag('li'):
+            doc.asis(button)
+        self.body.append(doc.getvalue())
+
+    def render(self):
+        return react_jsx_writer('menu.component.jsx.template',
+                                list_button='\n'.join(self.body),
+                                menu_name=self.menu_name,
+                                auth_enabled=self.auth_enabled)
 
 
 class AngularComponentHTML(Node):
