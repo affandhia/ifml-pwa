@@ -46,13 +46,18 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
     basic_template = ReactProject(
         app_name=interpreting_result.get_project_name())
 
+    basic_template.add_auth_modules_if_needed(enable_login)
+
     # Adding app.component.ts
     root_component_name = 'app'
     root_class_name = 'App'
 
+    interpreting_result.root_eseight_class.set_component_selector_class_name(
+        root_class_name)
+
     # Angular Typescript Component for root component
-    basic_template.add_default_app_component(
-        interpreting_result.root_eseight_class.render())
+    app_node = interpreting_result.root_react_node.build()
+    basic_template.add_default_app_component(app_node["App"]["app.js"])
     # basic_template.add_app_html_template(
     #     interpreting_result.root_html.render())
 
@@ -79,7 +84,8 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
         # basic_routing.register_component_with_router(component_node)
 
         # Insert the component definition into src folder
-        basic_template.add_new_component_using_basic_component_folder(component_node.build())
+        basic_template.add_new_component_using_basic_component_folder(
+            component_node.build())
 
     # Adding each service into the AngularProject
     # for _, service_node in interpreting_result.services.items():

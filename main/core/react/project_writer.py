@@ -51,10 +51,10 @@ class ReactProject(object):
     def write_index(self):
         self.project_structure[self.SRC_FOLDER_KEY][self.INDEX_KEY] = \
             base_file_writer(
-            [
-                self.SRC_FOLDER_KEY,
-                self.INDEX_KEY + '.template'
-            ])
+                [
+                    self.SRC_FOLDER_KEY,
+                    self.INDEX_KEY + '.template'
+                ])
 
     def write_package_dependencies(self):
         self.project_structure[self.PACKAGE_KEY] = base_file_writer(
@@ -160,6 +160,7 @@ class ReactProject(object):
     #
     def add_default_app_component(self, app_component_typescript):
         self.app_folder[self.APP_COMPONENT_KEY] = app_component_typescript
+
     #
     # def add_app_module_routing(self, app_routing_file):
     #     self.app_folder[self.APP_ROUTING_KEY] = app_routing_file
@@ -167,8 +168,10 @@ class ReactProject(object):
     # def add_app_module_file(self, app_module_file):
     #     self.app_folder[self.APP_MODULE_KEY] = app_module_file
     #
-    def add_new_component_using_basic_component_folder(self, inserted_component_folder):
+    def add_new_component_using_basic_component_folder(self,
+                                                       inserted_component_folder):
         self.app_folder.update(inserted_component_folder)
+
     #
     # def add_service_inside_services_folder(self, inserted_service_file):
     #     self.services_folder.update(inserted_service_file)
@@ -193,6 +196,28 @@ class ReactProject(object):
     #         self.RUN_SCRIPT_KEY + '.bat.template', app_name=self.app_name)
     #     self.project_structure[self.RUN_SCRIPT_KEY + '.sh'] = base_file_writer(self.RUN_SCRIPT_KEY + '.sh.template', app_name=self.app_name)
     #
+
+    def add_auth_modules_if_needed(self, auth_enabled: bool):
+        """
+        Import necessary modules for authentication purpose.
+
+        :param auth_enabled: the status whether authentication is enabled or not
+        :return: None
+        """
+        if auth_enabled:
+            auth_modules = {
+                "utils": {
+                    "token.js": "main/template/file/react/assets/src/utils"
+                },
+                "containers": {
+                    "Authentication": {
+                        "index.js": "main/template/file/react/assets/src/containers/Authentication"
+                    }
+                }
+            }
+
+            self.project_structure[self.SRC_FOLDER_KEY].update(auth_modules)
+
     def return_project_structure(self):
         return {self.app_name: self.project_structure}
 

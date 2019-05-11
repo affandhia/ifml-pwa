@@ -99,6 +99,11 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # initial root class for the current project.
         self.root_eseight_class = self.get_root_class()
 
+        self.root_react_node = ReactComponent(self.root_eseight_class,
+                                              self.root_template)
+
+
+
         logger_react.info(
             "Interpreting {name} IFML Project".format(name=self.project_name))
 
@@ -118,6 +123,25 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Interpret all Interaction Flow Model Elements
         self.interpret_interaction_flow_model()
+
+        self.prepare_root_render()
+
+    def prepare_root_render(self):
+        # wrap whole app
+        self.root_template.body.insert(0, "<div>")
+        self.root_template.body.append("</div>")
+
+        # wrap if auth enabled
+        if self.enable_authentication_guard:
+            self.root_eseight_class.add_import_statement_for_multiple_element(
+                './containers/Authentication',
+                ['AuthProvider', 'AuthConsumer']
+            )
+            self.root_template.body.insert(0, "<AuthProvider>")
+            self.root_template.body.append("</AuthProvider>")
+
+        self.root_template.body.insert(0, "<CookiesProvider>\n<BrowserRouter>")
+        self.root_template.body.append("</BrowserRouter>\n</CookiesProvider>")
 
     def interpret_domain_model(self):
         """
@@ -370,7 +394,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Register to components container
         self.components[menu_element.get_id()] = component_node
-
 
     def interpret_view_container(self, view_container: ViewContainer,
                                  html_calling: ReactJSX,

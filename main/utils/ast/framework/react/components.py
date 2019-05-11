@@ -61,7 +61,7 @@ class ReactComponent(Node):
                  component_markup_language: Node):
         self.component_class = component_class
         self.component_html = component_markup_language
-        self.component_name = f'{self.component_class.selector_name}.js'
+        self.component_name = ''
         self.routing_path = ''
 
     def set_routing_node(self, routing_path):
@@ -84,6 +84,7 @@ class ReactComponent(Node):
 
     def build(self):
         self.react_render()
+        self.component_name = f'{self.component_class.selector_name}.js'
 
         return {self.component_class.component_name: {
             self.component_name: self.component_class.render()

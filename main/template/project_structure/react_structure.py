@@ -27,9 +27,6 @@ default_structure = {
         #     "AddCustomerPage": {
         #         "index.js": ""
         #     },
-        #     "Authentication": {
-        #         "index.js": ""
-        #     },
         #     "CustomerPage": {
         #         "components": {
         #             "Navbar": {
@@ -55,9 +52,6 @@ default_structure = {
         "logo.svg": "main/template/file/react/assets/src",
         "serviceWorker.js": "main/template/file/react/assets/src",
         "setupProxy.js.example": "main/template/file/react/assets/src",
-        "utils": {
-            "token.js": "main/template/file/react/assets/src/utils"
-        }
     },
     "yarn.lock": "main/template/file/react/assets"
 }
