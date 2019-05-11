@@ -167,8 +167,8 @@ class ReactProject(object):
     # def add_app_module_file(self, app_module_file):
     #     self.app_folder[self.APP_MODULE_KEY] = app_module_file
     #
-    # def add_new_component_using_basic_component_folder(self, inserted_component_folder):
-    #     self.app_folder.update(inserted_component_folder)
+    def add_new_component_using_basic_component_folder(self, inserted_component_folder):
+        self.app_folder.update(inserted_component_folder)
     #
     # def add_service_inside_services_folder(self, inserted_service_file):
     #     self.services_folder.update(inserted_service_file)
