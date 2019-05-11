@@ -15,16 +15,16 @@ class ImportStatementType(Node):
         self.default_element = None
         self.imported_elements = []
 
-    def set_main_module(self, main_module):
+    def set_main_module(self, main_module: str):
         self.main_module = main_module
 
-    def set_default_element(self, default_element):
+    def set_default_element(self, default_element: str):
         self.default_element = default_element
 
-    def add_imported_elements(self, elements_that_want_to_be_imported):
+    def add_imported_elements(self, elements_that_want_to_be_imported: [str]):
         self.imported_elements += elements_that_want_to_be_imported
 
-    def add_imported_element(self, element_that_want_to_be_imported):
+    def add_imported_element(self, element_that_want_to_be_imported: str):
         self.imported_elements.append(element_that_want_to_be_imported)
 
     def render(self):
