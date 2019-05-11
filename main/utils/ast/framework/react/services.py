@@ -26,10 +26,21 @@ class AngularService(TypescriptClassType):
         self.action_event = action_event_behavior
 
     def set_endpoint_class_name_and_worker(self, name):
+        """
+        Setting API endpoint and the Service Worker configuration. Setting
+        class name by the API endpoint.
+
+        :param name: supposed to be the API endpoint
+        :return: None
+        """
+
         self.api_endpoint = dasherize(name)
         self.class_name = camel_classify(change_slash_and_dot_into_dash(name))
+
         self.worker_config = WorkerConfig(self.api_endpoint)
         self.worker_config.add_url(self.api_endpoint)
+
+        # define class name
         self.filename = change_slash_and_dot_into_dash(self.api_endpoint)
 
     def param_exist(self):
