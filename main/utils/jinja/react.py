@@ -20,8 +20,8 @@ model_env = Environment(
     loader=PackageLoader('main.template', 'file/react/model'),
     autoescape=[''],
     variable_start_string='{$', variable_end_string='$}')
-react_html_env = Environment(
-    loader=PackageLoader('main.template', 'file/react/html'),
+react_jsx_env = Environment(
+    loader=PackageLoader('main.template', 'file/react/jsx'),
     autoescape=[''],
     variable_start_string='{$', variable_end_string='$}')
 
@@ -51,6 +51,6 @@ def model_file_writer(template_name, *args, **kwargs):
     return template.render(*args, **kwargs)
 
 
-def react_html_writer(template_name, *args, **kwargs):
-    template = react_html_env.get_template(template_name)
+def react_jsx_writer(template_name, *args, **kwargs):
+    template = react_jsx_env.get_template(template_name)
     return template.render(*args, **kwargs)
