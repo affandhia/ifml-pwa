@@ -72,7 +72,7 @@ class InstanceVarDecl(VarDecl):
         self.acc_modifiers = modifier
 
 
-class ArrowFunctionType(Node):
+class FunctionType(Node):
     def __init__(self, name):
         super().__init__()
         self.function_name = camel_function_style(name)
@@ -90,6 +90,14 @@ class ArrowFunctionType(Node):
         self.function_body.append(statement)
 
     def render(self):
+        pass
+
+
+class ArrowFunctionType(FunctionType):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def render(self):
         # Parameter list
         parameter_list = []
         for _, param in self.parameter_dict.items():
@@ -101,13 +109,10 @@ class ArrowFunctionType(Node):
                               parameter_list=', '.join(parameter_list))
 
 
-class FunctionDeclType(ArrowFunctionType):
+class NormalFunctionType(ArrowFunctionType):
     def __init__(self, name):
         super().__init__(name)
         self.is_method = False
-
-    def add_param(self, var_decl):
-        self.parameter_dict[var_decl.variable_name] = var_decl
 
     def render(self):
         # Parameter list
@@ -124,7 +129,7 @@ class FunctionDeclType(ArrowFunctionType):
         )
 
 
-class MethodDeclType(FunctionDeclType):
+class NormalMethodType(NormalFunctionType):
     def __init__(self, name):
         super().__init__(name)
         self.is_method = True
@@ -136,6 +141,7 @@ class EseightClassType(Node):
         self.constructor_param = {}
         self.property_decl = {}
         self.constructor_body = []
+        self.methods = {}
         self.body = []
         self.import_dict = {}
         self.parent_class = None
@@ -146,7 +152,8 @@ class EseightClassType(Node):
     def get_class_name(self):
         return self.class_name
 
-    def add_import_statement_using_import_node(self, import_node: ImportStatementType):
+    def add_import_statement_using_import_node(self,
+                                               import_node: ImportStatementType):
         try:
             # Check if the imported element already exist, if not then
             # insert it
@@ -183,8 +190,11 @@ class EseightClassType(Node):
             new_import_statement_node.add_imported_element(element_imported)
             self.import_dict[main_module] = new_import_statement_node
 
-    def set_constructor_param(self, var_decl: ParamVarDecl):
+    def add_constructor_param(self, var_decl: ParamVarDecl):
         self.constructor_param[var_decl.variable_name] = var_decl
+
+    def add_method_to_body(self, func: NormalMethodType):
+        self.methods[func.function_name] = func
 
     def set_property_decl(self, var_decl: InstanceVarDecl):
         self.property_decl[var_decl.variable_name] = var_decl
@@ -207,6 +217,13 @@ class EseightClassType(Node):
         property_decl_list = []
         for _, param in self.property_decl.items():
             property_decl_list.append(param.render())
+
+        # add methods to body
+        methods = []
+        for _, param in self.methods.items():
+            methods.append(param.render())
+
+        self.body += methods
 
         return eseight_writer(
             CLASS_ESEIGHT_TEMPLATE,
