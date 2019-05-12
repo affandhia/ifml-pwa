@@ -1,0 +1,19 @@
+<Route
+  exact
+  path="{$ path $}"
+  component={
+  {%- if enable_guard %}
+  withAuth(
+  {%- endif %}
+
+  {$- component $}
+
+  {%- if enable_guard %}
+  )
+  {%- endif %}
+
+  }
+/>
+{% if flag %}
+{$- childrens|safe $}
+{%- endif %}
