@@ -1,0 +1,15 @@
+<div>
+  <label htmlFor="input-{$ dasherize_name|safe $}">{$ title_name|safe $}</label>
+  <div>
+    <input
+      id="input-{$ dasherize_name|safe $}"
+      name="{$ var_camel_name|safe $}"
+      type="{$ type|safe $}"
+      {% if placeholder %} placeholder='Fill the {$ title_name|safe $}'{% endif %}
+      {% if value %} defaultValue={"{$ value|safe $}"}{% endif %}
+      ref={e => {
+        this.{$ var_camel_name|safe $} = e;
+      }}
+    />
+  </div>
+</div>

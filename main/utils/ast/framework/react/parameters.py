@@ -5,13 +5,15 @@ from main.utils.jinja.angular import router_file_writer
 from main.utils.naming_management import camel_function_style, dasherize
 from .base import ANGULAR_CORE_MODULE
 
+
 class Parameter(Node):
 
     def __init__(self, name, type_node):
         self.var_camel_name = camel_function_style(name)
 
         # Checking the type
-        self.is_primitive_type = self.check_if_parameter_type_is_primitive_type(type_node)
+        self.is_primitive_type = self.check_if_parameter_type_is_primitive_type(
+            type_node)
 
         self.type_name = self.build_parameter_type(type_node)
 
@@ -35,7 +37,8 @@ class Parameter(Node):
             returned_import_node = ImportStatementType()
             returned_import_node.add_imported_element(model_node.class_name)
 
-            classifier_location = '../models/' + dasherize(model_node.class_name) + '.model'
+            classifier_location = '../models/' + dasherize(
+                model_node.class_name) + '.model'
             returned_import_node.set_main_module(classifier_location)
 
         return returned_import_node
@@ -101,21 +104,35 @@ class ParamGroup(Node):
 
 
 class ParameterBindingInterpretation(Node):
+    """
+    Generate parameter data binding/assignment. There are several ways data
+    being assigned. Those are: Query, Action, Instance Variable.
+    """
 
-    def __init__(self, source_param_name, dest_param_name, from_action, is_sent_through_routing):
+    def __init__(self, source_param_name, dest_param_name, from_action,
+                 is_sent_through_routing):
         self.source_param_is_a_result_of_action = from_action
         self.this_param_binding_is_query_param = is_sent_through_routing
         self.source_param_name = camel_function_style(source_param_name)
         self.dest_param_name = camel_function_style(dest_param_name)
 
     def render(self):
-        returned_statement = None
         if self.this_param_binding_is_query_param:
-            returned_statement = router_file_writer('query_parameter_binding_interpretation.ts.template' ,target_param=self.dest_param_name,
-                                                    source_param=self.source_param_name,
-                                                    from_action=self.source_param_is_a_result_of_action)
+            # Stringify the date whatever that are. This json value will be
+            # used as a parameter in Query.
+            return router_file_writer(
+                'query_parameter_binding_interpretation.ts.template',
+                target_param=self.dest_param_name,
+                source_param=self.source_param_name,
+                from_action=self.source_param_is_a_result_of_action
+            )
         else:
-            returned_statement = router_file_writer('parameter_binding_interpretation.ts.template', target_param=self.dest_param_name,
-                                                    source_param=self.source_param_name,
-                                                    from_action=self.source_param_is_a_result_of_action)
-        return returned_statement
+            # If its from action then just get the data[<param>] value
+            # Otherwise, get from instance variable:
+            #   <param>: this.getParamValue
+            return router_file_writer(
+                'parameter_binding_interpretation.ts.template',
+                target_param=self.dest_param_name,
+                source_param=self.source_param_name,
+                from_action=self.source_param_is_a_result_of_action
+            )

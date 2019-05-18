@@ -40,7 +40,7 @@ class ImportStatementType(Node):
             self.imported_elements) + ']'
 
 
-class VarDecl(Node):
+class VarDeclType(Node):
     def __init__(self, name, semicolon=';'):
         self.acc_modifiers = ''
         self.variable_name = name
@@ -59,17 +59,32 @@ class VarDecl(Node):
         )
 
 
-class ParamVarDecl(VarDecl):
+class ParamVarDeclType(VarDeclType):
     def __init__(self, name, semicolon=''):
         super().__init__(name, semicolon)
         self.is_instance = True
 
 
-class InstanceVarDecl(VarDecl):
+class InstanceVarDeclType(VarDeclType):
     def __init__(self, name, modifier='', semicolon=';'):
         super().__init__(name, semicolon)
         self.is_instance = True
         self.acc_modifiers = modifier
+
+
+class MethodAsInstanceVarDeclType(InstanceVarDeclType):
+    def __init__(self, name, modifier='', semicolon=';'):
+        super().__init__(name, modifier, semicolon)
+        self.function_as_value: FunctionType = None
+        self.prepare_value()
+
+    def prepare_value(self):
+        self.function_as_value = ArrowFunctionType(self.variable_name)
+
+    def render(self):
+        self.value = self.function_as_value.render()
+
+        super(MethodAsInstanceVarDeclType, self).render()
 
 
 class FunctionType(Node):
@@ -79,7 +94,7 @@ class FunctionType(Node):
         self.parameter_dict = {}
         self.function_body = []
 
-    def add_param(self, var_decl: ParamVarDecl):
+    def add_param(self, var_decl: ParamVarDeclType):
         self.parameter_dict[var_decl.variable_name] = var_decl
 
     def add_statements_to_body(self, list_of_statements):
@@ -103,8 +118,7 @@ class ArrowFunctionType(FunctionType):
         for _, param in self.parameter_dict.items():
             parameter_list.append(param.render())
 
-        return eseight_writer(ARROW_FUNCTION_DECLARATION_TEMPLATE,
-                              function_name=self.function_name,
+        return eseight_writer('arrow_function.js.template',
                               function_body='\n'.join(self.function_body),
                               parameter_list=', '.join(parameter_list))
 
@@ -143,7 +157,7 @@ class EseightClassType(Node):
         self.constructor_body = []
         self.methods = {}
         self.body = []
-        self.import_dict = {}
+        self.import_dict: [ImportStatementType] = {}
         self.parent_class = None
 
     def set_class_name(self, class_name):
@@ -157,6 +171,8 @@ class EseightClassType(Node):
         try:
             # Check if the imported element already exist, if not then
             # insert it
+            self.add_default_element_import_statement(
+                import_node.default_element, import_node.main_module)
             for element in import_node.imported_elements:
                 self.add_import_statement(import_node.main_module, element)
         except KeyError:
@@ -175,13 +191,21 @@ class EseightClassType(Node):
             new_import_statement_node.add_imported_elements(elements_imported)
             self.import_dict[main_module] = new_import_statement_node
 
+    def add_default_element_import_statement(self, main_module,
+                                             default_element):
+        if default_element is not None:
+            existing_import_node: ImportStatementType = self.import_dict[
+                main_module]
+            existing_import_node.set_default_element(
+                default_element)
+
     def add_import_statement(self, main_module, element_imported):
         try:
             # Check if the imported element already exist, if not then
             # insert it
             existing_import_node = self.import_dict[main_module]
-            if not (
-                    element_imported in existing_import_node.imported_elements):
+            if not (element_imported in
+                    existing_import_node.imported_elements):
                 self.import_dict[main_module].add_imported_element(
                     element_imported)
         except KeyError:
@@ -190,13 +214,13 @@ class EseightClassType(Node):
             new_import_statement_node.add_imported_element(element_imported)
             self.import_dict[main_module] = new_import_statement_node
 
-    def add_constructor_param(self, var_decl: ParamVarDecl):
+    def add_constructor_param(self, var_decl: ParamVarDeclType):
         self.constructor_param[var_decl.variable_name] = var_decl
 
     def add_method_to_body(self, func: NormalMethodType):
         self.methods[func.function_name] = func
 
-    def set_property_decl(self, var_decl: InstanceVarDecl):
+    def set_property_decl(self, var_decl: InstanceVarDeclType):
         self.property_decl[var_decl.variable_name] = var_decl
 
     def set_parent_class(self, parent_class: str):

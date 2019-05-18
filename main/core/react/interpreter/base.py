@@ -26,7 +26,8 @@ from ifml_parser.ifmlxmiparser import IFMLModel
 from main.utils.ast.framework.angular.buttons import \
     AngularButtonWithFunctionHandler, AngularSubmitButtonType, \
     AngularOnclickType, AngularModalButtonAndFunction, AngularMenuButton
-from main.utils.ast.framework.angular.component_parts import InputField, \
+from main.utils.ast.framework.react.buttons import SubmitButtonType
+from main.utils.ast.framework.react.component_parts import InputField, \
     DataBindingFunction, VisualizationWithSpan
 from main.utils.ast.framework.angular.components import AngularComponent, \
     AngularComponentTypescriptClass, \
@@ -38,7 +39,7 @@ from main.utils.ast.framework.angular.google_sign_in import LoginHTML, \
     LoginTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass, \
     OwnedOperation
-from main.utils.ast.framework.angular.parameters import InParameter, \
+from main.utils.ast.framework.react.parameters import InParameter, \
     OutParameter, ParamGroup, \
     ParameterBindingInterpretation
 from main.utils.ast.framework.react.routers import RouteToModule, \
@@ -48,14 +49,17 @@ from main.utils.ast.framework.angular.services import AngularService, \
     ActionEventInterpretation
 from main.utils.ast.framework.react.base import REACT_ROUTER_DOM_MODULE, \
     REACT_COOKIES_MODULE
-from main.utils.ast.language.eseight import ImportStatementType
+from main.utils.ast.framework.react.services import ReactAPICall
+from main.utils.ast.language.eseight import ImportStatementType, \
+    InstanceVarDeclType
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
 from main.utils.naming_management import dasherize, camel_function_style
 from . import BaseInterpreter
 
 from main.utils.ast.framework.react.components import \
-    ReactComponentEseightClass, ReactJSX, ReactComponent, MenuJSX
+    ReactComponentEseightClass, ReactJSX, ReactComponent, MenuJSX, FormJSX, \
+    ReactComponentWithInputEseightClass, FormComponentJSXCall
 
 logger_ifml_angular_interpreter = logging.getLogger(
     "main.core.angular.interpreter")
@@ -102,8 +106,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.root_react_node = ReactComponent(self.root_eseight_class,
                                               self.root_template)
 
-
-
         logger_react.info(
             "Interpreting {name} IFML Project".format(name=self.project_name))
 
@@ -127,6 +129,13 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.prepare_root_render()
 
     def prepare_root_render(self):
+        """
+        Prepare the main app JSX to be wrapped by the modules. Wrap the jsx
+        if authentication enabled.
+
+        :return: None
+        """
+
         # wrap whole app
         self.root_template.body.insert(0, "<div>")
         self.root_template.body.append("</div>")
@@ -140,6 +149,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             self.root_template.body.insert(0, "<AuthProvider>")
             self.root_template.body.append("</AuthProvider>")
 
+        # wrap all with the essential libraries for react
         self.root_template.body.insert(0, "<CookiesProvider>\n<BrowserRouter>")
         self.root_template.body.append("</BrowserRouter>\n</CookiesProvider>")
 
@@ -191,14 +201,33 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 text_outlet('')
         return doc_outlet.getvalue()
 
-    def append_router_outlet(self, angular_routing, html_call,
-                             typescipt_class):
-        if len(angular_routing.angular_children_routes) > 0:
+    def append_router_outlet(self,
+                             routing: RootRoutingNode,
+                             html_call: ReactJSX,
+                             component_class: ReactComponentEseightClass):
+        """
+        router-outlet is used in angular as a directive and the placeholder
+        of the component that will be inserted to the template.
+
+        TODO: gather more information what this method for.
+
+        :param routing: the parent routing
+        :param html_call: the jsx which will be inserted a route
+        :param component_class: the class component
+        :return: None
+        """
+
+        if len(routing.children_routes) > 0:
             html_call.append_html_into_body(
-                self.router_outlet_html(typescipt_class.selector_name))
-            angular_routing.enable_children_routing()
+                self.router_outlet_html(component_class.selector_name))
+            routing.enable_children_routing()
 
     def get_root_class(self):
+        """
+        Create a root class where will be the gateway of the apps.
+
+        :return: an react component class without JSX.
+        """
         root_react_class = ReactComponentEseightClass()
         root_react_class.class_name = 'App'
         root_react_class.component_name = 'App'
@@ -222,6 +251,12 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         return root_react_class
 
     def get_root_template(self):
+        """
+        create a root jsx.
+
+        :return: jsx representation
+        """
+
         root_template_node = ReactJSX()
         return root_template_node
 
@@ -259,11 +294,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                     self.root_template)
             # TODO: FOCUS ON THIS ONE FIRST
             elif isinstance(interaction_flow_model_element, ViewContainer):
-                pass
-                # self.interpret_view_container(interaction_flow_model_element,
-                #                               self.root_template,
-                #                               self.root_eseight_class,
-                #                               self.root_routing)
+                self.interpret_view_container(interaction_flow_model_element,
+                                              self.root_template,
+                                              self.root_eseight_class,
+                                              self.root_routing)
 
     def check_if_windows_is_different_than_view_container(self, window_element,
                                                           html_calling,
@@ -313,7 +347,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             # Import the service, create the constructor param
             typescript_calling.add_import_statement_using_import_node(
                 func_and_html_event_node.import_ngx_modal_service_node)
-            typescript_calling.set_constructor_param(
+            typescript_calling.add_constructor_param(
                 func_and_html_event_node.ngx_service_constructor)
 
             # Get the function and HTML
@@ -368,6 +402,14 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # add to Component Class imported module list
         component_class.add_import_statement_using_import_node(
             react_router_dom)
+
+        # add logout method
+
+        logout_event_clicked = InstanceVarDeclType("onLogoutClicked")
+        logout_event_clicked.value = \
+            "e => { e.preventDefault(); this.props.logout(); }"
+
+        component_class.set_property_decl(logout_event_clicked)
 
         # Prepare HTML
         html = MenuJSX(component_class.selector_name,
@@ -428,27 +470,30 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                          enable_guard=self.enable_authentication_guard)
             routing_node.enable_children_routing()
 
+        # check whether this VC is a landmark.
+        # if so, the VC should contain a route which path to itself.
         if view_container.get_is_landmark():
             landmark_path_var_name = camel_function_style(
                 container_class.class_name) + 'path'
 
             doc_landmark, tag_landmark, text_landmark = Doc().tagtext()
-            with tag_landmark('button', ('class', 'landmark-event'),
-                              ('id', container_class.selector_name),
-                              ('[routerLink]', landmark_path_var_name)):
+            with tag_landmark('Link', ('class', 'landmark-event'),
+                              ('to', landmark_path_var_name)
+                              ):
                 text_landmark(container_class.class_name)
 
             routing_parent.enable_children_routing()
-            routing_node = RouteToModule(container_class,
-                                         enable_guard=self.enable_authentication_guard) if routing_node is None else routing_node
+
+            routing_node = RouteToModule(
+                container_class,
+                enable_guard=self.enable_authentication_guard
+            ) if routing_node is None else routing_node
 
             absolute_path = routing_node.path
 
-            landmark_path_var_decl = VarDeclType(landmark_path_var_name, ';')
-            landmark_path_var_decl.acc_modifiers = 'public'
+            landmark_path_var_decl = InstanceVarDeclType(landmark_path_var_name)
             landmark_path_var_decl.value = "\'{value}\'".format(
                 value=absolute_path)
-            landmark_path_var_decl.variable_datatype = 'string'
 
             typescript_calling.set_property_decl(landmark_path_var_decl)
             html_calling.append_html_into_body(doc_landmark.getvalue())
@@ -460,18 +505,21 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             routing_node = RouteToModule(
                 container_class,
                 enable_guard=
-                self.enable_authentication_guard) if routing_node is None else routing_node
+                self.enable_authentication_guard
+            ) if routing_node is None else routing_node
+
+        if routing_node:
+            routing_node.path_from_root = \
+                routing_parent.path_from_root + '/' + routing_node.path
 
         # Decide if this container is default in its XOR
         if view_container.get_is_default():
             routing_parent.add_children_routing(
-                RedirectToAnotherPath('', container_class.selector_name))
+                RedirectToAnotherPath('', routing_node.path_from_root))
 
         # Build All View Element Event Inside
         for _, event in view_container.get_view_element_events().items():
             if isinstance(event, ViewElementEvent):
-                # self.interpret_view_element_event(event, html,
-                # typescript_class)
                 self.view_element_events.append(event)
 
         for _, parameter in view_container.get_parameters().items():
@@ -481,21 +529,18 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         for _, action in view_container.get_action().items():
             self.interpret_action(action)
 
-        if routing_node:
-            routing_node.path_from_root = routing_parent.path_from_root + '/' + routing_node.path
-
         # Build All Associated View Element
-        for key, view_element in view_container.get_assoc_view_element().items():
+        for _, view_element in view_container.get_assoc_view_element().items():
             if isinstance(view_element, List):
                 self.interpret_list(view_element, html, container_class)
             elif isinstance(view_element, Details):
                 self.interpret_detail(view_element, html, container_class)
             elif isinstance(view_element, Form):
                 self.interpret_form(view_element, html, container_class)
-            elif isinstance(view_element, Window):
-                self.check_if_windows_is_different_than_view_container(
-                    view_element, html, container_class,
-                    routing_node)
+            # elif isinstance(view_element, Window):
+            # self.check_if_windows_is_different_than_view_container(
+            #     view_element, html, container_class,
+            #     routing_node)
             elif isinstance(view_element, Menu):
                 self.interpret_menu(view_element, html)
             elif isinstance(view_element, ViewContainer):
@@ -503,19 +548,23 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                               container_class, routing_node)
 
         # The Component Itself
-        angular_component_node = AngularComponent(
-            component_typescript_class=container_class,
-            component_html=html)
+        component_node = ReactComponent(
+            component_class=container_class,
+            component_markup_language=html)
+
         # Add Routing Node and (If exist) any children route
         try:
             routing_parent.add_children_routing(routing_node)
-            angular_component_node.set_routing_node(
+
+            component_node.set_routing_node(
                 routing_node.path_from_root)
+
             logger_react.debug(routing_node.path_from_root)
-            self.append_router_outlet(routing_node, html, container_class)
+
+            # self.append_router_outlet(routing_node, html, container_class)
         # If this container must be called
         except Exception:
-            # This exeption catch a component without routing_node.
+            # This exception catch a component without routing_node.
             # Calling ViewContainer selector
             doc_selector, tag_selector, text_selector = Doc().tagtext()
 
@@ -524,7 +573,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
-        self.components[view_container.get_id()] = angular_component_node
+        self.components[view_container.get_id()] = component_node
 
     def interpret_action(self, action_element):
         """
@@ -551,7 +600,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             any_in_param = arbitary_param_inside_action.get_direction() == 'in'
 
         # Defining service typescript, and add the name into AngularService
-        service_typescript = AngularService(
+        service_typescript = ReactAPICall(
             enable_auth=self.enable_authentication_guard)
         service_typescript.set_endpoint_class_name_and_worker(element_name)
 
@@ -566,10 +615,19 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.services[action_element.get_id()] = service_typescript
 
         # Register service worker config
-        self.list_service_worker_config.append(
-            service_typescript.worker_config.render())
+        # TODO: figure out service worker works
+        # self.list_service_worker_config.append(
+        #     service_typescript.worker_config.render())
 
     def interpret_form(self, form_element, html_calling, typescript_calling):
+        """
+        Create a whole structure of form. Handle event later.
+
+        :param form_element:
+        :param html_calling:
+        :param typescript_calling:
+        :return:
+        """
         # Name of element
         element_name = form_element.get_name()
 
@@ -581,10 +639,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         typescript_class.set_component_selector_class_name(element_name)
 
         # The HTML for Form
-        html = AngularFormHTML(element_name)
+        html = FormJSX(element_name)
 
         # Preparing HTML Call template for form
-        form_call = AngularFormHTMLCall(typescript_class.selector_name)
+        form_call = FormComponentJSXCall(typescript_class.component_name)
 
         list_in_param = []
         for _, parameter in form_element.get_parameters().items():
@@ -592,7 +650,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                      list_in_param)
 
         # Build all View Component Part
-        for _, view_component_part in form_element.get_assoc_view_component_parts().items():
+        for _, view_component_part in \
+                form_element.get_assoc_view_component_parts().items():
             if isinstance(view_component_part, SimpleField):
                 self.interpret_simple_field(view_component_part, html,
                                             typescript_class, list_in_param)
@@ -600,31 +659,39 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 self.interpret_data_binding(view_component_part, html,
                                             typescript_class, list_in_param)
 
-        # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(form_call, typescript_calling,
-                                           list_in_param)
+        # TODO Implement Building all In Direction Parameter. These "In"
+        #  param will be passed as a props from its parent.
+        self.build_in_parameter_for_parent(
+            form_call,
+            typescript_calling,
+            list_in_param
+        )
 
         # Build All View Element Event Inside
+        # TODO: handle OnSubmitEvent
+        #  later. Due to former interpreter design, separating component and
+        #  logic give so much extra effort.
         for _, event in form_element.get_view_element_events().items():
             self.view_element_events.append(event)
 
         # Creating the component node
         # The Component Itself
-        angular_component_node = AngularComponent(
-            component_typescript_class=typescript_class,
-            component_html=html)
+        component_module = ReactComponent(typescript_class, html)
 
-        # Calling Form selector
-        doc_selector, tag_selector, text_selector = Doc().tagtext()
+        html_calling.append_html_into_body(form_call.render())
 
-        with tag_selector('div', id='div-form-{name}'.format(
-                name=html.form_dasherize),
-                          klass='div-form view-component'):
-            doc_selector.asis(form_call.render())
-        html_calling.append_html_into_body(doc_selector.getvalue())
+        form_import_statement = ImportStatementType()
+        form_import_statement.set_default_element(
+            component_module.component_class.component_name
+        )
+        form_import_statement.set_main_module(
+            f'../{component_module.component_class.component_name}/{component_module.get_component_filename()}'
+        )
+        typescript_calling.add_import_statement_using_import_node(
+            form_import_statement)
 
         # Register to components container
-        self.components[form_element.get_id()] = angular_component_node
+        self.components[form_element.get_id()] = component_module
 
     def interpret_detail(self, detail_element, html_calling,
                          typescript_calling):
@@ -771,19 +838,29 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 import_node)
 
         for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
-            typescript_calling.set_constructor_param(constructor_param)
+            typescript_calling.add_constructor_param(constructor_param)
 
     def interpret_onsubmit_event(self, onsubmit_event, html_calling,
-                                 typescript_calling):
+                                 typescript_calling: ReactComponentEseightClass):
+        """
+        Once the form had been interpreted, there are left works to do. One
+        of those may be interpreting Save/Submit button. This method will
+        interpret that element and append it into the corresponding
+        component class and jsx.
 
+        :param onsubmit_event: the IFML submit element
+        :param html_calling: the jsx where submit element JSX will be inserted into
+        :param typescript_calling: the component class where submit event handler function will be inserted into
+        :return: None
+        """
         # Get the name
         element_name = onsubmit_event.get_name()
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} OnSubmit Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
-        func_and_html_event_node = AngularSubmitButtonType(element_name)
+        func_and_html_event_node = SubmitButtonType(element_name)
 
         # Build all child
         for _, interaction_flow in onsubmit_event.get_out_interaction_flow().items():
@@ -796,14 +873,13 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         html_calling.add_submit_event(ngsubmit)
 
         # Call it to typescript body, and possibly add import node and constructor param to the class
-        typescript_calling.body.append(typescript_function)
+        # typescript_calling.body.append(typescript_function)
+        # add handler function into component class body
+        typescript_calling.set_property_decl(func_and_html_event_node.function_holder)
 
         for import_node in func_and_html_event_node.function_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(
                 import_node)
-
-        for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
-            typescript_calling.set_constructor_param(constructor_param)
 
     def interpret_onselect_event(self, onselect_event, html_calling,
                                  typescript_calling):
@@ -834,7 +910,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 import_node)
 
         for constructor_param in func_and_html_event_node.function_node.needed_constructor_param:
-            typescript_calling.set_constructor_param(constructor_param)
+            typescript_calling.add_constructor_param(constructor_param)
 
     def interpret_action_event(self, action_id_action_event_tuple):
         # Get the name
@@ -930,7 +1006,16 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         html_calling.append_html_into_body(visualization_span.render())
 
     def interpret_simple_field(self, simple_field_element, html_calling,
-                               typescript_calling, list_in_param):
+                               component_calling, list_in_param):
+        """
+        Parse simple field and append the result to its parent.
+
+        :param simple_field_element: the ifml element
+        :param html_calling: the parent markup language template
+        :param component_calling: the parent component class object
+        :param list_in_param: list of all in param for next process
+        :return: None
+        """
 
         # Get the name and type
         element_name = simple_field_element.get_name()
@@ -940,10 +1025,12 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Find the type in the UML Symbol Table
         datatype_of_field = self.uml_symbol_table.lookup(uml_model_name,
                                                          id_of_type).name
-
+        # TODO: this section meant to set instance variable for "out"
+        #  parameter. However, there is no futher research for "in" and
+        #  "inout" parameter.
         # Interpreting the parameter, because part of Simple Field is Parameter
-        self.interpret_parameter(simple_field_element, typescript_calling,
-                                 list_in_param)
+        # self.interpret_parameter(simple_field_element, component_calling,
+        #                          list_in_param)
 
         logger_ifml_angular_interpreter.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
@@ -1019,7 +1106,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         list_in_direction_parameter.append(input_node)
 
     def interpret_out_parameter(self, out_parameter_calling,
-                                child_typescript_calling):
+                                child_component_calling):
+
         # Get element name and type
         element_name = out_parameter_calling.get_name()
         uml_name, id_of_symbol = out_parameter_calling.get_type().split('#')
@@ -1034,10 +1122,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         output_node = OutParameter(element_name, type_used_by_parameter)
 
         # Declare it in the child typescript, and if the type is class, import the class
-        child_typescript_calling.set_property_decl(output_node.property)
+        child_component_calling.set_property_decl(output_node.property)
 
         if output_node.needed_import:
-            child_typescript_calling.add_import_statement_using_import_node(
+            child_component_calling.add_import_statement_using_import_node(
                 output_node.needed_import)
 
     def view_container_definition(self):
@@ -1063,7 +1151,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
     def view_component_definition(self):
 
         html, _, routing_node = self.view_container_definition()
-        typescript_class = AngularComponentWithInputTypescriptClass()
+        typescript_class = ReactComponentWithInputEseightClass()
         return html, typescript_class, routing_node
 
     def check_if_there_is_an_interaction_flow(self, element):
@@ -1113,8 +1201,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 constructor_body_statement.add_statement_for_saving_query_param_value_into_property(
                     query_param_name, property_name)
 
-        parent_typescript.constructor_body.append(
-            constructor_body_statement.render())
+        # React can just access the passed props without having issue with
+        # type.
+        # parent_typescript.constructor_body.append(
+        #     constructor_body_statement.render())
 
     def interpret_all_action_events(self):
         for action_id_action_event_tuple in self.action_events:
@@ -1145,6 +1235,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         param_binding_group = interaction_flow_element.get_parameter_binding_groups()
 
         if isinstance(interaction_flow_element, NavigationFlow):
+            # handle flow like API Call
             self.interpret_navigation_flow(interaction_flow_element,
                                            function_node, param_binding_group,
                                            from_action)
@@ -1165,6 +1256,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 self.components.get(target_symbol.id), function_node,
                 param_binding_group, from_action)
         elif isinstance(target_symbol, ActionSymbol):
+            # handle flow for API Call
             self.interaction_with_action_as_target(
                 self.services.get(target_symbol.id), function_node,
                 param_binding_group)
@@ -1224,6 +1316,15 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def interaction_with_action_as_target(self, service_node, function_node,
                                           param_binding_group):
+        """
+        Action is for simple API call then may lead into switching page.
+
+        :param service_node:
+        :param function_node:
+        :param param_binding_group:
+        :return:
+        """
+
         # Get the service name, and filename
         service_class_name = service_node.class_name
         service_filename = service_node.filename
@@ -1234,6 +1335,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Creating statement for navigation into service
         service_call_statement = RouteToAction(service_class_name,
                                                service_filename)
+
 
         # Build the param binding group
         if param_binding_group:
@@ -1269,7 +1371,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         param_group = ParamGroup()
 
         # Build all Parameter Binding inside Parameter Binding Group
-        for _, param_binding in param_binding_group.get_parameter_bindings().items():
+        for _, param_binding in \
+                param_binding_group.get_parameter_bindings().items():
             source_param_symbol = self.ifml_symbol_table.lookup(
                 param_binding.get_source_parameter())
             target_param_symbol = self.ifml_symbol_table.lookup(

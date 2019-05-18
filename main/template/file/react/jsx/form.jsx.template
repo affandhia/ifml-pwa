@@ -1,0 +1,6 @@
+<form id='{$ form_dasherize|safe $}' {$ on_submit_call|safe $}>
+  <fieldset>
+    <legend>{$ form_title|safe $}</legend>
+    {$ input_list|safe $}
+  </fieldset>
+</form>

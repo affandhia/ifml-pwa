@@ -2,7 +2,8 @@ from yattag import Doc
 
 from main.utils.ast.base import Node
 from main.utils.ast.language.eseight import ImportStatementType, \
-    EseightClassType, ParamVarDecl, InstanceVarDecl, ArrowFunctionType
+    EseightClassType, ParamVarDeclType, InstanceVarDeclType, ArrowFunctionType, \
+    NormalMethodType
 from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.jinja.react import react_jsx_writer
 from main.utils.naming_management import camel_classify, dasherize, \
@@ -59,9 +60,9 @@ class ReactComponentEseightClass(EseightClassType):
 class ReactComponent(Node):
     def __init__(self, component_class: ReactComponentEseightClass,
                  component_markup_language: Node):
-        self.component_class = component_class
-        self.component_html = component_markup_language
-        self.component_name = ''
+        self.component_class: ReactComponentEseightClass = component_class
+        self.component_html: ReactJSX = component_markup_language
+        self.component_name: str = self.get_component_filename()
         self.routing_path = ''
 
     def set_routing_node(self, routing_path):
@@ -82,9 +83,12 @@ class ReactComponent(Node):
     def get_component_html(self):
         return self.component_html
 
+    def get_component_filename(self):
+        return f'{self.component_class.selector_name}.js'
+
     def build(self):
         self.react_render()
-        self.component_name = f'{self.component_class.selector_name}.js'
+        self.component_name = self.get_component_filename()
 
         return {self.component_class.component_name: {
             self.component_name: self.component_class.render()
@@ -98,19 +102,13 @@ class ReactComponent(Node):
         """
         function_name = 'render'
 
-        # create an instance variable for the function
-        render_function = InstanceVarDecl(function_name)
-
         # create the function body
-        render_function_body = ArrowFunctionType(function_name)
+        render_function_body = NormalMethodType(function_name)
         render_function_body.add_statement_to_body(
             f'return ({self.component_html.render()});')
 
-        # set instance variable value with function body
-        render_function.value = render_function_body.render()
-
         # insert the render function as a property of the class
-        self.component_class.set_property_decl(render_function)
+        self.component_class.add_method_to_body(render_function_body)
 
 
 class AngularComponent(Node):
@@ -189,16 +187,16 @@ class AngularComponentTypescriptClass(EseightClassType):
             ANGULAR_ROUTER_MODULE] = import_component_from_angular_router
 
         # Adding ActivatedRoute and Router in constructor
-        activated_route_var = ParamVarDecl('route')
+        activated_route_var = ParamVarDeclType('route')
         activated_route_var.variable_datatype = 'ActivatedRoute'
         activated_route_var.acc_modifiers = 'private'
 
-        router_var = ParamVarDecl('router')
+        router_var = ParamVarDeclType('router')
         router_var.variable_datatype = 'Router'
         router_var.acc_modifiers = 'private'
 
-        self.set_constructor_param(activated_route_var)
-        self.set_constructor_param(router_var)
+        self.add_constructor_param(activated_route_var)
+        self.add_constructor_param(router_var)
 
     def set_component_selector_class_name(self, name):
         self.selector_name = dasherize(name)
@@ -244,6 +242,11 @@ class AngularComponentTypescriptClass(EseightClassType):
         )
 
 
+class ReactComponentWithInputEseightClass(ReactComponentEseightClass):
+    def __init__(self):
+        super().__init__()
+
+
 class AngularComponentWithInputTypescriptClass(
     AngularComponentTypescriptClass):
     def __init__(self):
@@ -279,6 +282,33 @@ class MenuJSX(ReactJSX):
                                 list_button='\n'.join(self.body),
                                 menu_name=self.menu_name,
                                 auth_enabled=self.auth_enabled)
+
+
+class FormJSX(ReactJSX):
+
+    def __init__(self, name):
+        super().__init__()
+        self.on_submit_call = ''
+        self.input_list = []
+        self.form_varcamel = camel_function_style(name)
+        self.form_dasherize = dasherize(name)
+        self.form_title = creating_title_sentence_from_dasherize_word(
+            self.form_dasherize)
+
+    def append_html_into_body(self, input_html_string):
+        self.input_list.append(input_html_string)
+
+    def add_submit_event(self, on_submit):
+        self.on_submit_call = on_submit
+
+    def render(self):
+        return react_jsx_writer(
+            'form.jsx.template',
+            form_title=self.form_title,
+            form_dasherize=self.form_dasherize,
+            on_submit_call=self.on_submit_call,
+            form_varcamel=self.form_varcamel,
+            input_list='\n'.join(self.input_list))
 
 
 class AngularComponentHTML(Node):
@@ -318,6 +348,28 @@ class AngularFormHTML(AngularComponentHTML):
             on_submit_call=self.on_submit_call,
             form_varcamel=self.form_varcamel,
             input_list='\n'.join(self.input_list))
+
+
+class ComponentJSXCall(Node):
+    def __init__(self, name):
+        super().__init__()
+        self.selector_name = name
+        self.parameter_and_property_pair_list = []
+
+    def add_parameter_and_property_pair(self, parameter, props):
+        parameter_name = parameter.variable_name
+        property_name = props.variable_name
+        self.parameter_and_property_pair_list.append(
+            (parameter_name, property_name))
+
+
+class FormComponentJSXCall(ComponentJSXCall):
+    def render(self):
+        return react_jsx_writer(
+            'form_call.jsx.template',
+            selector_name=self.selector_name,
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list
+        )
 
 
 class AngularDetailHTMLCall(Node):

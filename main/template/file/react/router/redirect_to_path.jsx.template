@@ -1,0 +1,1 @@
+<Redirect {$ path_match|safe $} from="{$ path|safe $}" to="{$ target_redirect|safe $}"/>
