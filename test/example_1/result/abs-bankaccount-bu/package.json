@@ -11,7 +11,6 @@
   },
   "private": true,
   "dependencies": {
-    "express": "^4.16.3",
     "@angular/animations": "^6.1.0",
     "@angular/common": "^6.1.0",
     "@angular/compiler": "^6.1.0",
@@ -25,9 +24,11 @@
     "@angular/service-worker": "^6.1.0",
     "angular-6-social-login-v2": "^1.0.5",
     "core-js": "^2.5.4",
+    "express": "^4.16.3",
+    "http-proxy-middleware": "^0.19.1",
+    "ngx-smart-modal": "^7.1.0",
     "rxjs": "6.0.0",
-    "zone.js": "~0.8.26",
-    "ngx-smart-modal": "^7.1.0"
+    "zone.js": "~0.8.26"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.7.0",

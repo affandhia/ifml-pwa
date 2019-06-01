@@ -1,0 +1,1 @@
+<li{% if onclick %} {$ onclick|safe $}{% endif %}>{$ body|safe $}</li>

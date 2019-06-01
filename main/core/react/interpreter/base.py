@@ -1,4 +1,5 @@
 import logging
+import re
 
 from yattag import Doc
 
@@ -29,12 +30,13 @@ from main.utils.ast.framework.angular.buttons import \
 from main.utils.ast.framework.react.buttons import SubmitButtonType
 from main.utils.ast.framework.react.component_parts import InputField, \
     DataBindingFunction, VisualizationWithSpan
-from main.utils.ast.framework.angular.components import AngularComponent, \
+from main.utils.ast.framework.react.components import AngularComponent, \
     AngularComponentTypescriptClass, \
     AngularComponentHTML, AngularFormHTML, AngularDetailHTMLCall, \
     AngularListHTMLCall, AngularListHTMLLayout, \
     AngularModalHTMLLayout, AngularComponentForModal, \
-    AngularComponentWithInputTypescriptClass, AngularFormHTMLCall
+    AngularComponentWithInputTypescriptClass, AngularFormHTMLCall, \
+    ListJSXLayout, ListJSXCall, DetailJSXCall, DetailJSXLayout
 from main.utils.ast.framework.angular.google_sign_in import LoginHTML, \
     LoginTypescriptClass
 from main.utils.ast.framework.angular.models import ModelFromUMLClass, \
@@ -49,12 +51,14 @@ from main.utils.ast.framework.angular.services import AngularService, \
     ActionEventInterpretation
 from main.utils.ast.framework.react.base import REACT_ROUTER_DOM_MODULE, \
     REACT_COOKIES_MODULE
-from main.utils.ast.framework.react.services import ReactAPICall
+from main.utils.ast.framework.react.services import ReactAPICall, \
+    ActionInterpretation
 from main.utils.ast.language.eseight import ImportStatementType, \
-    InstanceVarDeclType
+    InstanceVarDeclType, MethodAsInstanceVarDeclType
 from main.utils.ast.language.html import HTMLMenuTemplate
 from main.utils.ast.language.typescript import VarDeclType
-from main.utils.naming_management import dasherize, camel_function_style
+from main.utils.naming_management import dasherize, camel_function_style, \
+    camel_classify, remove_slash_and_dot, change_slash_and_dot_into_dash
 from . import BaseInterpreter
 
 from main.utils.ast.framework.react.components import \
@@ -121,10 +125,16 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # TODO: do something with model in React
         # react treat data as literal JSON. there is no need to
         # create a specific class and serialized it on.
-        # self.interpret_domain_model()
+        self.interpret_domain_model()
 
         # Interpret all Interaction Flow Model Elements
         self.interpret_interaction_flow_model()
+
+        # Interpret all Action Event Elements with it's corresponding navigation
+        self.interpret_all_action_events()
+
+        # Interpret all View Element Elements with it's corresponding navigation
+        # self.interpret_all_view_element_events()
 
         self.prepare_root_render()
 
@@ -143,7 +153,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # wrap if auth enabled
         if self.enable_authentication_guard:
             self.root_eseight_class.add_import_statement_for_multiple_element(
-                './containers/Authentication',
+                '../containers/Authentication',
                 ['AuthProvider', 'AuthConsumer']
             )
             self.root_template.body.insert(0, "<AuthProvider>")
@@ -276,22 +286,23 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 self.ifml_expressing_ui_design.items():
             # If the root have actions
             if isinstance(interaction_flow_model_element, Action):
-                pass
+                # TODO: this Action is not present in the IFML at all
                 # self.interpret_action(interaction_flow_model_element)
-            # If the root have Windows
-
-            elif isinstance(interaction_flow_model_element, Window):
-                # Note: this IFML haven't be used due to lack of things.
-                # TODO: remove this one due to unused
-                # self.check_if_windows_is_different_than_view_container(
-                #     interaction_flow_model_element, self.root_template,
-                #     self.root_eseight_class, self.angular_routing)
                 pass
+            # If the root have Windows
+            # Note: this IFML haven't be used due to lack of things.
+            # TODO: remove this one due to unused
+            # elif isinstance(interaction_flow_model_element, Window):
+            # self.check_if_windows_is_different_than_view_container(
+            #     interaction_flow_model_element, self.root_template,
+            #     self.root_eseight_class, self.angular_routing)
             # If the root have menu
             # TODO: after viewcontainer has been implemented, implement this one [SECOND ONE]
             elif isinstance(interaction_flow_model_element, Menu):
                 self.interpret_menu(interaction_flow_model_element,
-                                    self.root_template)
+                                    self.root_template,
+                                    self.root_eseight_class,
+                                    auth_guard=True)
             # TODO: FOCUS ON THIS ONE FIRST
             elif isinstance(interaction_flow_model_element, ViewContainer):
                 self.interpret_view_container(interaction_flow_model_element,
@@ -375,7 +386,9 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.components[window_element.get_id()] = angular_component_node
 
     def interpret_menu(self, menu_element: Menu,
-                       html_calling: ReactJSX):
+                       html_calling: ReactJSX,
+                       typescript_calling: ReactComponentEseightClass,
+                       auth_guard: bool = False):
         """
         Create new ReactComponent for menu element.
 
@@ -413,7 +426,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Prepare HTML
         html = MenuJSX(component_class.selector_name,
-                       self.enable_authentication_guard)
+                       auth_guard)
 
         # Build All View Element Event Inside
         # TODO: Why should enlist event globally?
@@ -427,12 +440,25 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Calling Menu selector
         doc_selector, tag_selector, text_selector = Doc().tagtext()
-
-        with tag_selector(component_class.component_name):
+        with tag_selector(
+                component_class.component_name + 'Component',
+                '{...values}'):
             text_selector('')
 
         # Menu always appended into first element
-        html_calling.append_html_into_body(doc_selector.getvalue())
+        html_calling.append_html_into_body(
+            "<AuthConsumer>{{ (values )=> {} }}</AuthConsumer>".format(
+                doc_selector.getvalue()
+            )
+        )
+
+        typescript_calling.add_import_statement(
+            '../containers/Authentication',
+            'AuthConsumer'
+        )
+
+        # add component to parent
+        self.add_import_component_to_parent(typescript_calling, component_node)
 
         # Register to components container
         self.components[menu_element.get_id()] = component_node
@@ -466,6 +492,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Decide if this container is callable or using router
         # Checking if its is a Landmark or having an interaction flow
         if view_container.get_is_xor():
+            # means this ViewContainer is a layout placeholder
             routing_node = RouteToModule(container_class,
                                          enable_guard=self.enable_authentication_guard)
             routing_node.enable_children_routing()
@@ -491,7 +518,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
             absolute_path = routing_node.path
 
-            landmark_path_var_decl = InstanceVarDeclType(landmark_path_var_name)
+            landmark_path_var_decl = InstanceVarDeclType(
+                landmark_path_var_name)
             landmark_path_var_decl.value = "\'{value}\'".format(
                 value=absolute_path)
 
@@ -512,11 +540,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             routing_node.path_from_root = \
                 routing_parent.path_from_root + '/' + routing_node.path
 
-        # Decide if this container is default in its XOR
-        if view_container.get_is_default():
-            routing_parent.add_children_routing(
-                RedirectToAnotherPath('', routing_node.path_from_root))
-
         # Build All View Element Event Inside
         for _, event in view_container.get_view_element_events().items():
             if isinstance(event, ViewElementEvent):
@@ -527,7 +550,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Build All Action inside the Container
         for _, action in view_container.get_action().items():
-            self.interpret_action(action)
+            self.interpret_action(action, container_class)
 
         # Build All Associated View Element
         for _, view_element in view_container.get_assoc_view_element().items():
@@ -542,7 +565,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             #     view_element, html, container_class,
             #     routing_node)
             elif isinstance(view_element, Menu):
-                self.interpret_menu(view_element, html)
+                self.interpret_menu(view_element, html, container_class)
             elif isinstance(view_element, ViewContainer):
                 self.interpret_view_container(view_element, html,
                                               container_class, routing_node)
@@ -554,7 +577,33 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Add Routing Node and (If exist) any children route
         try:
+            # Error given when routing_node is None
             routing_parent.add_children_routing(routing_node)
+
+            # Decide if this container is default in its XOR
+            # import Redirect and append to body first before any Route
+            if view_container.get_is_default():
+                typescript_calling.add_import_statement('react-router-dom',
+                                                        'Redirect')
+                redirect_node = RedirectToAnotherPath(
+                    routing_parent.path_from_root,
+                    routing_node.path_from_root)
+                routing_parent.add_children_routing(redirect_node)
+                html_calling.append_html_into_body(redirect_node.render())
+
+            self.add_import_component_to_parent(typescript_calling,
+                                                component_node)
+
+            # append this VC to parent jsx and import Route to parent
+            html_calling.append_html_into_body(routing_node.render())
+            typescript_calling.add_import_statement('react-router-dom',
+                                                    'Route')
+
+            # import withAuth HOC if login enabled
+            if self.enable_authentication_guard:
+                typescript_calling.add_import_statement(
+                    '../containers/Authentication',
+                    'withAuth')
 
             component_node.set_routing_node(
                 routing_node.path_from_root)
@@ -564,24 +613,26 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             # self.append_router_outlet(routing_node, html, container_class)
         # If this container must be called
         except Exception:
+            # if Window symbol encounter
+
             # This exception catch a component without routing_node.
             # Calling ViewContainer selector
             doc_selector, tag_selector, text_selector = Doc().tagtext()
 
-            with tag_selector(container_class.selector_name):
+            with tag_selector(container_class.component_name):
                 text_selector('')
             html_calling.append_html_into_body(doc_selector.getvalue())
 
         # Register to components container
         self.components[view_container.get_id()] = component_node
 
-    def interpret_action(self, action_element):
+    def interpret_action(self,
+                         action_element,
+                         parent_class: ReactComponentEseightClass):
         """
-        Interpret the given action.
+        Interpret the given action. Mostly handle API call.
+        """
 
-        :param action_element:
-        :return:
-        """
         # Name of element, the name in a form of API endpoint.
         # e.g. api/myentity/myaction.abs
         element_name = action_element.get_name()
@@ -589,12 +640,19 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         logger_react.info(
             "Interpreting a {name} Action".format(name=element_name))
 
+        action_intepretation = ActionInterpretation(
+            element_name,
+            self.enable_authentication_guard
+        )
+
+        parent_class.set_property_decl(action_intepretation.function)
+
         # TODO: what this is variable for
         any_in_param = False
 
         # TODO: what exactly the condition loop guard on
         # Check if there are any in parameter being defined
-        all_param_inside_action = action_element.get_parameters()
+        all_param_inside_action = dict.copy(action_element.get_parameters())
         while len(all_param_inside_action) and not any_in_param:
             arbitary_param_inside_action = all_param_inside_action.popitem()[1]
             any_in_param = arbitary_param_inside_action.get_direction() == 'in'
@@ -631,7 +689,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = form_element.get_name()
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} Form".format(name=element_name))
 
         # Only need the routing node and typescript_class
@@ -661,11 +719,12 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # TODO Implement Building all In Direction Parameter. These "In"
         #  param will be passed as a props from its parent.
-        self.build_in_parameter_for_parent(
-            form_call,
-            typescript_calling,
-            list_in_param
-        )
+        if len(list_in_param) > 0:
+            self.build_in_parameter_for_parent(
+                form_call,
+                typescript_calling,
+                list_in_param
+            )
 
         # Build All View Element Event Inside
         # TODO: handle OnSubmitEvent
@@ -680,15 +739,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         html_calling.append_html_into_body(form_call.render())
 
-        form_import_statement = ImportStatementType()
-        form_import_statement.set_default_element(
-            component_module.component_class.component_name
-        )
-        form_import_statement.set_main_module(
-            f'../{component_module.component_class.component_name}/{component_module.get_component_filename()}'
-        )
-        typescript_calling.add_import_statement_using_import_node(
-            form_import_statement)
+        self.add_import_component_to_parent(typescript_calling,
+                                            component_module)
 
         # Register to components container
         self.components[form_element.get_id()] = component_module
@@ -698,16 +750,19 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = detail_element.get_name()
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} Detail".format(name=element_name))
 
         # HTML, Typescript Class, and Routing Node
-        html, typescript_class, _ = self.view_component_definition()
+        _, typescript_class, _ = self.view_component_definition()
         typescript_class.set_component_selector_class_name(element_name)
+
+        # HTML Layout for Detail
+        html = DetailJSXLayout()
 
         # HTML Call for Detail
         # Preparation to Call Detail
-        detail_call = AngularDetailHTMLCall(typescript_class.selector_name)
+        detail_call = DetailJSXCall(typescript_class.component_name)
 
         list_in_param = []
         for _, parameter in detail_element.get_parameters().items():
@@ -728,31 +783,38 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                             typescript_class, list_in_param)
 
         # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(detail_call, typescript_calling,
-                                           list_in_param)
+        if len(list_in_param) > 0:
+            self.build_in_parameter_for_parent(detail_call, typescript_calling,
+                                               list_in_param)
 
         # Creating the component node
         # The Component Itself
-        angular_component_node = AngularComponent(
-            component_typescript_class=typescript_class,
-            component_html=html)
+        component_node = ReactComponent(
+            typescript_class,
+            html)
 
         # Calling Detail selector
-        doc_selector, tag_selector, text_selector = Doc().tagtext()
-        with tag_selector('div', id='div-detail-{name}'.format(
-                name=typescript_class.selector_name),
-                          klass='div-detail view-component'):
-            doc_selector.asis(detail_call.render())
-        html_calling.append_html_into_body(doc_selector.getvalue())
+        html_calling.append_html_into_body(detail_call.render())
+
+        self.add_import_component_to_parent(typescript_calling, component_node)
 
         # Register to components container
-        self.components[detail_element.get_id()] = angular_component_node
+        self.components[detail_element.get_id()] = component_node
 
     def interpret_list(self, list_element, html_calling, typescript_calling):
+        """
+        Interpret a list inside View Container.
+
+        :param list_element: IFML node
+        :param html_calling:  its jsx parent calling this component
+        :param typescript_calling: its class parent calling this component
+        :return: None
+        """
+
         # Name of element
         element_name = list_element.get_name()
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} List".format(name=element_name))
 
         # Typescript Class, and Routing Node
@@ -760,10 +822,10 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         typescript_class.set_component_selector_class_name(element_name)
 
         # List HTML Layout
-        html = AngularListHTMLLayout()
+        html = ListJSXLayout()
 
         # Preparation to Call List selector in parent
-        list_call = AngularListHTMLCall(typescript_class.selector_name)
+        list_call = ListJSXCall(typescript_class.component_name)
 
         list_in_param = []
         for _, parameter in list_element.get_parameters().items():
@@ -784,25 +846,34 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                             typescript_class, list_in_param)
 
         # TODO Implement Building all In Direction Parameter
-        self.build_in_parameter_for_parent(list_call, typescript_calling,
-                                           list_in_param)
+        if len(list_in_param) > 0:
+            self.build_in_parameter_for_parent(list_call, typescript_calling,
+                                               list_in_param)
 
         # Creating the component node
         # The Component Itself
-        angular_component_node = AngularComponent(
-            component_typescript_class=typescript_class,
-            component_html=html)
+        component_node = ReactComponent(
+            typescript_class,
+            html)
 
         # Calling Detail selector
-        doc_selector, tag_selector, text_selector = Doc().tagtext()
-        with tag_selector('div', id='div-list-{name}'.format(
-                name=typescript_class.selector_name),
-                          klass='div-list view-component'):
-            doc_selector.asis(list_call.render())
-        html_calling.append_html_into_body(doc_selector.getvalue())
+        html_calling.append_html_into_body(list_call.render())
+
+        self.add_import_component_to_parent(typescript_calling, component_node)
 
         # Register to components container
-        self.components[list_element.get_id()] = angular_component_node
+        self.components[list_element.get_id()] = component_node
+
+    def add_import_component_to_parent(self, parent_class, component):
+        form_import_statement = ImportStatementType()
+        form_import_statement.set_default_element(
+            component.component_class.component_name + 'Component'
+        )
+        form_import_statement.set_main_module(
+            f'../{component.component_class.component_name}/{component.get_component_filename()}'
+        )
+        parent_class.add_import_statement_using_import_node(
+            form_import_statement)
 
     def interpret_view_element_event(self, view_element_event, html_calling,
                                      typescript_calling, parent_symbol):
@@ -875,7 +946,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Call it to typescript body, and possibly add import node and constructor param to the class
         # typescript_calling.body.append(typescript_function)
         # add handler function into component class body
-        typescript_calling.set_property_decl(func_and_html_event_node.function_holder)
+        typescript_calling.set_property_decl(
+            func_and_html_event_node.function_holder)
 
         for import_node in func_and_html_event_node.function_node.needed_import:
             typescript_calling.add_import_statement_using_import_node(
@@ -920,7 +992,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         action_event_container = self.services.get(action_id)
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} ActionEvent".format(name=element_name))
 
         # The idea is to create fake button and HTML handler
@@ -937,10 +1009,19 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def interpret_data_binding(self, data_binding_element, html_calling,
                                typescript_calling, list_in_param):
+        """
+        Interpret the representation of content source comes from domain model.
+
+        :param data_binding_element:
+        :param html_calling:
+        :param typescript_calling:
+        :param list_in_param:
+        :return:
+        """
         # Get the name
         element_name = data_binding_element.get_name()
 
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} DataBinding".format(name=element_name))
         # Get the classifier
         classifier = self.ifml_symbol_table.lookup(
@@ -952,44 +1033,94 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Interpreting Data Binding
         data_binding_function = DataBindingFunction(element_name,
                                                     intended_model)
+        conditional_expression = []
 
         # Build (If any) Visualization Attribute or Simple Field
         for _, sub_view_component_part in data_binding_element.get_sub_view_component_parts().items():
             if isinstance(sub_view_component_part, VisualizationAttribute):
-                self.interpret_visualization_attribute(sub_view_component_part,
-                                                       html_calling,
-                                                       data_binding_function.property_declaration)
+                self.interpret_visualization_attribute(
+                    sub_view_component_part,
+                    html_calling,
+                    data_binding_function.property_declaration)
             elif isinstance(sub_view_component_part, SimpleField):
-                self.interpret_simple_field(sub_view_component_part,
-                                            html_calling, typescript_calling,
-                                            list_in_param)
+                self.interpret_simple_field(
+                    sub_view_component_part,
+                    html_calling,
+                    typescript_calling,
+                    list_in_param,
+                    default_value_source=data_binding_function.property_declaration
+                )
             elif isinstance(sub_view_component_part, ConditionalExpression):
-                self.interpret_conditional_expression(sub_view_component_part,
-                                                      data_binding_function.func_decl)
+                conditional_expression.append(sub_view_component_part)
+                self.interpret_conditional_expression(
+                    sub_view_component_part,
+                    data_binding_function.func_decl)
 
         # Add the import statement
-        typescript_calling.add_import_statement_using_import_node(
-            data_binding_function.import_statement)
+        # typescript_calling.add_import_statement_using_import_node(
+        #     data_binding_function.import_statement)
+
+        # Property object source data handled
+
+        if len(list_in_param) > 0:
+            param = list_in_param[0]
+            if isinstance(param, InParameter):
+                data_binding_function.property_declaration.value = \
+                    'this.props.{} || {{}}'.format(param.var_camel_name)
 
         # Add the property from Data Binding
+        # this should be placed in state
         typescript_calling.set_property_decl(
             data_binding_function.property_declaration)
 
+        # TODO: due to ConditionalExpression hardcoded, this is hack way to
+        #  assign value to object source data in instance variable.
+        for ce in conditional_expression:
+            statements = self.parse_conditional_expression_body(ce.get_body())
+            for statement in statements:
+                var, value = statement
+                property_declaration = data_binding_function.property_declaration
+                if var == property_declaration.variable_name and \
+                        property_declaration.value != '':
+                    continue
+                elif var == property_declaration.variable_name:
+                    model = re.search('\((.*)\)', value, re.IGNORECASE)
+                    assignment = model.group(1)
+                    assignment = assignment.replace('this.', 'this.props.')
+                    property_declaration.value = assignment
+                    continue
+                else:
+                    instance_var = InstanceVarDeclType(var)
+                    instance_var.value = value
+                    typescript_calling.set_property_decl(instance_var)
+
+        # Due to es8 feature of instance variable, dont need to put method
+        # into body and call it in the constructor. Just assign the value in
+        # the instance variable.
+
         # Call the function in the constructor
-        typescript_calling.constructor_body.append(
-            data_binding_function.get_function_call())
+        # typescript_calling.constructor_body.append(
+        #     data_binding_function.get_function_call())
 
         # Create the function
-        typescript_calling.body.append(
-            data_binding_function.get_function_declaration())
+        # typescript_calling.body.append(
+        #     data_binding_function.get_function_declaration())
 
     def interpret_visualization_attribute(self,
                                           visualization_attribute_element,
                                           html_calling,
                                           data_binding_property):
+        """
+        Interpret an attribute will be shown to user.
+
+        :param visualization_attribute_element:
+        :param html_calling:
+        :param data_binding_property: data from state
+        :return:
+        """
         # Get the name
         element_name = visualization_attribute_element.get_name()
-        logger_ifml_angular_interpreter.info(
+        logger_react.info(
             "Interpreting a {name} VisualizationAttribute".format(
                 name=element_name))
 
@@ -998,6 +1129,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             visualization_attribute_element.get_feature_concept()).struct_feature_symbol
 
         # Interpret the notation
+        # Note that data binding in react can be retrieved in component State
         visualization_span = VisualizationWithSpan(element_name,
                                                    structural_feature.name,
                                                    data_binding_property.variable_name)
@@ -1005,8 +1137,14 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Append to the HTML
         html_calling.append_html_into_body(visualization_span.render())
 
-    def interpret_simple_field(self, simple_field_element, html_calling,
-                               component_calling, list_in_param):
+    def interpret_simple_field(
+            self,
+            simple_field_element,
+            html_calling,
+            component_calling,
+            list_in_param,
+            default_value_source: InstanceVarDeclType = None
+    ):
         """
         Parse simple field and append the result to its parent.
 
@@ -1027,16 +1165,26 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                                          id_of_type).name
         # TODO: this section meant to set instance variable for "out"
         #  parameter. However, there is no futher research for "in" and
-        #  "inout" parameter.
-        # Interpreting the parameter, because part of Simple Field is Parameter
-        # self.interpret_parameter(simple_field_element, component_calling,
-        #                          list_in_param)
+        #  "inout" parameter. Revise#1: actually it might have something to
+        #  do with the data.
 
-        logger_ifml_angular_interpreter.info(
+        # Interpreting the parameter, because part of Simple Field is Parameter
+        self.interpret_parameter(simple_field_element, component_calling,
+                                 list_in_param)
+
+        logger_react.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
 
         # Create the Input Field
         input_html = InputField(element_name, datatype_of_field)
+
+        if default_value_source:
+            input_html.set_default_value(
+                'this.{object_variable_name}.{property_name}'.format(
+                    object_variable_name=default_value_source.variable_name,
+                    property_name=camel_function_style(element_name)
+                )
+            )
 
         # Call Into the HTML, because the property already declared by interpreting the parameter
         # The two way data binding angular ready to be implemented
@@ -1044,12 +1192,35 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def interpret_conditional_expression(self, conditional_expression_element,
                                          data_binding_function_declaration):
+        """
+        Interpret notation where it seems the body has been declared
+        hardcoded in the IFML structure.
 
+        :param conditional_expression_element:
+        :param data_binding_function_declaration:
+        :return:
+        """
         # Get body from the element
         body = conditional_expression_element.get_body()
 
         # Append Conditional Expression body into statement inside Data Binding Function
         data_binding_function_declaration.add_statement_to_body(body)
+
+    def parse_conditional_expression_body(self, text: str) -> [str]:
+        arr = []
+
+        statements = text.split(';')
+
+        for statement in statements:
+            if statement.strip() == '':
+                continue
+
+            areas: [str] = statement.split(' = ')
+            var: str = areas[0].replace('this.', '').strip()
+            value: str = areas[1].strip()
+            arr.append((var, value))
+
+        return arr
 
     def interpret_slot(self, view_element_event, html_calling,
                        typescript_calling):
@@ -1077,13 +1248,21 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def interpret_in_parameter(self, in_parameter_element, typescript_calling,
                                list_in_direction_parameter):
+        """
+        Handle input parameter to the component.
 
+        :param in_parameter_element:
+        :param typescript_calling:
+        :param list_in_direction_parameter:
+        :return:
+        """
         # Get element name and type
         element_name = in_parameter_element.get_name()
         uml_name, id_of_symbol = in_parameter_element.get_type().split('#')
         type_used_by_parameter = self.uml_symbol_table.lookup(uml_name,
                                                               id_of_symbol)
 
+        # UPDATE#1: Due to React mostly handle data in object so no need to replace it with symbol.
         # If type is class then take the model frommodel container, else just take the string name
         if isinstance(type_used_by_parameter, ClassSymbol):
             type_used_by_parameter = self.models[type_used_by_parameter.id]
@@ -1092,15 +1271,19 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         input_node = InParameter(element_name, type_used_by_parameter)
 
         # Declare it in the child typescript, and if the type is class, import the class
-        typescript_calling.set_property_decl(input_node.child_property)
 
-        if input_node.needed_import:
-            typescript_calling.add_import_statement_using_import_node(
-                input_node.needed_import)
+        # No need to set instance variable for this param
+        # typescript_calling.set_property_decl(input_node.child_property)
+
+        # UPDATE#1: Due to no Model interpreted
+        # if input_node.needed_import:
+        #     typescript_calling.add_import_statement_using_import_node(
+        #         input_node.needed_import)
 
         # Adding Input decorator import statement
-        typescript_calling.add_import_statement_using_import_node(
-            input_node.input_import_statement)
+        # There is no Input mechanism in React, only props.
+        # typescript_calling.add_import_statement_using_import_node(
+        #     input_node.input_import_statement)
 
         # Add it into InDirectionInput List at Child Component
         list_in_direction_parameter.append(input_node)
@@ -1121,8 +1304,11 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Creating Output Parameter in child
         output_node = OutParameter(element_name, type_used_by_parameter)
 
+        # TODO: react doesn't need to state the instance variable of out
+        #  parameter. Reduce unnecessary complex.
+
         # Declare it in the child typescript, and if the type is class, import the class
-        child_component_calling.set_property_decl(output_node.property)
+        # child_component_calling.set_property_decl(output_node.property)
 
         if output_node.needed_import:
             child_component_calling.add_import_statement_using_import_node(
@@ -1156,7 +1342,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def check_if_there_is_an_interaction_flow(self, element):
         """
-        Inpect if there is any interaction flow contained in the element.
+        Inspect if there is any interaction flow contained in the element.
 
         :param element: the IFML element
         :return:
@@ -1176,7 +1362,16 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
     def build_in_parameter_for_parent(self, call_html, parent_typescript,
                                       list_param):
+        """
+        handle all input parameter. Gather the data from query param in the
+        url. Implementing this way helps user to reload the page without
+        re-fetch data.
 
+        :param call_html:
+        :param parent_typescript:
+        :param list_param:
+        :return:
+        """
         # This logic is only good for parameter inside form and detail
         # Improve this logic for list
         constructor_body_statement = GettingQueryParam()
@@ -1186,14 +1381,14 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             call_html.add_parameter_and_property_pair(param.child_property,
                                                       param.parent_property)
 
-            # Adding needed property for parent component
+            #  TODO: set value here then adding needed property for parent component
             parent_typescript.set_property_decl(param.parent_property)
 
             # Check if the declaration of property need to import a model class, else no import needed
             if param.needed_import:
                 query_param_name, property_name, class_type = param.parent_property.variable_name, param.parent_property.variable_name, param.parent_property.variable_datatype
-                parent_typescript.add_import_statement_using_import_node(
-                    param.needed_import)
+                # parent_typescript.add_import_statement_using_import_node(
+                #     param.needed_import)
                 constructor_body_statement.add_statement_for_saving_query_param_value_into_property_typed_class(
                     query_param_name, property_name, class_type)
             else:
@@ -1203,8 +1398,18 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # React can just access the passed props without having issue with
         # type.
-        # parent_typescript.constructor_body.append(
-        #     constructor_body_statement.render())
+
+        # UPDATE#2: this statement is meant to parse the query param in URL
+        # into a JSON data so that can be processed by the destination route.
+
+        # UPDATE#3: to persist the data when user refresh the page so we
+        # still need to use Query Param
+        parent_typescript.add_default_element_import_statement(
+            'query-string',
+            'queryString'
+        )
+        parent_typescript.add_line_to_component_did_mount(
+            constructor_body_statement.render())
 
     def interpret_all_action_events(self):
         for action_id_action_event_tuple in self.action_events:
@@ -1271,6 +1476,9 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         elif isinstance(container_node, AngularComponent):
             self.route_to_component_page(container_node, function_node,
                                          param_binding_group, from_action)
+        elif isinstance(container_node, ReactComponent):
+            self.route_to_component_page(container_node, function_node,
+                                         param_binding_group, from_action)
 
     def route_to_component_page(self, component_page_node, function_node,
                                 param_binding_group, from_action):
@@ -1335,7 +1543,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Creating statement for navigation into service
         service_call_statement = RouteToAction(service_class_name,
                                                service_filename)
-
 
         # Build the param binding group
         if param_binding_group:

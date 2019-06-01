@@ -1,0 +1,1 @@
+<{$ selector_name|safe $}{% for pair in parameter_and_property_pair_list %} {$ pair[0] $}={ this.state.{$ pair[1]|safe $} || {} }{% endfor %}></{$ selector_name|safe $}>

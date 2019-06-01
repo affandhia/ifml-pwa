@@ -3,7 +3,7 @@ from yattag import Doc
 from main.utils.ast.base import Node
 from main.utils.ast.language.eseight import ImportStatementType, \
     EseightClassType, ParamVarDeclType, InstanceVarDeclType, ArrowFunctionType, \
-    NormalMethodType
+    NormalMethodType, MethodAsInstanceVarDeclType
 from main.utils.jinja.angular import component_file_writer, angular_html_writer
 from main.utils.jinja.react import react_jsx_writer
 from main.utils.naming_management import camel_classify, dasherize, \
@@ -20,6 +20,16 @@ class ReactComponentEseightClass(EseightClassType):
         self.component_name = ''
         self.set_import_and_constructor()
         self.set_react_component_as_parent()
+
+    def add_line_to_component_did_mount(self, line: str):
+        try:
+            var: MethodAsInstanceVarDeclType = self.property_decl[
+                'componentDidMount']
+        except KeyError:
+            var = MethodAsInstanceVarDeclType('componentDidMount')
+            self.set_property_decl(var)
+
+        var.function_as_value.add_statement_to_body(line)
 
     def set_react_component_as_parent(self):
         self.parent_class = 'React.Component'
@@ -261,6 +271,11 @@ class ReactJSX(Node):
         self.body.append(html_element)
 
     def render(self):
+        if len(self.body) > 0:
+            return "<React.Fragment>\n{}\n</React.Fragment>".format(
+                react_jsx_writer('basic.component.jsx.template',
+                                 body='\n'.join(self.body))
+            )
         return react_jsx_writer('basic.component.jsx.template',
                                 body='\n'.join(self.body))
 
@@ -367,9 +382,37 @@ class FormComponentJSXCall(ComponentJSXCall):
     def render(self):
         return react_jsx_writer(
             'form_call.jsx.template',
-            selector_name=self.selector_name,
+            selector_name=self.selector_name + 'Component',
             parameter_and_property_pair_list=self.parameter_and_property_pair_list
         )
+
+
+class DetailJSXLayout(ReactJSX):
+    def render(self):
+        doc_selector, tag_selector, text_selector = Doc().tagtext()
+        with tag_selector('React.Fragment'):
+            doc_selector.asis(super().render())
+        return doc_selector.getvalue()
+
+
+class DetailJSXCall(Node):
+
+    def __init__(self, name):
+        super().__init__()
+        self.selector_name = name
+        self.parameter_and_property_pair_list = []
+
+    def add_parameter_and_property_pair(self, parameter, property):
+        parameter_name = parameter.variable_name
+        property_name = property.variable_name
+        self.parameter_and_property_pair_list.append(
+            (parameter_name, property_name))
+
+    def render(self):
+        return react_jsx_writer(
+            'detail_call.jsx.template',
+            selector_name=self.selector_name + 'Component',
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
 class AngularDetailHTMLCall(Node):
@@ -404,6 +447,26 @@ class AngularFormHTMLCall(AngularDetailHTMLCall):
             parameter_and_property_pair_list=self.parameter_and_property_pair_list)
 
 
+class ListJSXCall(Node):
+
+    def __init__(self, name):
+        super().__init__()
+        self.selector_name = name
+        self.parameter_and_property_pair_list = []
+
+    def add_parameter_and_property_pair(self, parameter, property):
+        tuple_param_prop_pair = (
+            parameter.variable_name, property.variable_name)
+        self.parameter_and_property_pair_list.append(tuple_param_prop_pair)
+
+    def render(self):
+        return react_jsx_writer(
+            'list_call.jsx.template',
+            selector_name=self.selector_name + 'Component',
+            parameter_and_property_pair_list=self.parameter_and_property_pair_list
+        )
+
+
 class AngularListHTMLCall(Node):
 
     def __init__(self, name):
@@ -421,6 +484,22 @@ class AngularListHTMLCall(Node):
             'list_call.html.template',
             selector_name=self.selector_name,
             parameter_and_property_pair_list=self.parameter_and_property_pair_list)
+
+
+class ListJSXLayout(ReactJSX):
+
+    def __init__(self):
+        super().__init__()
+        self.onclick = ''
+
+    def add_onclick(self, onclick):
+        self.onclick = onclick
+
+    def render(self):
+        return react_jsx_writer(
+            'unordered_list_element.jsx.template',
+            onclick=self.onclick,
+            body='\n'.join(self.body))
 
 
 class AngularListHTMLLayout(AngularComponentHTML):

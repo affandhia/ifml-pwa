@@ -52,3 +52,11 @@ def creating_title_sentence_from_dasherize_word(word):
 #Specially used for ABS Microservice Framework naming convention
 def change_slash_and_dot_into_dash(word):
     return word.replace('/','-').replace('.','-')
+
+
+def change_slash_and_dot(word, replaced_string):
+    return word.replace('/', replaced_string).replace('.', replaced_string)
+
+
+def remove_slash_and_dot(word):
+    return word.replace('/', '').replace('.', '')

@@ -1,1 +1,1 @@
-({$ parameter_list|safe $}) => { {$ function_body|safe $} }
+{% if is_async %}async {% endif %}({$ parameter_list|safe $}) => { {$ function_body|safe $} }

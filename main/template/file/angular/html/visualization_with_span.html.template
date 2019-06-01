@@ -1,4 +1,4 @@
 <div id='div-vis-{$ dasherize_name|safe $}' class='view-component-part visualization-attribute'>
     <p id='label-vis-{$ dasherize_name|safe $}' class='label-visualization'>{$ title_name|safe $}</p>
-    <p id='vs-{$ dasherize_name|safe $}' class='class-attribute'>{{ {$ class_name|safe $}.{$ attribute_name $} }}</p>
+    <p id='vs-{$ dasherize_name|safe $}' class='class-attribute'>{{ this.props.{$ class_name|safe $}.{$ attribute_name $} }}</p>
 </div>

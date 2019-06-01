@@ -81,16 +81,20 @@ class MethodAsInstanceVarDeclType(InstanceVarDeclType):
     def prepare_value(self):
         self.function_as_value = ArrowFunctionType(self.variable_name)
 
+    def enable_async(self):
+        self.function_as_value.is_async = True
+
     def render(self):
         self.value = self.function_as_value.render()
 
-        super(MethodAsInstanceVarDeclType, self).render()
+        return super(MethodAsInstanceVarDeclType, self).render()
 
 
 class FunctionType(Node):
     def __init__(self, name):
         super().__init__()
         self.function_name = camel_function_style(name)
+        self.is_async = False
         self.parameter_dict = {}
         self.function_body = []
 
@@ -120,6 +124,7 @@ class ArrowFunctionType(FunctionType):
 
         return eseight_writer('arrow_function.js.template',
                               function_body='\n'.join(self.function_body),
+                              is_async=self.is_async,
                               parameter_list=', '.join(parameter_list))
 
 
@@ -135,8 +140,9 @@ class NormalFunctionType(ArrowFunctionType):
             parameter_list.append(param.render())
 
         return eseight_writer(
-            FUNCTION_DECLARATION_TEMPLATE,
+            'function.js.template',
             is_method=self.is_method,
+            is_async=self.is_async,
             function_name=self.function_name,
             parameter_list=', '.join(parameter_list),
             function_body='\n'.join(self.function_body)
@@ -172,7 +178,7 @@ class EseightClassType(Node):
             # Check if the imported element already exist, if not then
             # insert it
             self.add_default_element_import_statement(
-                import_node.default_element, import_node.main_module)
+                import_node.main_module, import_node.default_element)
             for element in import_node.imported_elements:
                 self.add_import_statement(import_node.main_module, element)
         except KeyError:
@@ -193,11 +199,15 @@ class EseightClassType(Node):
 
     def add_default_element_import_statement(self, main_module,
                                              default_element):
-        if default_element is not None:
-            existing_import_node: ImportStatementType = self.import_dict[
+        try:
+            import_node: ImportStatementType = self.import_dict[
                 main_module]
-            existing_import_node.set_default_element(
-                default_element)
+        except KeyError:
+            import_node = ImportStatementType()
+            import_node.set_main_module(main_module)
+            self.import_dict[main_module] = import_node
+
+        import_node.set_default_element(default_element)
 
     def add_import_statement(self, main_module, element_imported):
         try:
@@ -250,7 +260,7 @@ class EseightClassType(Node):
         self.body += methods
 
         return eseight_writer(
-            CLASS_ESEIGHT_TEMPLATE,
+            'class.js.template',
             class_name=self.class_name,
             instance_variables='\n'.join(property_decl_list),
             constructor_param=','.join(

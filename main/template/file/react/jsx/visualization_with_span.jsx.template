@@ -1,0 +1,4 @@
+<div id='div-vis-{$ dasherize_name|safe $}' className='view-component-part visualization-attribute'>
+    <p id='label-vis-{$ dasherize_name|safe $}' className='label-visualization'>{$ title_name|safe $}</p>
+    <p id='vs-{$ dasherize_name|safe $}' className='class-attribute'>{ this.{$ class_name|safe $} && this.{$ class_name|safe $}.{$ attribute_name $} }</p>
+</div>

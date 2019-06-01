@@ -1,6 +1,6 @@
 from main.utils.ast.base import Node
-from main.utils.ast.language.typescript import VarDeclType, \
-    ImportStatementType, FunctionDeclType
+from main.utils.ast.language.eseight import InstanceVarDeclType, \
+    ImportStatementType, NormalMethodType
 from main.utils.jinja.react import react_jsx_writer
 from main.utils.naming_management import dasherize, camel_function_style, \
     creating_title_sentence_from_dasherize_word, camel_classify
@@ -13,19 +13,18 @@ class DataBindingFunction(Node):
         self.property_declaration = None
         self.import_statement = None
         self.build_import_statement_and_property_declaration(model_node)
-        self.func_decl = FunctionDeclType('attach' + camel_classify(name))
+        self.func_decl = NormalMethodType('attach' + camel_classify(name))
 
     def build_import_statement_and_property_declaration(self, model_node):
-        self.property_declaration = VarDeclType(self.var_camel_name, ';')
-        self.property_declaration.variable_datatype = model_node.class_name
-        self.property_declaration.acc_modifiers = 'public'
+        self.property_declaration = InstanceVarDeclType(self.var_camel_name)
 
-        self.import_statement = ImportStatementType()
-        self.import_statement.add_imported_element(model_node.class_name)
-
-        classifier_location = '../models/' + dasherize(
-            model_node.class_name) + '.model'
-        self.import_statement.set_main_module(classifier_location)
+        # no need to import because react treats data as literal JSON.
+        # self.import_statement = ImportStatementType()
+        # self.import_statement.add_imported_element(model_node.class_name)
+        #
+        # classifier_location = '../models/' + dasherize(
+        #     model_node.class_name) + '.model'
+        # self.import_statement.set_main_module(classifier_location)
 
     def add_statement_to_body(self, statement):
         self.func_decl.add_statement_to_body(statement)
@@ -42,6 +41,11 @@ class DataBindingFunction(Node):
 
 
 class InputField(Node):
+    """
+
+    defaultValue: is javascript assignment statement, this will be the
+    source of the element default value.
+    """
     ANGULAR_TPYE_TO_HTML_CONVERSION = {'string': 'text', 'number': 'number',
                                        'boolean': 'text'}
 
@@ -69,7 +73,7 @@ class InputField(Node):
         return react_jsx_writer('form_input_field.jsx.template',
                                 dasherize_name=self.dasherize_name,
                                 title_name=self.title_name,
-                                var_camel_name=self.var_camel_name,
+                                var_camel_name=self.var_camel_name + 'Input',
                                 placeholder=self.placeholder, value=self.value,
                                 type=self.type)
 
@@ -83,7 +87,7 @@ class VisualizationWithSpan(Node):
         self.class_name = data_binding_name
 
     def render(self):
-        return react_jsx_writer('visualization_with_span.html.template',
+        return react_jsx_writer('visualization_with_span.jsx.template',
                                 title_name=self.title_name,
                                 dasherize_name=self.dasherize_name,
                                 attribute_name=self.attribute_name,

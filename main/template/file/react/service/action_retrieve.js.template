@@ -1,0 +1,39 @@
+{$ function_name $} = async params => {
+  {% if auth_guard %}
+  const token = new Token().get();
+  params = Object.assign(params, { token });
+  {% endif %}
+  const encodedData = Object.keys(params)
+    .map(thekey => `${thekey}=${encodeURI(params[thekey])}`)
+    .join('&');
+
+  this.setState({
+    loading: 'Loading detail...',
+    error: null,
+    data: {},
+  });
+
+  try {
+    const response = await axios.get(
+      `/{$ action_api $}?${encodedData}`,
+      undefined,
+      {
+        cancelToken: this._cancelToken,
+      }
+    );
+
+    if (this._isMounted) {
+      this.setState({
+        loading: null,
+        error: null,
+        data: response.data.data,
+      });
+    }
+  } catch (e) {
+    this.setState({
+      loading: null,
+      error: 'The related data can not be found.',
+      data: {},
+    });
+  }
+};

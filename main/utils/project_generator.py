@@ -56,7 +56,9 @@ def write_or_copy(filename, target_directory, content):
 
 
 def js_linter(content):
-    return jsbeautifier.beautify(content)
+    opts = jsbeautifier.default_options()
+    opts.e4x = True
+    return jsbeautifier.beautify(content, opts)
 
 #TODO Implement
 def css_linter(content):
@@ -64,7 +66,7 @@ def css_linter(content):
 
 def linter(filename, content):
     linting_result = None
-    if filename.lower().endswith('.ts'):
+    if filename.lower().endswith('.ts') or filename.lower().endswith('.js'):
         linting_result = js_linter(content)
     elif filename.lower().endswith('.html'):
         linting_result = content
@@ -99,7 +101,10 @@ def create_structure(struct, directory=None):
 
     for name, content in struct.items():
         if isinstance(content, str):
-            write_or_copy(name, target_directory, linter(name, content))
+            if content.startswith('main/template/file'):
+                write_or_copy(name, target_directory, content)
+            else:
+                write_or_copy(name, target_directory, linter(name, content))
             changed[name] = content
         elif isinstance(content, dict):
             create_new_directory(name, target_directory)

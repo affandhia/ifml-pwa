@@ -1,4 +1,4 @@
 {% if not is_method %}function {% endif %}
-{$- function_name|safe $} ({$ parameter_list|safe $}) {
+{% if is_async %}async {% endif %}{$- function_name|safe $} ({$ parameter_list|safe $}) {
   {$ function_body|safe $}
 }

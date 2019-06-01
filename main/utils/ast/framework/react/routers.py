@@ -138,12 +138,12 @@ class RouteToModule(RootRoutingNode):
         logger_routers.info(
             'Rendering RouteToModule {name}'.format(name=self.path))
         children_routes = []
-        for _, route_node in self.children_routes.items():
-            children_routes.append(route_node.render())
-        return router_file_writer(self.ROUTE_TO_MODULE_TEMPLATE,
-                                  flag=self.flag, path=self.path,
+        # for _, route_node in self.children_routes.items():
+        #     children_routes.append(route_node.render())
+        return router_file_writer('route_to_module.jsx.template',
+                                  flag=self.flag, path=self.path_from_root,
                                   component=self.component,
-                                  childrens=',\n'.join(children_routes),
+                                  childrens='\n'.join(children_routes),
                                   enable_guard=self.enable_guard)
 
 
@@ -159,7 +159,7 @@ class RedirectToAnotherPath(BaseRoutingNode):
         self.target_redirect = target_redirect
 
     def render(self):
-        return router_file_writer(self.REDIRECT_TO_PATH_TEMPLATE,
+        return router_file_writer('redirect_to_path.jsx.template',
                                   path=self.path,
                                   target_redirect=self.target_redirect,
                                   path_match=self.path_match)
@@ -175,14 +175,12 @@ class RouteUsingInteractionFlow(Node):
 
 
 class RouteToComponentPage(RouteUsingInteractionFlow):
-    ROUTE_TO_COMPONENT_PAGE_TEMPLATE = 'route_to_component_page.ts.template'
-
     def __init__(self, routing_path):
         super().__init__()
         self.routing_path = routing_path
 
     def render(self):
-        return router_file_writer(self.ROUTE_TO_COMPONENT_PAGE_TEMPLATE,
+        return router_file_writer('route_to_component_page.js.template',
                                   routing_path=self.routing_path,
                                   param_binding_group=self.param_binding_group)
 
@@ -232,18 +230,22 @@ class GettingQueryParam(Node):
                                                                  query_param_name,
                                                                  property_name):
         self.list_query_param_and_property_pair.append(
-            'this.{property_name} = JSON.parse(params.{query_param_name});'.format(
+            '{property_name} : JSON.parse(queryString.parse(this.props.location.search).{query_param_name})'.format(
                 query_param_name=query_param_name,
                 property_name=property_name))
 
     def add_statement_for_saving_query_param_value_into_property_typed_class(
             self, query_param_name, property_name, class_type):
-        self.list_query_param_and_property_pair.append(
-            'this.{property_name} = new {class_type}(JSON.parse(params.{query_param_name}));'.format(
-                query_param_name=query_param_name,
-                property_name=property_name, class_type=class_type))
+        # self.list_query_param_and_property_pair.append(
+        #     'this.{property_name} = new {class_type}(JSON.parse(queryString.parse(this.props.location.search).{query_param_name}));'.format(
+        #         query_param_name=query_param_name,
+        #         property_name=property_name, class_type=class_type))
+        self.add_statement_for_saving_query_param_value_into_property(
+            query_param_name,
+            property_name
+        )
 
     def render(self):
-        return router_file_writer('getting_query_params.ts.template',
+        return router_file_writer('getting_query_params.js.template',
                                   list_of_param='\n'.join(
                                       self.list_query_param_and_property_pair))

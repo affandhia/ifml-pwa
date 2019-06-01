@@ -1,0 +1,4 @@
+this.props.history.push({
+  pathname: '{$ routing_path|safe $}',
+  {% if param_binding_group %}, {search: queryString.stringify({$ param_binding_group|safe $})}{% endif %}
+});

@@ -14,7 +14,7 @@ default_structure = {
         "manifest.json": "main/template/file/react/assets/public"
     },
     "src": {
-        "App.js": "",
+        'services': {},
         # "components": {
         #     "Form": {
         #         "index.js": ""

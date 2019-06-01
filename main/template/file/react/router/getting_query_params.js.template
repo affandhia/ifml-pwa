@@ -1,0 +1,1 @@
+this.setState({ {$ list_of_param|safe $} });

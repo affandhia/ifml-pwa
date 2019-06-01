@@ -1,6 +1,6 @@
 from custom_xmi_parser.umlsymboltable import TypeSymbol
 from main.utils.ast.base import Node
-from main.utils.ast.language.typescript import VarDeclType, ImportStatementType
+from main.utils.ast.language.eseight import ImportStatementType, InstanceVarDeclType
 from main.utils.jinja.angular import router_file_writer
 from main.utils.naming_management import camel_function_style, dasherize
 from .base import ANGULAR_CORE_MODULE
@@ -21,7 +21,6 @@ class Parameter(Node):
         self.needed_import = self.build_needed_import(type_node)
 
     def build_parameter_type(self, type_node):
-        returned_type = None
         if self.is_primitive_type:
             returned_type = type_node.name
         else:
@@ -53,7 +52,7 @@ class OutParameter(Parameter):
 
     def build_param(self):
         # Declaring the property
-        self.property = VarDeclType(self.var_camel_name, ';')
+        self.property = InstanceVarDeclType(self.var_camel_name)
         self.property.acc_modifiers = 'public'
         self.property.variable_datatype = self.type_name
 
@@ -62,11 +61,9 @@ class InParameter(Parameter):
 
     def __init__(self, name, type_node):
         super().__init__(name, type_node)
-
         # Creating typescript code for defining proprty in child and parent
         self.parent_property = None
         self.child_property = None
-        self.build_import_statement_input()
         self.build_parent_and_child_param()
 
     def build_import_statement_input(self):
@@ -80,14 +77,12 @@ class InParameter(Parameter):
 
     def build_parent_param(self):
         # Declaring the property
-        self.parent_property = VarDeclType(self.var_camel_name, ';')
-        self.parent_property.acc_modifiers = 'public'
+        self.parent_property = InstanceVarDeclType(self.var_camel_name)
         self.parent_property.variable_datatype = self.type_name
 
     def build_child_param(self):
-        self.child_property = VarDeclType(self.var_camel_name, ';')
+        self.child_property = InstanceVarDeclType(self.var_camel_name)
         self.child_property.variable_datatype = self.type_name
-        self.child_property.decorator = '@Input()'
 
 
 class ParamGroup(Node):

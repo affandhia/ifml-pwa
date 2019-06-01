@@ -6,7 +6,7 @@
       name="{$ var_camel_name|safe $}"
       type="{$ type|safe $}"
       {% if placeholder %} placeholder='Fill the {$ title_name|safe $}'{% endif %}
-      {% if value %} defaultValue={"{$ value|safe $}"}{% endif %}
+      {% if value %} defaultValue={ {$ value|safe $} }{% endif %}
       ref={e => {
         this.{$ var_camel_name|safe $} = e;
       }}

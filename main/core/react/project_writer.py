@@ -5,7 +5,10 @@ from main.utils.jinja.react import base_file_writer
 
 
 class ReactProject(object):
+    APP_FOLDER_KEY = 'App'
     SRC_FOLDER_KEY = 'src'
+    SERVICES_KEY = 'services'
+
     INDEX_KEY = 'index.js'
     PACKAGE_KEY = 'package.json'
     README_KEY = 'README.md'
@@ -16,6 +19,8 @@ class ReactProject(object):
         self.project_structure = \
             default_structure if structure is None else structure
         self.app_folder = self.project_structure[self.SRC_FOLDER_KEY]
+        self.services_folder = self.app_folder[self.SERVICES_KEY]
+
         self.write_base_angular_project_file()
 
     def get_app_name(self):
@@ -158,8 +163,8 @@ class ReactProject(object):
     #         self.E2E_KEY + '/' + self.SRC_FOLDER_KEY + '/' + self.E2E_SPEC_KEY + '.template')
     #
     #
-    def add_default_app_component(self, app_component_typescript):
-        self.app_folder[self.APP_COMPONENT_KEY] = app_component_typescript
+    def add_default_app_component(self, app_component):
+        self.app_folder.update(app_component)
 
     #
     # def add_app_module_routing(self, app_routing_file):
@@ -173,8 +178,8 @@ class ReactProject(object):
         self.app_folder.update(inserted_component_folder)
 
     #
-    # def add_service_inside_services_folder(self, inserted_service_file):
-    #     self.services_folder.update(inserted_service_file)
+    def add_service_inside_services_folder(self, inserted_service_file):
+        self.services_folder.update(inserted_service_file)
     #
     # def add_model_inside_models_folder(self, inserted_model_file):
     #     self.models_folder.update(inserted_model_file)
@@ -207,7 +212,8 @@ class ReactProject(object):
         if auth_enabled:
             auth_modules = {
                 "utils": {
-                    "token.js": "main/template/file/react/assets/src/utils"
+                    "token.js": "main/template/file/react/assets/src/utils",
+                    "environment.js": "main/template/file/react/assets/src/utils"
                 },
                 "containers": {
                     "Authentication": {

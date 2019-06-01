@@ -57,7 +57,7 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
 
     # Angular Typescript Component for root component
     app_node = interpreting_result.root_react_node.build()
-    basic_template.add_default_app_component(app_node["App"]["app.js"])
+    basic_template.add_default_app_component(app_node)
     # basic_template.add_app_html_template(
     #     interpreting_result.root_html.render())
 
@@ -88,9 +88,9 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
             component_node.build())
 
     # Adding each service into the AngularProject
-    # for _, service_node in interpreting_result.services.items():
-    #     # Insert the service into the services folder
-    #     basic_template.add_service_inside_services_folder(service_node.render())
+    for _, service_node in interpreting_result.services.items():
+        # Insert the service into the services folder
+        basic_template.add_service_inside_services_folder(service_node.render())
 
     # If user wants the predefined login to be used, then it will generate the predefined Authentication by Google
     # if enable_login:
