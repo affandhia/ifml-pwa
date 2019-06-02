@@ -1,3 +1,4 @@
+coloredlogs
 beautifulsoup4==4.6.3
 click==6.7
 EditorConfig==0.12.2

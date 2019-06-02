@@ -1,17 +1,16 @@
-import logging
-
 from main.utils.ast.base import Node
 from main.utils.ast.framework.react.components import \
     ReactComponentEseightClass
 from main.utils.ast.language.eseight import EseightClassType, \
     ImportStatementType
 from main.utils.jinja.react import base_file_writer, router_file_writer
+from main.utils.logger_generator import get_logger
 from main.utils.naming_management import dasherize
 from .base import ANGULAR_CORE_MODULE, IMPORTED_ROUTER_MODULE, IMPORTED_ROUTES, \
     IMPORTED_NG_MODULE, \
     ANGULAR_ROUTER_MODULE
 
-logger_routers = logging.getLogger("main.utils.ast.framework.react.routers")
+logger = get_logger()
 
 
 class ReactDefaultRouterDefinition(EseightClassType):
@@ -133,7 +132,7 @@ class RouteToModule(RootRoutingNode):
 
     def render(self):
         # Rendering Children route
-        logger_routers.info(
+        logger.info(
             'Rendering RouteToModule {name}'.format(name=self.path))
         children_routes = []
         # for _, route_node in self.children_routes.items():

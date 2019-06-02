@@ -1,4 +1,3 @@
-import logging
 import re
 
 from yattag import Doc
@@ -24,25 +23,25 @@ from ifml_parser.ifml_element.interaction_flow_elements.view_family.view_contain
 from ifml_parser.ifmlsymboltable import ViewContainerSymbol, WindowSymbol, \
     ActionSymbol, MenuSymbol, IFMLSymbolTable
 from ifml_parser.ifmlxmiparser import IFMLModel
-from main.utils.ast.framework.react.buttons import \
-    ModalButtonAndFunction
-from main.utils.ast.framework.react.google_sign_in import LoginHTML, \
-    LoginClass
-from main.utils.ast.framework.react.models import ModelFromUMLClass, \
-    OwnedOperation
 from main.utils.ast.framework.react.base import REACT_ROUTER_DOM_MODULE, \
     REACT_COOKIES_MODULE
+from main.utils.ast.framework.react.buttons import \
+    ModalButtonAndFunction
 from main.utils.ast.framework.react.buttons import SubmitButtonType, \
     ButtonWithFunctionHandler, MenuButton, OnclickType
 from main.utils.ast.framework.react.component_parts import InputField, \
     DataBindingFunction, VisualizationWithSpan
-from main.utils.ast.framework.react.components import AngularComponent, \
+from main.utils.ast.framework.react.components import \
     AngularComponentTypescriptClass, \
     AngularModalHTMLLayout, AngularComponentForModal, \
     ListJSXLayout, ListJSXCall, DetailJSXCall, DetailJSXLayout, RootJSX
 from main.utils.ast.framework.react.components import \
     ReactComponentEseightClass, ReactJSX, ReactComponent, MenuJSX, FormJSX, \
     ReactComponentWithInputEseightClass, FormComponentJSXCall
+from main.utils.ast.framework.react.google_sign_in import LoginHTML, \
+    LoginClass
+from main.utils.ast.framework.react.models import ModelFromUMLClass, \
+    OwnedOperation
 from main.utils.ast.framework.react.parameters import InParameter, \
     OutParameter, ParamGroup, \
     ParameterBindingInterpretation
@@ -50,13 +49,14 @@ from main.utils.ast.framework.react.routers import RouteToModule, \
     RedirectToAnotherPath, RootRoutingNode, \
     RouteToComponentPage, RouteToAction, GettingQueryParam
 from main.utils.ast.framework.react.services import ReactAPICall, \
-    ActionInterpretation, ActionEventInterpretation
+    ActionEventInterpretation
 from main.utils.ast.language.eseight import ImportStatementType, \
     InstanceVarDeclType, MethodAsInstanceVarDeclType
+from main.utils.logger_generator import get_logger
 from main.utils.naming_management import dasherize, camel_function_style
 from . import BaseInterpreter
 
-logger_react = logging.getLogger("main.core.react.interpreter")
+logger = get_logger()
 
 
 class IFMLtoReactInterpreter(BaseInterpreter):
@@ -98,7 +98,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.root_react_node = ReactComponent(self.root_eseight_class,
                                               self.root_template)
 
-        logger_react.info(
+        logger.info(
             "Interpreting {name} IFML Project".format(name=self.project_name))
 
         # Get all the IFML element/node/notation model IFML
@@ -110,7 +110,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # interpret domain model means the app will process all the class
         # within UML.
 
-        # TODO: do something with model in React
         # react treat data as literal JSON. there is no need to
         # create a specific class and serialized it on.
         self.interpret_domain_model()
@@ -151,7 +150,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Get class name based on UML class.
         element_name = class_xmi.get_model_name()
 
-        logger_react.info("UML name: {element}".format(element=element_name))
+        logger.info("UML name: {element}".format(element=element_name))
 
         # Interpret it
         model_from_class = ModelFromUMLClass(element_name)
@@ -297,7 +296,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                           typescript_calling, routing_parent):
         # Name of element
         element_name = window_element.get_name()
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} Windows".format(name=element_name))
 
         # Modal Typescript class and HTML
@@ -369,7 +368,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = menu_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} Menu".format(name=element_name))
 
         # Prepare Component Class
@@ -450,7 +449,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element that will be a component name
         element_name = view_container.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} View Container".format(name=element_name))
 
         # prepare the initial component requirements
@@ -583,7 +582,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             component_node.set_routing_node(
                 routing_node.path_from_root)
 
-            logger_react.debug(routing_node.path_from_root)
+            logger.debug(routing_node.path_from_root)
 
             # self.append_router_outlet(routing_node, html, container_class)
         # If this container must be called
@@ -612,7 +611,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # e.g. api/myentity/myaction.abs
         element_name = action_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} Action".format(name=element_name))
 
         # action_intepretation = ActionInterpretation(
@@ -664,7 +663,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = form_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} Form".format(name=element_name))
 
         # Only need the routing node and typescript_class
@@ -725,7 +724,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = detail_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} Detail".format(name=element_name))
 
         # HTML, Typescript Class, and Routing Node
@@ -789,7 +788,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Name of element
         element_name = list_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} List".format(name=element_name))
 
         # Typescript Class, and Routing Node
@@ -859,7 +858,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Get the name
         element_name = view_element_event.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} View Element Event".format(
                 name=element_name))
 
@@ -908,7 +907,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Get the name
         element_name = onsubmit_event.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} OnSubmit Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
@@ -939,7 +938,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Get the name
         element_name = onselect_event.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} OnSelect Event".format(name=element_name))
 
         # Interpret, Defining Typescript function and HTML button
@@ -970,7 +969,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         action_event_container = self.services.get(action_id)
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} ActionEvent".format(name=element_name))
 
         # The idea is to create fake button and HTML handler
@@ -999,7 +998,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         # Get the name
         element_name = data_binding_element.get_name()
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} DataBinding".format(name=element_name))
         # Get the classifier
         classifier = self.ifml_symbol_table.lookup(
@@ -1051,7 +1050,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
 
         # Add the property from Data Binding
         # this should be placed in state
-        all_props: [InstanceVarDeclType] = [data_binding_function.property_declaration]
+        all_props: [InstanceVarDeclType] = [
+            data_binding_function.property_declaration]
 
         # TODO: due to ConditionalExpression hardcoded, this is hack way to
         #  assign value to object source data in instance variable.
@@ -1107,7 +1107,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         """
         # Get the name
         element_name = visualization_attribute_element.get_name()
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} VisualizationAttribute".format(
                 name=element_name))
 
@@ -1159,7 +1159,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         self.interpret_parameter(simple_field_element, component_calling,
                                  list_in_param)
 
-        logger_react.info(
+        logger.info(
             "Interpreting a {name} SimpleField".format(name=element_name))
 
         # Create the Input Field

@@ -27,7 +27,7 @@ project_base = Path(os.sys.path[0])
 main_module_base = Path(os.path.dirname(MainModule.__file__))
 
 if project_base / "main" != main_module_base:
-    logger.info("SYNCHRONIZED project base")
+    logger.info("SYNCHRONIZING project base")
     logger.debug(
         f"project base {str(project_base)} is not synchronized with the main "
         f"module base {str(main_module_base.parent)}")
