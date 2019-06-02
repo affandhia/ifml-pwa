@@ -1,1 +1,1 @@
-{$ target_param $}: JSON.stringify({% if from_action %}data['{$ source_param $}']{% else %}this.{$ source_param $}{% endif %})
+{$ target_param $}: JSON.stringify({% if from_action %}data['data']['{$ source_param $}']{% else %}this.{$ source_param $}{% endif %})

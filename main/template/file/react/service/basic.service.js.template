@@ -5,7 +5,7 @@ import environment from '../utils/environment';
 
 class {$ class_name|safe $}Service {
   {$ property_decl|safe $}
-    call = async (params = {}) => {
+    static call = async (params = {}) => {
       {% if enable_auth %}
       const token = new Token().get();
       params = Object.assign(params, { token });
@@ -16,7 +16,7 @@ class {$ class_name|safe $}Service {
         .join('&');
 
       try {
-        const response = await axios.get(`${environment.rootApi}/{$ action_api $}?${encodedData}`);
+        const response = await axios.get(`${environment.rootApi}/{$ api_endpoint $}?${encodedData}`);
 
         return response;
       } catch (e) {

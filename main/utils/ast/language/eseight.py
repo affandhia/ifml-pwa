@@ -1,6 +1,6 @@
 from main.utils.ast.base import Node
 from main.utils.jinja.language_template_writer import eseight_writer
-from main.utils.naming_management import camel_function_style
+from main.utils.naming_management import camel_function_style, dasherize
 
 IMPORT_ESEIGHT_TEMPLATE = 'import.js.template'
 CLASS_ESEIGHT_TEMPLATE = 'class.js.template'
@@ -79,7 +79,7 @@ class MethodAsInstanceVarDeclType(InstanceVarDeclType):
         self.prepare_value()
 
     def prepare_value(self):
-        self.function_as_value = ArrowFunctionType(self.variable_name)
+        self.function_as_value = ArrowFunctionType(dasherize(self.variable_name))
 
     def enable_async(self):
         self.function_as_value.is_async = True
@@ -97,6 +97,10 @@ class FunctionType(Node):
         self.is_async = False
         self.parameter_dict = {}
         self.function_body = []
+        self.needed_import = []
+
+    def add_needed_import(self, import_node):
+        self.needed_import.append(import_node)
 
     def add_param(self, var_decl: ParamVarDeclType):
         self.parameter_dict[var_decl.variable_name] = var_decl
@@ -179,6 +183,9 @@ class EseightClassType(Node):
             # insert it
             self.add_default_element_import_statement(
                 import_node.main_module, import_node.default_element)
+            for element in import_node.imported_elements:
+                self.add_import_statement(import_node.main_module, element)
+        except AttributeError:
             for element in import_node.imported_elements:
                 self.add_import_statement(import_node.main_module, element)
         except KeyError:

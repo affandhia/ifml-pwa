@@ -1,7 +1,7 @@
 <ul id='list-{$ selector_name|safe $}' className='list-component view-component'>
 {% for pair in parameter_and_property_pair_list -%}
 { this.state.{$ pair[1]|safe $} && this.state.{$ pair[1]|safe $}.map( ( {$ pair[0]|safe $} ) => (
-    <{$ selector_name|safe $} {$ pair[0]|safe $}={ {$ pair[0]|safe $} } />
+    <{$ selector_name|safe $} {...this.props} {$ pair[0]|safe $}={ {$ pair[0]|safe $} } />
 )) }
 {% endfor -%}
 </ul>

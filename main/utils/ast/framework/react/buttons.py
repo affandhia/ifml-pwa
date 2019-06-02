@@ -9,9 +9,6 @@ from main.utils.naming_management import dasherize, camel_function_style, \
     creating_title_sentence_from_dasherize_word
 from .base import NGX_SMART_MODAL_LOCATION, ReactMainModule
 
-logger_ifml_angular_interpreter = logging.getLogger(
-    "main.utils.ast.framework.angular.buttons")
-
 
 class ButtonWithFunctionHandler(Node):
 
@@ -40,12 +37,12 @@ class ButtonWithFunctionHandler(Node):
 
     def button_template(self):
         doc, tag, text = Doc().tagtext()
-        with tag('button',
-                 ('id', 'view-event-{name}'.format(name=self.button_id_name)),
-                 ('class', 'event view-element-event'),
-                 ('(click)', "{handler}({obj_param})".format(
-                     handler=self.function_node.function_name,
-                     obj_param=self.object_param))):
+        with tag(
+                'button',
+                'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
+                    handler=self.function_node.function_name,
+                    obj_param=self.object_param)
+        ):
             text(self.button_text)
 
         return doc.getvalue()
@@ -61,21 +58,16 @@ class ButtonWithFunctionHandler(Node):
 
 
 class MenuButton(ButtonWithFunctionHandler):
-
     def __init__(self, name, type=''):
         super().__init__(name, type)
 
     def button_template(self):
         doc, tag, text = Doc().tagtext()
         with tag('button',
-                 ('id', 'view-event-{name}'.format(name=self.button_id_name)),
-                 ('class', 'event view-element-event'),
-                 ('(click)', "{handler}({obj_param})".format(
+                 'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
                      handler=self.function_node.function_name,
-                     obj_param=self.object_param))):
-            with tag('a', id='v-menu-{name}'.format(name=self.button_id_name),
-                     klass='menu-a'):
-                text(self.button_text)
+                     obj_param=self.object_param)):
+            text(self.button_text)
 
         return doc.getvalue()
 
@@ -86,14 +78,14 @@ class OnclickType(ButtonWithFunctionHandler):
         super().__init__(name, type=type)
 
     def onclick_html_call(self):
-        ngsubmit_string = '(click)=\'{handler}({obj_param})\''.format(
+        ngsubmit_string = 'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
             handler=self.function_node.function_name,
             obj_param=self.object_param)
         return ngsubmit_string
 
     def render(self):
         # Rendering function first
-        function = self.function_node.render()
+        function = self.function_holder.render()
 
         # Rendering OnClick HTML
         html = self.onclick_html_call()
@@ -129,9 +121,9 @@ class SubmitButtonType(ButtonWithFunctionHandler):
 
         return f'''\
         <button
-          onClick={{this.{self.function_holder.variable_name}}}
-          id="button-{self.button_id_name}"
+        onClick={{(e) => {{ e.preventDefault();\nthis.{self.function_holder.variable_name}(); }} }}
           name="{self.button_id_name}"
+          type="submit"
         >
           {self.button_text}
         </button>
@@ -150,10 +142,7 @@ class SubmitButtonType(ButtonWithFunctionHandler):
         # Rendering Button HTML
         html = self.button_template()
 
-        # Rendering ngSubmit Call HTML
-        ngsubmit = self.ngsubmit_html_call()
-
-        return html, function, ngsubmit
+        return html, function
 
 
 class ModalButtonAndFunction(ButtonWithFunctionHandler):

@@ -1,7 +1,8 @@
 from custom_xmi_parser.umlsymboltable import TypeSymbol
 from main.utils.ast.base import Node
-from main.utils.ast.language.eseight import ImportStatementType, InstanceVarDeclType
-from main.utils.jinja.angular import router_file_writer
+from main.utils.ast.language.eseight import ImportStatementType, \
+    InstanceVarDeclType
+from main.utils.jinja.react import router_file_writer
 from main.utils.naming_management import camel_function_style, dasherize
 from .base import ANGULAR_CORE_MODULE
 
@@ -85,19 +86,6 @@ class InParameter(Parameter):
         self.child_property.variable_datatype = self.type_name
 
 
-class ParamGroup(Node):
-
-    def __init__(self):
-        self.list_param = []
-
-    def add_param_statement(self, param_statement):
-        self.list_param.append(param_statement.render())
-
-    def render(self):
-        object_json_template = '{' + ','.join(self.list_param) + '}'
-        return object_json_template
-
-
 class ParameterBindingInterpretation(Node):
     """
     Generate parameter data binding/assignment. There are several ways data
@@ -116,7 +104,7 @@ class ParameterBindingInterpretation(Node):
             # Stringify the date whatever that are. This json value will be
             # used as a parameter in Query.
             return router_file_writer(
-                'query_parameter_binding_interpretation.ts.template',
+                'query_parameter_binding_interpretation.js.template',
                 target_param=self.dest_param_name,
                 source_param=self.source_param_name,
                 from_action=self.source_param_is_a_result_of_action
@@ -126,8 +114,22 @@ class ParameterBindingInterpretation(Node):
             # Otherwise, get from instance variable:
             #   <param>: this.getParamValue
             return router_file_writer(
-                'parameter_binding_interpretation.ts.template',
+                'parameter_binding_interpretation.js.template',
                 target_param=self.dest_param_name,
                 source_param=self.source_param_name,
                 from_action=self.source_param_is_a_result_of_action
             )
+
+
+class ParamGroup(Node):
+
+    def __init__(self):
+        self.list_param = []
+
+    def add_param_statement(self,
+                            param_statement: ParameterBindingInterpretation):
+        self.list_param.append(param_statement.render())
+
+    def render(self):
+        object_json_template = '{' + ','.join(self.list_param) + '}'
+        return object_json_template

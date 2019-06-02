@@ -1,1 +1,1 @@
-<Redirect {$ path_match|safe $} from="{$ path|safe $}" to="{$ target_redirect|safe $}"/>
+<Redirect {$ path_match|safe $} from="{$ path|safe $}" to={"{$ target_redirect|safe $}"{% if carry_param %} + this.props.location.search{% endif %}}/>

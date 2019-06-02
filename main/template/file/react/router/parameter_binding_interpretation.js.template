@@ -1,1 +1,1 @@
-{$ target_param $}: {% if from_action %}data['{$ source_param $}']{% else %}this.{$ source_param $}.value{% endif %}
+{$ target_param $}: {% if from_action %}data['data']['{$ source_param $}']{% else %}this.{$ source_param $}.value{% endif %}

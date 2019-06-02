@@ -19,7 +19,13 @@ class ReactComponentEseightClass(EseightClassType):
         self.selector_name = ''
         self.component_name = ''
         self.set_import_and_constructor()
+        self.add_state_as_instance_var()
         self.set_react_component_as_parent()
+
+    def add_state_as_instance_var(self):
+        var = InstanceVarDeclType('state')
+        var.value = '{}'
+        self.set_property_decl(var)
 
     def add_line_to_component_did_mount(self, line: str):
         try:
@@ -266,11 +272,20 @@ class AngularComponentWithInputTypescriptClass(
 class ReactJSX(Node):
     def __init__(self):
         self.body = []
+        self.routes = []
 
     def append_html_into_body(self, html_element):
         self.body.append(html_element)
 
+    def append_route(self, route_jsx_element: str):
+        self.routes.append(route_jsx_element)
+
     def render(self):
+        if len(self.routes):
+            routes_jsx = "\n".join(self.routes)
+            self.append_html_into_body(
+                f'<Switch>\n{routes_jsx}\n</Switch>'
+            )
         if len(self.body) > 0:
             return "<React.Fragment>\n{}\n</React.Fragment>".format(
                 react_jsx_writer('basic.component.jsx.template',
@@ -278,6 +293,27 @@ class ReactJSX(Node):
             )
         return react_jsx_writer('basic.component.jsx.template',
                                 body='\n'.join(self.body))
+
+
+class RootJSX(ReactJSX):
+    def __init__(self, auth_guard):
+        super(RootJSX, self).__init__()
+        self.auth_guard = auth_guard
+
+    def render(self, ):
+        if self.auth_guard:
+
+            content = "<AuthProvider>\n{}\n</AuthProvider>".format(
+                super(RootJSX, self).render()
+            )
+        else:
+            content = super(RootJSX, self).render()
+
+        content = '<CookiesProvider><BrowserRouter>' +\
+                  content + \
+                  '</BrowserRouter></CookiesProvider>'
+
+        return content
 
 
 class MenuJSX(ReactJSX):

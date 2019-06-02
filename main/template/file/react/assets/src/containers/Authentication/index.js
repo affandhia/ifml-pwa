@@ -12,7 +12,7 @@ export const LOADING_STATUS = {
 };
 
 export class AuthProvider extends React.Component {
-  state = { isAuth: false, googleMethod: null };
+  state = { isAuth: null, googleMethod: null };
   tokenManager = new Token();
 
   componentDidMount = () => {
@@ -29,10 +29,6 @@ export class AuthProvider extends React.Component {
         });
       }
     }, 90);
-  };
-
-  componentWillUpdate = async () => {
-    console.log(this.state.isAuth);
   };
 
   // GOOGLE Method
@@ -152,7 +148,7 @@ export class AuthProvider extends React.Component {
           gapi: window.gapi,
         }}
       >
-        {this.props.children}
+        {this.state.isAuth != null ? this.props.children : null}
       </AuthContext.Provider>
     );
   }

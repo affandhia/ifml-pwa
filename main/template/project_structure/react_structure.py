@@ -1,9 +1,8 @@
 # the key's value:
 #   dict: as a folder
 #   string: as a file, this is the path
-#       those key which values is emtpy string will be changed by the project_writer
 
-from main.utils.jinja.angular import base_file_writer
+# those key which values is emtpy string will be changed by the project_writer
 
 default_structure = {
     "README.md": "",
@@ -15,43 +14,11 @@ default_structure = {
     },
     "src": {
         'services': {},
-        # "components": {
-        #     "Form": {
-        #         "index.js": ""
-        #     },
-        #     "Navbar": {
-        #         "index.js": ""
-        #     }
-        # },
-        # "containers": {
-        #     "AddCustomerPage": {
-        #         "index.js": ""
-        #     },
-        #     "CustomerPage": {
-        #         "components": {
-        #             "Navbar": {
-        #                 "index.js": ""
-        #             }
-        #         },
-        #         "index.js": ""
-        #     },
-        #     "DetailCustomerPage": {
-        #         "index.js": ""
-        #     },
-        #     "ListAccountPage": {
-        #         "index.js": ""
-        #     },
-        #     "ListCustomerPage": {
-        #         "index.js": ""
-        #     },
-        #     "LoginPage": {
-        #         "index.js": ""
-        #     }
-        # },
         "index.js": "",
         "logo.svg": "main/template/file/react/assets/src",
         "serviceWorker.js": "main/template/file/react/assets/src",
         "setupProxy.js.example": "main/template/file/react/assets/src",
     },
+    ".env": "main/template/file/react/assets",
     "yarn.lock": "main/template/file/react/assets"
 }

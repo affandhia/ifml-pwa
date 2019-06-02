@@ -1,0 +1,4 @@
+const data = {$ is_await|safe $}await {$ service_name $}.call({% if param_binding_group %}{$ param_binding_group|safe $}{% endif %});
+{% if after_statement %}
+{$ after_statement|safe $}
+{% endif %}

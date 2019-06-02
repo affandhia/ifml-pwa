@@ -3,15 +3,13 @@ import logging
 from main.utils.ast.base import Node
 from main.utils.ast.framework.react.components import \
     ReactComponentEseightClass
-from main.utils.ast.language.typescript import TypescriptClassType, \
-    VarDeclType, ImportStatementType
-from main.utils.ast.language.eseight import EseightClassType
+from main.utils.ast.language.eseight import EseightClassType, \
+    ImportStatementType
 from main.utils.jinja.react import base_file_writer, router_file_writer
-from main.utils.naming_management import camel_function_style, dasherize
+from main.utils.naming_management import dasherize
 from .base import ANGULAR_CORE_MODULE, IMPORTED_ROUTER_MODULE, IMPORTED_ROUTES, \
     IMPORTED_NG_MODULE, \
     ANGULAR_ROUTER_MODULE
-from yattag import Doc
 
 logger_routers = logging.getLogger("main.utils.ast.framework.react.routers")
 
@@ -150,10 +148,12 @@ class RouteToModule(RootRoutingNode):
 class RedirectToAnotherPath(BaseRoutingNode):
     REDIRECT_TO_PATH_TEMPLATE = 'redirect_to_path.ts.template'
 
-    def __init__(self, path, target_redirect, path_match='exact'):
+    def __init__(self, path, target_redirect, path_match='exact',
+                 carry_param=True):
         super().__init__(path)
         self.path_match = path_match
         self.target_redirect = target_redirect
+        self.carry_param = carry_param
 
     def set_target_redirect(self, target_redirect):
         self.target_redirect = target_redirect
@@ -162,7 +162,8 @@ class RedirectToAnotherPath(BaseRoutingNode):
         return router_file_writer('redirect_to_path.jsx.template',
                                   path=self.path,
                                   target_redirect=self.target_redirect,
-                                  path_match=self.path_match)
+                                  path_match=self.path_match,
+                                  carry_param=self.carry_param)
 
 
 class RouteUsingInteractionFlow(Node):
@@ -186,8 +187,6 @@ class RouteToComponentPage(RouteUsingInteractionFlow):
 
 
 class RouteToAction(RouteUsingInteractionFlow):
-    ROUTE_TO_ACTION_PAGE_TEMPLATE = 'route_to_action.ts.template'
-
     def __init__(self, service_class_name, service_filename):
         super().__init__()
         self.service_class_name = service_class_name + 'Service'
@@ -196,7 +195,6 @@ class RouteToAction(RouteUsingInteractionFlow):
         self.import_statement = None
         self.constructor_param = None
         self.build_import_statement()
-        self.build_constructor_param()
 
     def build_import_statement(self):
         self.import_statement = ImportStatementType()
@@ -204,18 +202,11 @@ class RouteToAction(RouteUsingInteractionFlow):
         service_location = '../services/{service_filename}.service'.format(
             service_filename=self.service_filename)
         self.import_statement.set_main_module(service_location)
-        self.import_statement.add_imported_element(self.service_class_name)
-
-    def build_constructor_param(self):
-        self.constructor_param = VarDeclType(
-            camel_function_style(self.service_class_name))
-        self.constructor_param.acc_modifiers = 'public'
-        self.constructor_param.variable_datatype = self.service_class_name
+        self.import_statement.set_default_element(self.service_class_name)
 
     def render(self):
-        return router_file_writer(self.ROUTE_TO_ACTION_PAGE_TEMPLATE,
-                                  service_name=camel_function_style(
-                                      self.service_class_name),
+        return router_file_writer('route_to_action.js.template',
+                                  service_name=self.service_class_name,
                                   param_binding_group=self.param_binding_group,
                                   after_statement='\n'.join(
                                       self.after_statement))
