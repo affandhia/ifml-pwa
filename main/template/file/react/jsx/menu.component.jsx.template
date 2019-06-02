@@ -1,9 +1,5 @@
 <nav>
   <ul>
-    <li>
-      <Link to="/">Home</Link>
-    </li>
-
     {% if auth_enabled %}
     {this.props.isAuth ? (
       <React.Fragment>

@@ -377,13 +377,14 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         component_class.set_component_selector_class_name(element_name)
 
         # Set import for Link element from React Router DOM
-        react_router_dom = ImportStatementType()
-        react_router_dom.set_main_module('react-router-dom')
-        react_router_dom.add_imported_element('Link')
+        if auth_guard:
+            react_router_dom = ImportStatementType()
+            react_router_dom.set_main_module('react-router-dom')
+            react_router_dom.add_imported_element('Link')
 
-        # add to Component Class imported module list
-        component_class.add_import_statement_using_import_node(
-            react_router_dom)
+            # add to Component Class imported module list
+            component_class.add_import_statement_using_import_node(
+                react_router_dom)
 
         # add logout method
 
@@ -1045,13 +1046,12 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 data_binding_function.property_declaration.value = \
                     'this.props.{} || {{}}'.format(param.var_camel_name)
 
-        did_mount_method = MethodAsInstanceVarDeclType('componentDidMount')
+        did_mount_method = MethodAsInstanceVarDeclType('componentWillMount')
         typescript_calling.set_property_decl(did_mount_method)
 
         # Add the property from Data Binding
         # this should be placed in state
-        typescript_calling.set_property_decl(
-            data_binding_function.property_declaration)
+        all_props: [InstanceVarDeclType] = [data_binding_function.property_declaration]
 
         # TODO: due to ConditionalExpression hardcoded, this is hack way to
         #  assign value to object source data in instance variable.
@@ -1072,7 +1072,14 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 else:
                     instance_var = InstanceVarDeclType(var)
                     instance_var.value = value
-                    typescript_calling.set_property_decl(instance_var)
+                    all_props.append(instance_var)
+
+        for prop in all_props:
+            statement = "this.{} = {}".format(
+                prop.variable_name,
+                prop.value
+            )
+            did_mount_method.function_as_value.add_statement_to_body(statement)
 
         # Due to es8 feature of instance variable, dont need to put method
         # into body and call it in the constructor. Just assign the value in

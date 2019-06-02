@@ -63,7 +63,7 @@ class MenuButton(ButtonWithFunctionHandler):
 
     def button_template(self):
         doc, tag, text = Doc().tagtext()
-        with tag('button',
+        with tag('a', 'href="#"'
                  'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
                      handler=self.function_node.function_name,
                      obj_param=self.object_param)):

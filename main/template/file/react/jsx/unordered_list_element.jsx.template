@@ -1,1 +1,4 @@
-<li{% if onclick %} {$ onclick|safe $}{% endif %}>{$ body|safe $}</li>
+<li{% if onclick %} {$ onclick|safe $}{% endif %}>
+{$ body|safe $}
+<hr/>
+</li>

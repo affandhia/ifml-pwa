@@ -1,5 +1,5 @@
 <div>
-  <label htmlFor="input-{$ dasherize_name|safe $}">{$ title_name|safe $}</label>
+  <label htmlFor="input-{$ dasherize_name|safe $}"><strong>{$ title_name|safe $}</strong></label>
   <div>
     <input
       id="input-{$ dasherize_name|safe $}"
@@ -12,4 +12,5 @@
       }}
     />
   </div>
+  <br/>
 </div>
