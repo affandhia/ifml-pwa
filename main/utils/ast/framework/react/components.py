@@ -425,10 +425,7 @@ class FormComponentJSXCall(ComponentJSXCall):
 
 class DetailJSXLayout(ReactJSX):
     def render(self):
-        doc_selector, tag_selector, text_selector = Doc().tagtext()
-        with tag_selector('React.Fragment'):
-            doc_selector.asis(super().render())
-        return doc_selector.getvalue()
+        return super().render()
 
 
 class DetailJSXCall(Node):

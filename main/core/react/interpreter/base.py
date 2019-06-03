@@ -1043,7 +1043,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             param = list_in_param[0]
             if isinstance(param, InParameter):
                 data_binding_function.property_declaration.value = \
-                    'this.props.{} || {{}}'.format(param.var_camel_name)
+                    'this.props.{}'.format(param.var_camel_name)
 
         did_mount_method = MethodAsInstanceVarDeclType('componentWillMount')
         typescript_calling.set_property_decl(did_mount_method)
