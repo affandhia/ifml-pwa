@@ -1594,7 +1594,8 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 source_param_symbol.name, target_param_symbol.name,
                 from_action, is_query_param)
             if from_input_text:
-                param_binding_statement.source_param_name = param_binding_statement.source_param_name + 'Input'
+                param_binding_statement.source_param_name = \
+                    param_binding_statement.source_param_name + 'Input.value'
 
             param_group.add_param_statement(param_binding_statement)
 
