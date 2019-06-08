@@ -1,5 +1,5 @@
 {
-  "name": "ifml-react-pwa",
+  "name": "{$ app_name $}",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:7776",

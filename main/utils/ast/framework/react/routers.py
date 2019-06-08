@@ -226,10 +226,6 @@ class GettingQueryParam(Node):
 
     def add_statement_for_saving_query_param_value_into_property_typed_class(
             self, query_param_name, property_name, class_type):
-        # self.list_query_param_and_property_pair.append(
-        #     'this.{property_name} = new {class_type}(JSON.parse(queryString.parse(this.props.location.search).{query_param_name}));'.format(
-        #         query_param_name=query_param_name,
-        #         property_name=property_name, class_type=class_type))
         self.add_statement_for_saving_query_param_value_into_property(
             query_param_name,
             property_name

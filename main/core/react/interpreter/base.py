@@ -213,7 +213,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         ])
 
         root_react_class.add_import_statement_for_multiple_element(
-            '../containers/Authentication',
+            '../Authentication',
             ['AuthProvider']
         )
 
@@ -420,7 +420,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         )
 
         typescript_calling.add_import_statement(
-            '../containers/Authentication',
+            '../Authentication',
             'AuthConsumer'
         )
         typescript_calling.add_import_statement(
@@ -576,7 +576,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             # import withAuth HOC if login enabled
             if self.enable_authentication_guard:
                 typescript_calling.add_import_statement(
-                    '../containers/Authentication',
+                    '../Authentication',
                     'withAuth')
 
             component_node.set_routing_node(
@@ -1045,9 +1045,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 data_binding_function.property_declaration.value = \
                     'this.props.{}'.format(param.var_camel_name)
 
-        did_mount_method = MethodAsInstanceVarDeclType('componentWillMount')
-        typescript_calling.set_property_decl(did_mount_method)
-
         # Add the property from Data Binding
         # this should be placed in state
         all_props: [InstanceVarDeclType] = [
@@ -1079,19 +1076,11 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                 prop.variable_name,
                 prop.value
             )
-            did_mount_method.function_as_value.add_statement_to_body(statement)
+            typescript_calling.add_line_to_component_will_mount(statement)
 
         # Due to es8 feature of instance variable, dont need to put method
         # into body and call it in the constructor. Just assign the value in
         # the instance variable.
-
-        # Call the function in the constructor
-        # typescript_calling.constructor_body.append(
-        #     data_binding_function.get_function_call())
-
-        # Create the function
-        # typescript_calling.body.append(
-        #     data_binding_function.get_function_declaration())
 
     def interpret_visualization_attribute(self,
                                           visualization_attribute_element,
@@ -1254,7 +1243,7 @@ class IFMLtoReactInterpreter(BaseInterpreter):
         if isinstance(type_used_by_parameter, ClassSymbol):
             type_used_by_parameter = self.models[type_used_by_parameter.id]
 
-        # Creating @Input Property Declaration in child
+        # Creating Input Property Declaration in child
         input_node = InParameter(element_name, type_used_by_parameter)
 
         # Declare it in the child typescript, and if the type is class, import the class
@@ -1368,14 +1357,9 @@ class IFMLtoReactInterpreter(BaseInterpreter):
             call_html.add_parameter_and_property_pair(param.child_property,
                                                       param.parent_property)
 
-            #  TODO: set value here then adding needed property for parent component
-            parent_typescript.set_property_decl(param.parent_property)
-
             # Check if the declaration of property need to import a model class, else no import needed
             if param.needed_import:
                 query_param_name, property_name, class_type = param.parent_property.variable_name, param.parent_property.variable_name, param.parent_property.variable_datatype
-                # parent_typescript.add_import_statement_using_import_node(
-                #     param.needed_import)
                 constructor_body_statement.add_statement_for_saving_query_param_value_into_property_typed_class(
                     query_param_name, property_name, class_type)
             else:
@@ -1460,12 +1444,6 @@ class IFMLtoReactInterpreter(BaseInterpreter):
                                              function_node,
                                              param_binding_group, from_action):
 
-        # if isinstance(container_node, AngularComponentForModal):
-        #     self.route_to_component_modal(container_node, function_node,
-        #                                   param_binding_group, from_action)
-        # elif isinstance(container_node, AngularComponent):
-        #     self.route_to_component_page(container_node, function_node,
-        #                                  param_binding_group, from_action)
         if isinstance(container_node, ReactComponent):
             self.route_to_component_page(container_node, function_node,
                                          param_binding_group, from_action)

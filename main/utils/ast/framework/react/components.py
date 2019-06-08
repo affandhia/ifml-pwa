@@ -37,6 +37,16 @@ class ReactComponentEseightClass(EseightClassType):
 
         var.function_as_value.add_statement_to_body(line)
 
+    def add_line_to_component_will_mount(self, line: str):
+        try:
+            var: MethodAsInstanceVarDeclType = self.property_decl[
+                'componentWillMount']
+        except KeyError:
+            var = MethodAsInstanceVarDeclType('componentWillMount')
+            self.set_property_decl(var)
+
+        var.function_as_value.add_statement_to_body(line)
+
     def set_react_component_as_parent(self):
         self.parent_class = 'React.Component'
 
@@ -286,13 +296,11 @@ class ReactJSX(Node):
             self.append_html_into_body(
                 f'<Switch>\n{routes_jsx}\n</Switch>'
             )
-        if len(self.body) > 0:
-            return "<React.Fragment>\n{}\n</React.Fragment>".format(
-                react_jsx_writer('basic.component.jsx.template',
-                                 body='\n'.join(self.body))
-            )
-        return react_jsx_writer('basic.component.jsx.template',
-                                body='\n'.join(self.body))
+
+        return "<React.Fragment>\n{}\n</React.Fragment>".format(
+            react_jsx_writer('basic.component.jsx.template',
+                             body='\n'.join(self.body))
+        )
 
 
 class RootJSX(ReactJSX):

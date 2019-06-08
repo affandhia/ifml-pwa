@@ -3,7 +3,8 @@ from main.utils.file_and_folder_management import path_joiner
 
 base_env = Environment(
     loader=PackageLoader('main.template', 'file/react/base'),
-    autoescape=[''])
+    autoescape=[''],
+    variable_start_string='{$', variable_end_string='$}')
 component_env = Environment(
     loader=PackageLoader('main.template', 'file/react/component'),
     autoescape=[''],

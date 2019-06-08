@@ -63,10 +63,12 @@ class MenuButton(ButtonWithFunctionHandler):
 
     def button_template(self):
         doc, tag, text = Doc().tagtext()
-        with tag('a', 'href="#"'
-                 'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
-                     handler=self.function_node.function_name,
-                     obj_param=self.object_param)):
+        with tag(
+                'a',
+                'href="#"',
+                'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
+                    handler=self.function_node.function_name,
+                    obj_param=self.object_param)):
             text(self.button_text)
 
         return doc.getvalue()
@@ -78,10 +80,10 @@ class OnclickType(ButtonWithFunctionHandler):
         super().__init__(name, type=type)
 
     def onclick_html_call(self):
-        ngsubmit_string = 'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
+        onclick = 'onClick={{(e) => {{ e.preventDefault();\nthis.{handler}({obj_param}); }} }}'.format(
             handler=self.function_node.function_name,
             obj_param=self.object_param)
-        return ngsubmit_string
+        return onclick
 
     def render(self):
         # Rendering function first

@@ -17,8 +17,7 @@ logger_react = get_logger()
 # enable login
 def generate_project(path_to_ifml_file, path_to_class_diagram,
                      target_directory='', enable_login=False,
-                     remove_folder_content=False):
-
+                     remove_folder_content=False, google_client_id=''):
     # handle output folder
     target_project_directory = sys.path[
         0] if target_directory == '' else target_directory
@@ -47,7 +46,8 @@ def generate_project(path_to_ifml_file, path_to_class_diagram,
     )
 
     basic_template = ReactProject(
-        app_name=interpreting_result.get_project_name())
+        app_name=interpreting_result.get_project_name(),
+        google_client_id=google_client_id)
 
     basic_template.add_auth_modules_if_needed(enable_login)
 

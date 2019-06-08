@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import Token from '../../utils/token';
+import Token from '../utils/token';
 
 const AuthContext = React.createContext();
 
