@@ -4,17 +4,6 @@ import _debounce from 'lodash/debounce';
 import { AuthConsumer } from '../Authentication';
 
 class LoginPage extends React.Component {
-  saveToken = token => {
-    this.props.login(token);
-  };
-
-  saveTokenDebounced = _debounce(this.saveToken, 1000);
-
-  handleTokenChange = e => {
-    const token = e.target.value;
-    this.saveTokenDebounced(token);
-  };
-
   handleLoginWithGoogle = () => {
     this.props.loginGoogle();
   };
@@ -26,11 +15,6 @@ class LoginPage extends React.Component {
 
     return (
       <div>
-        <div>Input the Token here</div>
-        <div>
-          <textarea onChange={this.handleTokenChange} />
-        </div>
-        <div>- OR -</div>
         <div>
           <input
             onClick={this.handleLoginWithGoogle}

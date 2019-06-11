@@ -87,7 +87,7 @@ class ReactComponent(Node):
     def __init__(self, component_class: ReactComponentEseightClass,
                  component_markup_language: Node):
         self.component_class: ReactComponentEseightClass = component_class
-        self.component_html: ReactJSX = component_markup_language
+        self.component_jsx: ReactJSX = component_markup_language
         self.component_name: str = self.get_component_filename()
         self.routing_path = ''
 
@@ -107,7 +107,7 @@ class ReactComponent(Node):
         return self.component_class
 
     def get_component_html(self):
-        return self.component_html
+        return self.component_jsx
 
     def get_component_filename(self):
         return f'{self.component_class.selector_name}.js'
@@ -131,7 +131,7 @@ class ReactComponent(Node):
         # create the function body
         render_function_body = NormalMethodType(function_name)
         render_function_body.add_statement_to_body(
-            f'return ({self.component_html.render()});')
+            f'return ({self.component_jsx.render()});')
 
         # insert the render function as a property of the class
         self.component_class.add_method_to_body(render_function_body)
@@ -284,7 +284,7 @@ class ReactJSX(Node):
         self.body = []
         self.routes = []
 
-    def append_html_into_body(self, html_element):
+    def append_jsx_into_body(self, html_element):
         self.body.append(html_element)
 
     def append_route(self, route_jsx_element: str):
@@ -293,7 +293,7 @@ class ReactJSX(Node):
     def render(self):
         if len(self.routes):
             routes_jsx = "\n".join(self.routes)
-            self.append_html_into_body(
+            self.append_jsx_into_body(
                 f'<Switch>\n{routes_jsx}\n</Switch>'
             )
 
@@ -330,7 +330,7 @@ class MenuJSX(ReactJSX):
         self.auth_enabled = auth_enabled
         self.menu_name = name
 
-    def append_html_into_body(self, button):
+    def append_jsx_into_body(self, button):
         doc, tag, text = Doc().tagtext()
         with tag('li'):
             doc.asis(button)
@@ -354,7 +354,7 @@ class FormJSX(ReactJSX):
         self.form_title = creating_title_sentence_from_dasherize_word(
             self.form_dasherize)
 
-    def append_html_into_body(self, input_html_string):
+    def append_jsx_into_body(self, input_html_string):
         self.input_list.append(input_html_string)
 
     def add_submit_event(self, on_submit):
