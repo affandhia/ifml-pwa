@@ -12,7 +12,7 @@ IFML to React Interpreter adalah program untuk mengubah model aplikasi web yang 
 
 ### Ringkasan Manual
 
-Manual terdiri dari empat bagian: Informasi Umum, Informasi Sistem, Persiapan, dan Penggunaan Program.
+User Manual terdiri dari empat bagian: Informasi Umum, Informasi Sistem, Persiapan, dan Penggunaan Program.
 
 - Bagian **Informasi Umum** menjelaskan _hardware_ dan _software_ pendukung yang diperlukan untuk menjalankan programm, akses yang tersedia untuk pengguna.
 
