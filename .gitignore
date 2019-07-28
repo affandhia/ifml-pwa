@@ -67,3 +67,5 @@ test/example_1_react/result
 test/example_1_react/mvps
 test/example_1/result
 venv
+__pycache__/
+.DS_Store
